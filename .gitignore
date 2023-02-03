@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/datasets
+/insightface2
+/models
+backbone.pth
+data/CUSP_network.pkl
