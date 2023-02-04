@@ -116,7 +116,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
     aging_steps = 4
 
     number_of_images = images_as_tensor.shape[0]
-    images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
+    images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
 
     labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
 
