@@ -181,7 +181,7 @@ def run(images_path : str):
     data_labels_range = configs[FFHQ_RR_KEY]['classes']
     side_config = configs[FFHQ_RR_KEY]['side']
 
-    out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range)
+    out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema)
 
     plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
 
