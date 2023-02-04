@@ -42,7 +42,7 @@ def read_image_filenames(images_path : str):
 
 def load_cusp(device : torch.device):
 
-    weights_path = 'data/CUSP_network.pkl'
+    weights_path = 'data/cusp_network.pkl'
     vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 
     with open(weights_path, 'rb') as f:
