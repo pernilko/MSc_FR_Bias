@@ -177,7 +177,7 @@ def run(images_path : str):
     }
 
     batch_of_filenames = read_image_filenames(images_path)
-    g_ema = load_cusp(torch.device('cuda'))
+    g_ema = load_cusp(torch.device('cuda', 0))
     data_labels_range = configs[FFHQ_RR_KEY]['classes']
     side_config = configs[FFHQ_RR_KEY]['side']
 
