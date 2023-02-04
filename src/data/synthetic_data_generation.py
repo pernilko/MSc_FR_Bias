@@ -56,7 +56,7 @@ def load_cusp(device : torch.device):
     vgg.load_state_dict(vgg_state_dict)
     module_no_grad(vgg) 
 
-    g_ema.skip_grad_blur.classifier = vgg
+    g_ema.skip_grad_blur.model.classifier = vgg  
 
     g_ema = g_ema.to(device).eval().requires_grad_(False)
 
