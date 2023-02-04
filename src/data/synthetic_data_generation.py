@@ -161,6 +161,7 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
             ax.set_title(l)
 
         plt.savefig(f"test_{counter}.png")
+        counter = counter + 1
 
 def run(images_path : str):
 
