@@ -189,7 +189,7 @@ def run(images_path : str):
     plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
 
 
-run("models/cusp/sample_images")
+run("data/images") #"models/cusp/sample_images"
 
 
 #load_pretrained_model('/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/data/CUSP_network.pkl',torch.device('cpu'))
