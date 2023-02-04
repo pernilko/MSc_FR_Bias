@@ -133,3 +133,4 @@ src/insightface2
 src/models
 src/backbone.pth
 src/data/CUSP_network.pkl
+src/data/dex_imdb_wiki.caffemodel.pt

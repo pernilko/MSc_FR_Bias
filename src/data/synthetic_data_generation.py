@@ -18,34 +18,13 @@ import sys
 folder_root = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src'
 sys.path.append(folder_root)
 
-import models.cusp.legacy
+from models.cusp import legacy
 from models.cusp.torch_utils import persistence
 import models.cusp.training
 from models.cusp import dnnlib
 
 from models.cusp.training.networks import VGG, module_no_grad
 from models.cusp.torch_utils import misc
-'''
-tu_path = os.path.join('/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/models','cusp','torch_utils')
-dnnlib_path = os.path.join('/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/models','cusp','dnnlib')
-
-#add those strings to python path
-sys.path.append(tu_path)
-sys.path.append(dnnlib_path)
-print(sys.path)
-
-'''
-
-def convert_pkl_to_pt_file(checkpoint_path):
-    #print(f"Loading CUSP generator from path: {checkpoint_path}")
-    with open(checkpoint_path, 'rb') as f:
-        decoder = pickle.load(f)['G_ema'].cuda()
-    print('Loading done!')
-
-    state_dict = decoder.state_dict()
-    torch.save(state_dict, "cusp_net.pt")
-    print('Converting done!')
-
 
 def load_pretrained_model(filename : str, device : torch.device):
     model = torch.load(filename)
@@ -53,16 +32,163 @@ def load_pretrained_model(filename : str, device : torch.device):
 
     return model
 
+def read_image_filenames(images_path : str):
+    batch_of_filenames = [
+      os.path.join(images_path,f) 
+      for  f in next(iter(os.walk(images_path)))[2] 
+      if f[-4:] == '.png'
+    ]
+    return batch_of_filenames
+
+def load_cusp(device : torch.device):
+
+    weights_path = 'data/CUSP_network.pkl'
+    vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
+
+    with open(weights_path, 'rb') as f:
+        data = legacy.load_network_pkl(f)
+    
+    g_ema = data['G_ema'] # exponential movign average model
+
+    vgg = VGG()
+    vgg_state_dict = torch.load(vgg_path)
+    vgg_state_dict = {k.replace('-', '_'): v for k, v in vgg_state_dict.items()}
+    vgg.load_state_dict(vgg_state_dict)
+    module_no_grad(vgg) 
+
+    g_ema.skip_grad_blur.classifier = vgg
+
+    g_ema = g_ema.to(device).eval().requires_grad_(False)
+
+    return g_ema
 
 
+def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
+
+    ohe_label = torch.nn.functional.F.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
+
+    _, c_out_skip = G.content_enc(img)
+
+    s_out = G.style_enc(img)[0].mean((2,3))
+
+    truncation_psi = 1
+    truncation_cutoff = None
+    s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
+
+    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
+
+    w = G.__interleave_attr_style__(a_out, s_out)
+
+    for i, (f,_) in enumerate(zip(G.skip_transf, c_out_skip)):
+        if f is not None:
+            c_out_skip[i] = G._batch_blur(c_out_skip[i], blur_val = global_blur_val)
+    
+    cam = G.skip_grad_blur(img.float())
+    msk = cam
+    for i, (f, c) in enumerate(zip(G.skip_transf, c_out_skip)):
+        if f is not None:
+            im_size = c.size(-1)
+            blur_c = G._batch_blur(c, blur_val= mask_blur_val)
+            if msk.size(2) != im_size:
+                msk = F.interpolate(msk,size=(im_size,im_size), mode='area')
+            merged_c = c * msk + blur_c * (1 - msk)
+            c_out_skip[i] = merged_c
+    
+    img_out = G.image_dec(c_out_skip, w)
+
+    if return_msk:
+        to_return = (img_out,msk,cam) if G.learn_mask is not None else (img_out,None,None)
+    else:
+        to_return = img_out
+    
+
+    return to_return
+
+def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
+    images = []
+
+    for file in batch_of_filenames:
+        img = np.array(PIL.Image.open(file).resize((side, side)), dtype=np.float32).transpose((2,0,1))
+        images.append(img)
+
+    images_as_tensor = (torch.tensor(np.array(images))/256*2-1).cuda()
+
+    aging_steps = 4
+
+    number_of_images = images_as_tensor.shape[0]
+    images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
+
+    labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+
+    batch_size = 12
+
+    out_tensor_exp = torch.concat([generate_synthetic_data(
+    g_ema,
+    mini_im,
+    mini_label,
+    global_blur_val=0.2, # CUSP global blur
+    mask_blur_val=0.8)   # CUSP masked blur
+    for mini_im, mini_label
+    in zip(
+        images_as_tensor_exp.split(batch_size),
+        labels_exp.split(batch_size)
+    )])
+
+    out_tensor = out_tensor_exp.reshape([-1,aging_steps,*out_tensor_exp.shape[1:]])
+
+    return out_tensor, images_as_tensor, labels_exp
+
+def to_uint8(img_tensor):
+    img_tensor = (img_tensor.detach().cpu().numpy().transpose((1,2,0))+1)
+    img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
+    return img_tensor
+
+def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
+    # For every input image
+    for fname, im_in, im_out, age_labels in zip(
+            batch_of_filenames,img_in_tensor,img_out_tensor, 
+            labels_exp.numpy().reshape(-1,aging_steps)
+            ):
+        # Create figure
+        fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
+        age_labels = ['Input'] + [f'Label "{i}"' for i in age_labels]
+        # For every [input,step...]
+        for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
+            ax.axis('off')
+            ax.imshow(to_uint8(im))
+            ax.set_title(l,fontname='Liberation Serif')
+
+        plt.savefig("test.png")
+
+def run(images_path : str):
+
+    FFHQ_LS_KEY = "lats"  # Model trained on LATS dataset
+    FFHQ_RR_KEY = "hrfae" # Model trained on HRFAE dataset
+
+    configs = {
+    FFHQ_LS_KEY: dict(
+        gdrive_id="1sWSH3tHgm9DkHrc19hoEMrR-KQgnaFuw",
+        side=256, 
+        classes=(1,8)),
+    FFHQ_RR_KEY: dict(
+        gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
+        side=224, 
+        classes=(20,65))
+    }
+
+    batch_of_filenames = read_image_filenames(images_path)
+    g_ema = load_cusp(torch.device('cuda'))
+    data_labels_range = configs[FFHQ_RR_KEY]['classes']
+    side_config = configs[FFHQ_RR_KEY]['side']
+
+    out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range)
+
+    plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
 
 
-def generate_synthetic_data():
+run("models/cusp/sample_images")
 
 
-
-    return
-
-load_pretrained_model('/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/data/CUSP_network.pkl',torch.device('cpu'))
-path = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/data/CUSP_network.pkl'
+#load_pretrained_model('/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/data/CUSP_network.pkl',torch.device('cpu'))
+#path = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/data/CUSP_network.pkl'
 #convert_pkl_to_pt_file(path)
