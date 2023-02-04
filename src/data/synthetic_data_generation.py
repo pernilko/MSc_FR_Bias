@@ -139,26 +139,28 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
     return out_tensor, images_as_tensor, labels_exp
 
 def to_uint8(img_tensor):
-    img_tensor = (img_tensor.detach().cpu().numpy().transpose((1,2,0))+1)
+    img_tensor = (img_tensor.detach().cpu().numpy().transpose((1,2,0))+1)*(256/2)
     img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
     return img_tensor
 
 def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
     # For every input image
+    counter = 1
     for fname, im_in, im_out, age_labels in zip(
             batch_of_filenames,img_in_tensor,img_out_tensor, 
             labels_exp.numpy().reshape(-1,aging_steps)
             ):
         # Create figure
         fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
+        
         age_labels = ['Input'] + [f'Label "{i}"' for i in age_labels]
         # For every [input,step...]
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
             ax.axis('off')
             ax.imshow(to_uint8(im))
-            ax.set_title(l,fontname='Liberation Serif')
+            ax.set_title(l)
 
-        plt.savefig("test.png")
+        plt.savefig(f"test_{counter}.png")
 
 def run(images_path : str):
 
