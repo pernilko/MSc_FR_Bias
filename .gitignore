@@ -128,8 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-/datasets
-/insightface2
-/models
-backbone.pth
-data/CUSP_network.pkl
+src/datasets
+src/insightface2
+src/models
+src/backbone.pth
+src/data/CUSP_network.pkl

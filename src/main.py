@@ -20,7 +20,7 @@ from data.synthetic_data_generation import load_pretrained_model
 
 
 a = ArcFace()
-path = "/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/datasets/lfw"
+path = "/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/datasets/lfw"
 #dataset = a.LoadData(path)
 #for x in range(0,len(dataset)-1):
 #    similarityScore = a.CalculateSimilarityScores(a,dataset[x],dataset[x+1])
