@@ -122,7 +122,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
 
     batch_size = 12
 
-    out_tensor_exp = torch.concat([generate_synthetic_data(
+    out_tensor_exp = torch.cat([generate_synthetic_data(
     g_ema,
     mini_im,
     mini_label,
