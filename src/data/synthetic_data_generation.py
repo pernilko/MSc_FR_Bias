@@ -217,7 +217,6 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
 
     # create root folder for generated images
     os.makedirs(synthetic_images_path, exist_ok=True)
-    counter = 0
 
     # create one folder for each identity (00000, 00001, ...)
 
@@ -225,21 +224,20 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
             batch_of_filenames,img_in_tensor,img_out_tensor, 
             labels_exp.numpy().reshape(-1,aging_steps)
             ):
-        # Create figure
+        os.makedirs(synthetic_images_path + os.path.basename(fname)[:-4], exist_ok=True)
         fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
         
         age_labels = ['Input'] + [f'Label "{i}"' for i in age_labels]
-        # For every [input,step...]
+        
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
           img = PIL.Image.fromarray(to_uint8(im))
-          path = synthetic_images_path + os.path.basename(fname)[:-4] + '_' + str(counter) + '.png'
+          path = synthetic_images_path + os.path.basename(fname)[:-4] +  os.path.basename(fname)[:-4] + "_"+ l + '.png'
           img.save(path)
-          counter = counter + 1
 
 
 
 
 
-run("models/cusp/sample_images") #"models/cusp/sample_images"
+run("models/cusp/sample_images")
 
 
