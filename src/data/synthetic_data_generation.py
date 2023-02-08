@@ -227,12 +227,13 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
         os.makedirs(synthetic_images_path + os.path.basename(fname)[:-4], exist_ok=True)
         fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
         
-        age_labels = ['Input'] + [f'Label "{i}"' for i in age_labels]
+        age_labels = ['Input'] + [i for i in age_labels]
         
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
-          img = PIL.Image.fromarray(to_uint8(im))
-          path = synthetic_images_path + os.path.basename(fname)[:-4] + "/"+  os.path.basename(fname)[:-4] + "_"+ l + '.png'
-          img.save(path)
+            if l != 'Input':
+                img = PIL.Image.fromarray(to_uint8(im))
+                path = synthetic_images_path + os.path.basename(fname)[:-4] + "/"+  os.path.basename(fname)[:-4] + "_"+ l + '.png'
+                img.save(path)
 
 
 
