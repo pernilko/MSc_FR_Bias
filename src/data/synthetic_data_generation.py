@@ -10,11 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import sys
 
-#from models.cusp.torch_utils import persistence
-#import models.cusp.training
-#import models.cusp.dnnlib
-#save the literal filepath to both directories as strings
-
 folder_root = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src'
 sys.path.append(folder_root)
 
@@ -26,6 +21,12 @@ from models.cusp import dnnlib
 from models.cusp.training.networks import VGG, module_no_grad
 from models.cusp.torch_utils import misc
 
+
+'''
+Method for reading the filenames of the input images to be subjected to age editing
+Input: images_path -> path of where the input images are located
+Output: batch_of_filenames -> filenames for the current path of images
+'''
 def read_image_filenames(images_path : str):
     batch_of_filenames = [
       os.path.join(images_path,f) 
@@ -34,6 +35,11 @@ def read_image_filenames(images_path : str):
     ]
     return batch_of_filenames
 
+'''
+Method loads the pre-trained CUSP model
+Input: device 
+Output: g_ema
+'''
 def load_cusp(device : torch.device):
 
     weights_path = 'data/cusp_network.pkl'
@@ -56,7 +62,9 @@ def load_cusp(device : torch.device):
 
     return g_ema
 
-
+'''
+Method 
+'''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
 
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
@@ -98,6 +106,9 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
 
     return to_return
 
+'''
+Method
+'''
 def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
     images = []
 
@@ -132,11 +143,16 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
 
     return out_tensor, images_as_tensor, labels_exp
 
+'''
+Method
+'''
 def to_uint8(img_tensor):
     img_tensor = (img_tensor.detach().cpu().numpy().transpose((1,2,0))+1)*(256/2)
     img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
     return img_tensor
-
+'''
+Method plots and saves plots of generated images
+'''
 def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
     # For every input image
     counter = 1
@@ -154,9 +170,16 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
             ax.imshow(to_uint8(im))
             ax.set_title(l)
 
+
         plt.savefig(f"test_{counter}.png")
         counter = counter + 1
 
+'''
+Method generates synthetic face images of input images.
+The method applies age editing to all input images, and generates new images with different ages of each identity.
+Input:
+Return:
+'''
 def run(images_path : str):
 
     FFHQ_LS_KEY = "lats"  # Model trained on LATS dataset
@@ -180,7 +203,41 @@ def run(images_path : str):
 
     out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema)
 
-    plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
+    #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
+    generated_images_path = "datasets/cusp_generated/"
+    create_dataset(generated_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, 4)
+
+
+'''
+Method creates dataset of generated images, and saves the images to folder.
+Input:
+Return:
+'''
+def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
+
+    # create root folder for generated images
+    os.makedirs(synthetic_images_path, exist_ok=True)
+    counter = 0
+
+    # create one folder for each identity (00000, 00001, ...)
+
+    for fname, im_in, im_out, age_labels in zip(
+            batch_of_filenames,img_in_tensor,img_out_tensor, 
+            labels_exp.numpy().reshape(-1,aging_steps)
+            ):
+        # Create figure
+        fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
+        
+        age_labels = ['Input'] + [f'Label "{i}"' for i in age_labels]
+        # For every [input,step...]
+        for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
+          img = PIL.Image.fromarray(to_uint8(im))
+          path = synthetic_images_path + fname[:-4] + '_' + str(counter) + '.png'
+          img.save(path)
+          counter = counter + 1
+
+
+
 
 
 run("models/cusp/sample_images") #"models/cusp/sample_images"

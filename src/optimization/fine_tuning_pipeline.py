@@ -1,6 +1,7 @@
 from insightface2.recognition.arcface_torch.backbones import iresnet50
 import torch;
 from torch.nn import Module as m
+from data.data_preprocessing import load_dataset
 
 '''
 Method loads pretrained model
@@ -44,13 +45,17 @@ Input:
 Input:
 Return 
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
     model = unfreeze_model_layers(frozenParams, frozenLayers)
 
     # Load dataset
+    data, labels = load_dataset(path)
+
+    # Preprocess data
+    
 
     # Train the unfrozen layers
 
