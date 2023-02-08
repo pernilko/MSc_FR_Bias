@@ -232,7 +232,7 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
         # For every [input,step...]
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
           img = PIL.Image.fromarray(to_uint8(im))
-          path = synthetic_images_path + fname[:-4] + '_' + str(counter) + '.png'
+          path = synthetic_images_path + os.path.basename(fname)[:-4] + '_' + str(counter) + '.png'
           img.save(path)
           counter = counter + 1
 
@@ -241,4 +241,5 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
 
 
 run("models/cusp/sample_images") #"models/cusp/sample_images"
+
 
