@@ -231,7 +231,7 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
         
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
           img = PIL.Image.fromarray(to_uint8(im))
-          path = synthetic_images_path + os.path.basename(fname)[:-4] +  os.path.basename(fname)[:-4] + "_"+ l + '.png'
+          path = synthetic_images_path + os.path.basename(fname)[:-4] + "/"+  os.path.basename(fname)[:-4] + "_"+ l + '.png'
           img.save(path)
 
 
