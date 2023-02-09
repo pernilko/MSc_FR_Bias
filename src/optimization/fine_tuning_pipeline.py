@@ -118,7 +118,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
-    model = unfreeze_model_layers(frozenParams, frozenLayers)
+    model = unfreeze_model_layers(frozenParams, frozenLayers, model)
 
 
     tsfm = transforms.Compose([
