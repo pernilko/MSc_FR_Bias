@@ -62,4 +62,4 @@ tsfm = transforms.Compose([
         transforms.ToTensor()
 ])
 
-load_dataset("/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/datasets/lfw", 20, tsfm)
+#load_dataset("/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/datasets/lfw", 20, tsfm)
