@@ -1,4 +1,3 @@
-from sklearn import metrics
 import torch
 
 def evaluate_performance(model, test_data_loader):
