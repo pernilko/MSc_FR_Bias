@@ -2,9 +2,10 @@ import sys
 folder_root = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src'
 sys.path.append(folder_root)
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
+import utils.evaluation as evaluation
 import torch;
 from torch.nn import Module as m
-from data.data_preprocessing import load_dataset
+from data.data_preprocessing import load_dataset, load_test_dataset
 from torchvision import transforms, datasets
 import os
 
@@ -77,7 +78,7 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function):
 def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader):
     epoch_number = 0
     best_vloss = 1_000_000.
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     loss_fn = torch.nn.CrossEntropyLoss()
 
     for epoch in range(number_of_epochs):
@@ -136,6 +137,11 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
+
+    test_data_loader = load_test_dataset("models/cusp/sample_images", 12, tsfm)
+    evaluation.evaluate_performance(fine_tuned_model, test_data_loader)
+
+    
 
 
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']

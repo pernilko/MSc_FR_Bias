@@ -84,12 +84,3 @@ class ArcFace:
 
         return similarityScore
 
-
-    '''
-    path = "/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/datasets/lfw"
-    dataset = LoadData(path)
-    for x in range(0,2,len(dataset)):
-        for y in range(1,2,len(dataset)):
-            similarityScore = CalculateSimilarityScores(x,y)
-            print(similarityScore)
-    '''

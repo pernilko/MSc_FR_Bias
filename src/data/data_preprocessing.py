@@ -17,12 +17,18 @@ def load_dataset(img_path : str, batch_size : int, transforms):
     training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
     validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=2)
     
+    '''
     for batch in training_data_loader:
         inputs, targets = batch
         print(inputs.shape)
-    
+    '''
 
     return training_data_loader, validation_data_loader
+
+def load_test_dataset(img_path : str, batch_size : int, transforms):
+    data = datasets.ImageFolder(img_path, transforms)
+    test_data_loader = DataLoader(data, batch_size=batch_size, shuffle=True, num_workers=2)
+    return test_data_loader
 
 def test_image_loader(training_data_loader, validation_data_loader):
     for train_batch, val_batch in zip(training_data_loader, validation_data_loader):
