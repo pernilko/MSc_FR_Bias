@@ -16,10 +16,11 @@ def load_dataset(img_path : str, batch_size : int, transforms):
 
     training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
     validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=2)
-    '''
-    for batch in dataloader:
+    
+    for batch in training_data_loader:
         inputs, targets = batch
-    '''
+        print(inputs.shape)
+    
 
     return training_data_loader, validation_data_loader
 
@@ -51,11 +52,6 @@ def test_image_loader(training_data_loader, validation_data_loader):
             plt.imshow(val_scaled_data)
             plt.savefig("val" + str(counter)+ ".png")
             counter = counter + 1
-
-def data_preprocessing_arcface():
-    
-    return
-
 
 
 tsfm = transforms.Compose([

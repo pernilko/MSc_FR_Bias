@@ -123,11 +123,12 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Resize(3, 98, 98)
+        transforms.Resize(98)
     ])
     batch_size = 20
     # Load training and validation dataset
     training_data_loader, validation_data_loader = load_dataset(path, batch_size, tsfm)
+
 
     # Train the unfrozen layers
     train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader)
