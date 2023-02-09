@@ -5,6 +5,7 @@ from models.insightface2.recognition.arcface_torch.backbones import iresnet50
 import torch;
 from torch.nn import Module as m
 from data.data_preprocessing import load_dataset
+from torchvision import transforms, datasets
 
 '''
 Method loads pretrained model
@@ -119,8 +120,13 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     model = load_pretrained_model(filename, device)
     model = unfreeze_model_layers(frozenParams, frozenLayers)
 
+
+    tsfm = transforms.Compose([
+        transforms.ToTensor()
+    ])
+    batch_size = 20
     # Load training and validation dataset
-    training_data_loader, validation_data_loader = load_dataset(path)
+    training_data_loader, validation_data_loader = load_dataset(path, batch_size, tsfm)
 
     # Train the unfrozen layers
     train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader)
