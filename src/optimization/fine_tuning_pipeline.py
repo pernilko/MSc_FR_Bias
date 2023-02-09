@@ -106,6 +106,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             torch.save(model.state_dict(), model_path)
 
         epoch_number += 1
+    return model
 
 
 '''
@@ -114,7 +115,7 @@ Input:
 Input:
 Return 
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -131,12 +132,14 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
 
     # Train the unfrozen layers
-    train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader)
+    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader)
+    torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
 
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
 frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
 input_images_path = "datasets/cusp_generated/"
+name_of_fine_tuned_model = "fine_tuned_model_1.pt"
 
-fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, input_images_path)
+fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, input_images_path, name_of_fine_tuned_model)
