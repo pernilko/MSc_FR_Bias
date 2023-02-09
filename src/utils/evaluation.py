@@ -6,9 +6,12 @@ def evaluate_performance(model, test_data_loader):
     with torch.no_grad():
         for data in test_data_loader:
             images, labels = data
+            print("labels: ", labels)
             outputs = model(images)
+            print("outputs:", outputs)
             _, predictions = torch.max(outputs, 1)
-           
+            print("Predict: ", predictions)
+
             true_positives, false_positives, true_negatives, false_negatives = performance_measure(labels, predictions)
             print("TP: ", true_positives, "FP: ", false_positives, "TN: ", true_negatives, "FN: ", false_negatives)
 
