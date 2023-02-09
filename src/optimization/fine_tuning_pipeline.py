@@ -138,7 +138,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
-    test_data_loader = load_test_dataset("models/cusp/sample_images", 12, tsfm)
+    test_data_loader = load_test_dataset("models/cusp/sample_images/", 12, tsfm)
     evaluation.evaluate_performance(fine_tuned_model, test_data_loader)
 
     
