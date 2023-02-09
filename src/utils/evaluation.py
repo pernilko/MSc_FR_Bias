@@ -9,7 +9,7 @@ def evaluate_performance(model, test_data_loader):
             print("labels: ", labels)
             outputs = model(images)
             print("outputs:", outputs)
-            _, predictions = torch.max(outputs)
+            _, predictions = torch.max(outputs.data, 1)
             print("Predict: ", predictions)
 
             true_positives, false_positives, true_negatives, false_negatives = performance_measure(labels, predictions)
