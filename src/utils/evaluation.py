@@ -26,10 +26,10 @@ def calculate_far_frr(false_positives, false_negatives, true_negatives, true_pos
     return far, frr
 
 def performance_measure(actual_labels, predicted_labels):
-    true_positives = 0
-    false_positives = 0
-    true_negatives = 0
-    false_negatives = 0
+    true_positives = []
+    false_positives = []
+    true_negatives = []
+    false_negatives = []
     class_id = set(actual_labels).union(set(predicted_labels))
 
     for index ,_id in enumerate(class_id):
