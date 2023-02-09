@@ -84,7 +84,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        avg_loss = train_one_epoch(training_data_loader, optimizer, loss_fn)
+        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn)
 
         # We don't need gradients on to do reporting
         model.train(False)
