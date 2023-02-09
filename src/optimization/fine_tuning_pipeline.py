@@ -1,4 +1,7 @@
-from insightface2.recognition.arcface_torch.backbones import iresnet50
+import sys
+folder_root = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src'
+sys.path.append(folder_root)
+from models.insightface2.recognition.arcface_torch.backbones import iresnet50
 import torch;
 from torch.nn import Module as m
 from data.data_preprocessing import load_dataset
