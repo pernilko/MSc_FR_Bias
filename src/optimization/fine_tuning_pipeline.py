@@ -122,7 +122,8 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
 
     tsfm = transforms.Compose([
-        transforms.ToTensor()
+        transforms.ToTensor(),
+        transforms.Resize((3, 98, 98))
     ])
     batch_size = 20
     # Load training and validation dataset
