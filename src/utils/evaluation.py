@@ -1,4 +1,8 @@
 import torch
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
 
 def evaluate_performance(model, test_data_loader):
 
@@ -48,3 +52,20 @@ def performance_measure(actual_labels, predicted_labels):
                 false_negatives[index] += 1
 
     return(class_id, true_positives, false_positives, true_negatives, false_negatives)
+
+def create_distribution_plot(df : pd.DataFrame, output_filename : str):
+    # need to take in a dataFrame which contains three columns named "mated", "agevsage" and "non-mated".
+    # Each row must contain one identity with values pertaining to the three columns, 
+    # i.e. the identitiy's similarity score for a mated sample, sim score compared to mated but older, and non-mated.
+
+    similarity_id_1 = [0.89, 0.66, 0.001]
+    similarity_id_2 = [0.9, 0.56, 0.1]
+    similarity_id_3 = [0.83, 0.75, 0.2]
+    similarity_id_4 = [0.86, 0.67, 0.02]
+    df = pd.DataFrame(np.array((similarity_id_1, similarity_id_2, similarity_id_3, similarity_id_4)),
+                   columns=['mated', '20vs50', 'non-mated'])
+    print(df.head())
+    sns.displot(df, kind="kde")
+    plt.savefig('plot_test.png')
+
+#create_distribution_plot()
