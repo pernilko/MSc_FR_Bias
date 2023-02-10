@@ -46,7 +46,7 @@ def unfreeze_model_layers(frozenParams: list, frozenLayers, model : m):
     return model
 
 
-def train_one_epoch(training_data_loader, optimizer, model, loss_function):
+def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch_size):
     running_loss = 0.
     last_loss = 0.
 
@@ -68,14 +68,14 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function):
 
         # Gather data and report
         running_loss += loss.item()
-        if i % 1000 == 999:
-            last_loss = running_loss / 1000 # loss per batch
+        if i % batch_size == (batch_size-1):
+            last_loss = running_loss / batch_size # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             running_loss = 0.
 
     return last_loss
 
-def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader):
+def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size):
     epoch_number = 0
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -86,7 +86,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn)
+        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size)
 
         # We don't need gradients on to do reporting
         model.train(False)
@@ -134,7 +134,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
 
     # Train the unfrozen layers
-    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader)
+    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
