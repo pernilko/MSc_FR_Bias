@@ -17,11 +17,11 @@ def load_dataset(img_path : str, batch_size : int, transforms):
     training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
     validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=2)
     
-    '''
+    
     for batch in training_data_loader:
         inputs, targets = batch
-        print(inputs.shape)
-    '''
+        print(targets)
+    
 
     return training_data_loader, validation_data_loader
 
