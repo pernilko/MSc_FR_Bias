@@ -10,8 +10,11 @@ import numpy as np
 def load_dataset(img_path : str, batch_size : int, transforms):
     
     data = datasets.ImageFolder(img_path, transforms)
+    '''
     for c in data.targets:
         print(c)
+    '''
+   
 
     length = [round(len(data)*0.8), round(len(data)*0.2)]
     train_data, val_data = torch.utils.data.random_split(data, length)
