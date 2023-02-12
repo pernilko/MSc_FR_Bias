@@ -10,6 +10,8 @@ import numpy as np
 def load_dataset(img_path : str, batch_size : int, transforms):
     
     data = datasets.ImageFolder(img_path, transforms)
+    for c in data.classes:
+        print(c)
 
     length = [round(len(data)*0.8), round(len(data)*0.2)]
     train_data, val_data = torch.utils.data.random_split(data, length)
@@ -17,10 +19,12 @@ def load_dataset(img_path : str, batch_size : int, transforms):
     training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
     validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=2)
     
-    
+    '''
     for batch in training_data_loader:
         inputs, targets = batch
         print(targets)
+    '''
+    
     
 
     return training_data_loader, validation_data_loader
@@ -64,4 +68,4 @@ tsfm = transforms.Compose([
         transforms.ToTensor()
 ])
 
-#load_dataset("/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/datasets/lfw", 20, tsfm)
+load_dataset("/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src/datasets/lfw", 20, tsfm)
