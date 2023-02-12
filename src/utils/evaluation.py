@@ -19,7 +19,7 @@ def evaluate_performance(model, test_data_loader):
             class_id, true_positives, false_positives, true_negatives, false_negatives = performance_measure(labels, predictions)
             print("class_id: ", class_id, "TP: ", true_positives, "FP: ", false_positives, "TN: ", true_negatives, "FN: ", false_negatives)
 
-            far, frr = calculate_far_frr(false_positives, false_negatives, true_negatives, true_positives)
+            far, frr = calculate_far_frr(np.sum(false_positives), np.sum(false_negatives), np.sum(true_negatives), np.sum(true_positives))
             print ("FAR: ", far, "FRR: ", frr)
     
     
@@ -52,6 +52,21 @@ def performance_measure(actual_labels, predicted_labels):
                 false_negatives[index] += 1
 
     return(class_id, true_positives, false_positives, true_negatives, false_negatives)
+
+def create_dataframe(imgs_identities):
+    sim_scores = np.array()
+    for identity in imgs_identities:
+        mated_similarity = 0.
+        aged_similatiry = 0.
+        non_mated_similarity = 0.
+        np.append(sim_scores, (mated_similarity, aged_similatiry, non_mated_similarity))
+    # for each identity:
+        # find sim score for mated sample
+        # find  sim score for 20 vs 50 year old
+        # find avg? sim score for non-mated sample
+    df = pd.DataFrame(sim_scores, columns=['mated', '20vs50', 'non-mated'])
+
+    return df
 
 def create_distribution_plot(df : pd.DataFrame, output_filename : str):
     # need to take in a dataFrame which contains three columns named "mated", "agevsage" and "non-mated".

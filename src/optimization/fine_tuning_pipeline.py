@@ -46,7 +46,7 @@ def unfreeze_model_layers(frozenParams: list, frozenLayers, model : m):
     return model
 
 
-def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch_size):
+def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch_size, epoch):
     running_loss = 0.
     last_loss = 0.
 
@@ -72,6 +72,10 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
             last_loss = running_loss / batch_size # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             running_loss = 0.
+    
+    #if epoch == 10:
+    #    df = evaluation.create_dataframe()
+    #    evaluation.create_distribution_plot(df, "distribution_plot.png")
 
     return last_loss
 
@@ -86,7 +90,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size)
+        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size, epoch)
 
         # We don't need gradients on to do reporting
         model.train(False)
