@@ -56,7 +56,7 @@ def performance_measure(actual_labels, predicted_labels):
     return(class_id, true_positives, false_positives, true_negatives, false_negatives)
 
 def calculate_similarity_score(orginal_img, img_to_compare):
-    similarity_score = dist = np.linalg.norm(np.array(img_to_compare)-np.array(orginal_img))
+    similarity_score = np.linalg.norm(img_to_compare.detach().numpy()-orginal_img.detach().numpy())
     return similarity_score
 
 def create_dataframe(similarity_scores):
