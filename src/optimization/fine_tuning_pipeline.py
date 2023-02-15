@@ -76,7 +76,7 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
 
     return last_loss
 
-def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader):
+def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size):
     epoch_number = 0
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
