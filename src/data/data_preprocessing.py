@@ -20,7 +20,7 @@ def load_dataset(img_path : str, batch_size : int, transforms):
     train_data, val_data = torch.utils.data.random_split(data, length)
 
     training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
-    validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=True, num_workers=2)
+    validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=2)
     
     '''
     for batch in training_data_loader:

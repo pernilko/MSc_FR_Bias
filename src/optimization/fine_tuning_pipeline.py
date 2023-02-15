@@ -110,25 +110,29 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
                     sim_score_non_mated =[]
                     sim_score_age_mated = []
                     for j in range(i+1, len(vinputs)):
-                        if vlabels[i] == vlabels[j] and j < 3: #mated
-                            print("mated match")
+                        counter = 1
+                        if vlabels[i] == vlabels[j] and counter < 3: #mated
+                            print("mated match", "counter: ", counter)
                             output1 = voutputs[i]
                             output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_mated.append(distance)
+                            counter = counter + 1
 
                         if vlabels[i] != vlabels[j]: # non-mated
-                            print("non-mated match")
+                            print("non-mated match", "counter: ", counter)
                             output1 = voutputs[i]
                             output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_non_mated.append(distance)
+                            counter = counter + 1
                         if vlabels[i] == vlabels[j] and j > 2: #age-mated
-                            print("age-mated match") 
+                            print("age-mated match", "counter: ", counter) 
                             output1 = voutputs[i]
                             output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_age_mated.append(distance)
+                            counter = counter + 1
                     sim_score_identity.append(np.mean(sim_score_age_mated))
                     sim_score_identity.append(np.mean(sim_score_age_mated))
                     sim_score_identity.append(np.mean(sim_score_non_mated))
