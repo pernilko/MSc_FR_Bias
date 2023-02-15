@@ -95,7 +95,9 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
         running_vloss = 0.0
         for i, vdata in enumerate(validation_data_loader):
             vinputs, vlabels = vdata
+            print(len(vinputs))
             voutputs = model(vinputs)
+            print(len(voutputs))
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
@@ -116,7 +118,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
                             sim_score_mated.append(distance)
 
                         if vlabels[i] != vlabels[j]: # non-mated
-                            print("non-mated match") 
+                            print("non-mated match")
                             output1 = model(vinputs[i])
                             output2 = model(vinputs[j])
                             distance = evaluation.calculate_similarity_score(output1, output2)
