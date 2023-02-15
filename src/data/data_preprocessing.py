@@ -34,7 +34,7 @@ def load_dataset(img_path : str, batch_size : int, transforms):
 
 def load_test_dataset(img_path : str, batch_size : int, transforms):
     data = datasets.ImageFolder(img_path, transforms)
-    test_data_loader = DataLoader(data, batch_size=batch_size, shuffle=True, num_workers=2)
+    test_data_loader = DataLoader(data, batch_size=batch_size, shuffle=False, num_workers=2)
     return test_data_loader
 
 def test_image_loader(training_data_loader, validation_data_loader):

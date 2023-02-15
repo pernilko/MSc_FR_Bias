@@ -76,7 +76,7 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
 
     return last_loss
 
-def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size):
+def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader):
     epoch_number = 0
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -101,8 +101,9 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
+             
+            '''Sim scores
             if epoch + 1 == 10:    
-                '''Sim scores'''
                 sim_scores = []
                 for i in range(0,len(vinputs)):
                     sim_score_identity = []
@@ -117,7 +118,6 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
                             output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_mated.append(distance)
-                            counter = counter + 1
 
                         if vlabels[i] != vlabels[j]: # non-mated
                             print("non-mated match", "counter: ", counter)
@@ -125,14 +125,13 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
                             output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_non_mated.append(distance)
-                            counter = counter + 1
                         if vlabels[i] == vlabels[j] and j > 2: #age-mated
                             print("age-mated match", "counter: ", counter) 
                             output1 = voutputs[i]
                             output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_age_mated.append(distance)
-                            counter = counter + 1
+                        counter = counter + 1
                     sim_score_identity.append(np.mean(sim_score_age_mated))
                     sim_score_identity.append(np.mean(sim_score_age_mated))
                     sim_score_identity.append(np.mean(sim_score_non_mated))
@@ -140,7 +139,8 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
                 print("sim scores: ", sim_scores, "end sim scores")
                 evaluation.create_dataframe(sim_scores)
-
+                '''
+        
         avg_vloss = running_vloss / (i + 1)
         print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
@@ -150,11 +150,10 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             model_path = 'model_{}'.format(epoch_number)
             torch.save(model.state_dict(), model_path)
 
-        '''
-        if epoch == 10:
-            evaluation.create_dataframe(test_data_loader)
-            evaluation.create_distribution_plot()
-        '''
+       
+        if epoch + 1 == 10:    
+            evaluation.test(test_data_loader)
+        
         epoch_number += 1
     return model
 
@@ -179,15 +178,16 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     batch_size = 20
     # Load training and validation dataset
     training_data_loader, validation_data_loader = load_dataset(path, batch_size, tsfm)
+    test_data_loader = load_test_dataset(path, batch_size, tsfm)
 
 
     # Train the unfrozen layers
-    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size)
+    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader)
     print("fine-tuned model: ", fine_tuned_model)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
-    test_data_loader = load_test_dataset("datasets/lfw/", 12, tsfm)
+    #test_data_loader = load_test_dataset("datasets/lfw/", 12, tsfm)
     #evaluation.evaluate_performance(fine_tuned_model, test_data_loader)
 
     

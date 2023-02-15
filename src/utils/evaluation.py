@@ -59,6 +59,51 @@ def calculate_similarity_score(orginal_img, img_to_compare):
     similarity_score = np.linalg.norm(img_to_compare.detach().numpy()-orginal_img.detach().numpy())
     return similarity_score
 
+def test(test_data_loader, model : iresnet50):
+
+    for i, data in enumerate(test_data_loader):
+            vinputs, vlabels = data
+            for label in vlabels:
+                print(label)
+            
+            voutputs = model(vinputs)
+                
+            sim_scores = []
+            for i in range(0,len(vinputs)):
+                sim_score_identity = []
+                sim_score_mated = []
+                sim_score_non_mated =[]
+                sim_score_age_mated = []
+                for j in range(i+1, len(vinputs)):
+                    counter = 1
+                    if vlabels[i] == vlabels[j] and counter < 3: #mated
+                        print("mated match", "counter: ", counter)
+                        output1 = voutputs[i]
+                        output2 = voutputs[j]
+                        distance = evaluation.calculate_similarity_score(output1, output2)
+                        sim_score_mated.append(distance)
+
+                    if vlabels[i] != vlabels[j]: # non-mated
+                        print("non-mated match", "counter: ", counter)
+                        output1 = voutputs[i]
+                        output2 = voutputs[j]
+                        distance = evaluation.calculate_similarity_score(output1, output2)
+                        sim_score_non_mated.append(distance)
+                    if vlabels[i] == vlabels[j] and j > 2: #age-mated
+                        print("age-mated match", "counter: ", counter) 
+                        output1 = voutputs[i]
+                        output2 = voutputs[j]
+                        distance = evaluation.calculate_similarity_score(output1, output2)
+                        sim_score_age_mated.append(distance)
+                    counter = counter + 1
+                sim_score_identity.append(np.mean(sim_score_age_mated))
+                sim_score_identity.append(np.mean(sim_score_age_mated))
+                sim_score_identity.append(np.mean(sim_score_non_mated))
+                sim_scores.append(sim_score_identity)
+
+            print("sim scores: ", sim_scores, "end sim scores")
+            create_dataframe(sim_scores)
+
 def create_dataframe(similarity_scores):
     for score in similarity_scores:
         print("df: ", score)
