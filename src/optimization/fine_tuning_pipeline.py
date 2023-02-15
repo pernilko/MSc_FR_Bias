@@ -95,9 +95,9 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
         running_vloss = 0.0
         for i, vdata in enumerate(validation_data_loader):
             vinputs, vlabels = vdata
-            print("inp len", len(vinputs))
+            #print("inp len", len(vinputs))
             voutputs = model(vinputs)
-            print("out len", len(voutputs))
+            #print("out len", len(voutputs))
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
