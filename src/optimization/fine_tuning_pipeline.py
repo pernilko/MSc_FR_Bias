@@ -99,7 +99,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
-            if epoch == 10:    
+            if epoch + 1 == 10:    
                 '''Sim scores'''
                 sim_scores = []
                 for i in range(0,len(vinputs)):
