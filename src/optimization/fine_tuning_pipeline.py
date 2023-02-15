@@ -152,7 +152,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
        
         if epoch + 1 == 10:    
-            evaluation.test(test_data_loader)
+            evaluation.test(test_data_loader, model)
         
         epoch_number += 1
     return model
