@@ -80,20 +80,20 @@ def test(test_data_loader, model : iresnet50):
                         print("mated match", "counter: ", counter)
                         output1 = voutputs[i]
                         output2 = voutputs[j]
-                        distance = evaluation.calculate_similarity_score(output1, output2)
+                        distance = calculate_similarity_score(output1, output2)
                         sim_score_mated.append(distance)
 
                     if vlabels[i] != vlabels[j]: # non-mated
                         print("non-mated match", "counter: ", counter)
                         output1 = voutputs[i]
                         output2 = voutputs[j]
-                        distance = evaluation.calculate_similarity_score(output1, output2)
+                        distance = calculate_similarity_score(output1, output2)
                         sim_score_non_mated.append(distance)
                     if vlabels[i] == vlabels[j] and j > 2: #age-mated
                         print("age-mated match", "counter: ", counter) 
                         output1 = voutputs[i]
                         output2 = voutputs[j]
-                        distance = evaluation.calculate_similarity_score(output1, output2)
+                        distance = calculate_similarity_score(output1, output2)
                         sim_score_age_mated.append(distance)
                     counter = counter + 1
                 sim_score_identity.append(np.mean(sim_score_age_mated))
