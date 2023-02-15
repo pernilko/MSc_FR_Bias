@@ -3,6 +3,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+from models.insightface2.recognition.arcface_torch.backbones import iresnet50
+import math
 
 def evaluate_performance(model, test_data_loader):
 
@@ -53,20 +55,27 @@ def performance_measure(actual_labels, predicted_labels):
 
     return(class_id, true_positives, false_positives, true_negatives, false_negatives)
 
-def create_dataframe(imgs_identities):
-    sim_scores = np.array()
-    for identity in imgs_identities:
-        mated_similarity = 0.
+def calculate_similarity_score(orginal_img, img_to_compare):
+    similarity_score = math.dist(orginal_img, img_to_compare)
+    return similarity_score
+
+def create_dataframe(similarity_scores):
+    for score in similarity_scores:
+        print("df: ", score)
+        '''
+        mated_similarity = calculate_similarity_score(identity, identity)
         aged_similatiry = 0.
         non_mated_similarity = 0.
         np.append(sim_scores, (mated_similarity, aged_similatiry, non_mated_similarity))
+        '''
+        
     # for each identity:
         # find sim score for mated sample
         # find  sim score for 20 vs 50 year old
         # find avg? sim score for non-mated sample
-    df = pd.DataFrame(sim_scores, columns=['mated', '20vs50', 'non-mated'])
+    #df = pd.DataFrame(sim_scores, columns=['mated', '20vs50', 'non-mated'])
 
-    return df
+    #return df
 
 def create_distribution_plot(df : pd.DataFrame, output_filename : str):
     # need to take in a dataFrame which contains three columns named "mated", "agevsage" and "non-mated".

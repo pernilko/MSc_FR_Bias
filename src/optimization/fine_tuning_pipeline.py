@@ -8,6 +8,7 @@ from torch.nn import Module as m
 from data.data_preprocessing import load_dataset, load_test_dataset
 from torchvision import transforms, datasets
 import os
+import numpy as np
 
 '''
 Method loads pretrained model
@@ -46,7 +47,7 @@ def unfreeze_model_layers(frozenParams: list, frozenLayers, model : m):
     return model
 
 
-def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch_size, epoch):
+def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch_size):
     running_loss = 0.
     last_loss = 0.
 
@@ -72,14 +73,10 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
             last_loss = running_loss / batch_size # loss per batch
             print('  batch {} loss: {}'.format(i + 1, last_loss))
             running_loss = 0.
-    
-    #if epoch == 10:
-    #    df = evaluation.create_dataframe()
-    #    evaluation.create_distribution_plot(df, "distribution_plot.png")
 
     return last_loss
 
-def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size):
+def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader):
     epoch_number = 0
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -90,7 +87,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size, epoch)
+        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size)
 
         # We don't need gradients on to do reporting
         model.train(False)
@@ -102,6 +99,42 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
+            if epoch == 10:    
+                '''Sim scores'''
+                sim_scores = []
+                for i in range(0,len(vinputs)):
+                    sim_score_identity = []
+                    sim_score_mated = []
+                    sim_score_non_mated =[]
+                    sim_score_age_mated = []
+                    for j in range(i+1, len(vinputs)):
+                        if vlabels[i] == vlabels[j] and j < 3: #mated
+                            print("mated match")
+                            output1 = model(vinputs[i])
+                            output2 = model(vinputs[j])
+                            distance = evaluation.calculate_similarity_score(output1, output2)
+                            sim_score_mated.append(distance)
+
+                        if vlabels[i] != vlabels[j]: # non-mated
+                            print("non-mated match") 
+                            output1 = model(vinputs[i])
+                            output2 = model(vinputs[j])
+                            distance = evaluation.calculate_similarity_score(output1, output2)
+                            sim_score_non_mated.append(distance)
+                        if vlabels[i] == vlabels[j] and j > 2: #age-mated
+                            print("age-mated match") 
+                            output1 = model(vinputs[i])
+                            output2 = model(vinputs[j])
+                            distance = evaluation.calculate_similarity_score(output1, output2)
+                            sim_score_age_mated.append(distance)
+                    sim_score_identity.append(np.mean(sim_score_age_mated))
+                    sim_score_identity.append(np.mean(sim_score_age_mated))
+                    sim_score_identity.append(np.mean(sim_score_non_mated))
+                    sim_scores.append(sim_score_identity)
+
+                print("sim scores: ", sim_scores, "end sim scores")
+                evaluation.create_dataframe(sim_scores)
+
         avg_vloss = running_vloss / (i + 1)
         print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
@@ -111,6 +144,11 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             model_path = 'model_{}'.format(epoch_number)
             torch.save(model.state_dict(), model_path)
 
+        '''
+        if epoch == 10:
+            evaluation.create_dataframe(test_data_loader)
+            evaluation.create_distribution_plot()
+        '''
         epoch_number += 1
     return model
 
@@ -139,11 +177,12 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     # Train the unfrozen layers
     fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size)
+    print("fine-tuned model: ", fine_tuned_model)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
     test_data_loader = load_test_dataset("datasets/lfw/", 12, tsfm)
-    evaluation.evaluate_performance(fine_tuned_model, test_data_loader)
+    #evaluation.evaluate_performance(fine_tuned_model, test_data_loader)
 
     
 
