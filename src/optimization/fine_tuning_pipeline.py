@@ -95,9 +95,9 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
         running_vloss = 0.0
         for i, vdata in enumerate(validation_data_loader):
             vinputs, vlabels = vdata
-            print(len(vinputs))
+            print("inp len", len(vinputs))
             voutputs = model(vinputs)
-            print(len(voutputs))
+            print("out len", len(voutputs))
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
@@ -112,21 +112,21 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
                     for j in range(i+1, len(vinputs)):
                         if vlabels[i] == vlabels[j] and j < 3: #mated
                             print("mated match")
-                            output1 = model(vinputs[i])
-                            output2 = model(vinputs[j])
+                            output1 = voutputs[i]
+                            output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_mated.append(distance)
 
                         if vlabels[i] != vlabels[j]: # non-mated
                             print("non-mated match")
-                            output1 = model(vinputs[i])
-                            output2 = model(vinputs[j])
+                            output1 = voutputs[i]
+                            output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_non_mated.append(distance)
                         if vlabels[i] == vlabels[j] and j > 2: #age-mated
                             print("age-mated match") 
-                            output1 = model(vinputs[i])
-                            output2 = model(vinputs[j])
+                            output1 = voutputs[i]
+                            output2 = voutputs[j]
                             distance = evaluation.calculate_similarity_score(output1, output2)
                             sim_score_age_mated.append(distance)
                     sim_score_identity.append(np.mean(sim_score_age_mated))
