@@ -77,32 +77,35 @@ def test(test_data_loader, model : iresnet50):
                 for j in range(i+1, len(vinputs)):
                     counter = 1
                     if vlabels[i] == vlabels[j] and counter < 3: #mated
-                        print("mated match", "counter: ", counter)
+                        #print("mated match", "counter: ", counter)
                         output1 = voutputs[i]
                         output2 = voutputs[j]
                         distance = calculate_similarity_score(output1, output2)
                         sim_score_mated.append(distance)
 
                     if vlabels[i] != vlabels[j]: # non-mated
-                        print("non-mated match", "counter: ", counter)
+                        #print("non-mated match", "counter: ", counter)
                         output1 = voutputs[i]
                         output2 = voutputs[j]
                         distance = calculate_similarity_score(output1, output2)
                         sim_score_non_mated.append(distance)
                     if vlabels[i] == vlabels[j] and j > 2: #age-mated
-                        print("age-mated match", "counter: ", counter) 
+                        #print("age-mated match", "counter: ", counter) 
                         output1 = voutputs[i]
                         output2 = voutputs[j]
                         distance = calculate_similarity_score(output1, output2)
+                        t : bool = np.isnan(distance)
+                        if t:
+                            print("label 1: ", vlabels[i], "label 2: ", vlabels[j], "out 1: ", output1, "out 2: ", output2)
                         sim_score_age_mated.append(distance)
                     counter = counter + 1
-                sim_score_identity.append(np.mean(sim_score_age_mated))
+                sim_score_identity.append(np.mean(sim_score_mated))
                 sim_score_identity.append(np.mean(sim_score_age_mated))
                 sim_score_identity.append(np.mean(sim_score_non_mated))
                 sim_scores.append(sim_score_identity)
 
-            print("sim scores: ", sim_scores, "end sim scores")
-            create_dataframe(sim_scores)
+    print("sim scores: ", sim_scores, "end sim scores")
+    create_dataframe(sim_scores)
 
 def create_dataframe(similarity_scores):
     for score in similarity_scores:
