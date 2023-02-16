@@ -82,7 +82,7 @@ def test(test_data_loader, model : iresnet50):
             sim_scores = []
             for identity_index in identity_start_indicies:
                 sim_score_identity = []
-                for mated_img in range(identity_index + 1,identity_index + 3):
+                for mated_img in range(identity_index + 1,identity_index + 4):
                     if vlabels[identity_index] == vlabels[mated_img] and mated_img < identity_index + 3:
                         print("mated match")
                         output1 = voutputs[identity_index]
