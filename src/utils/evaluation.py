@@ -69,13 +69,13 @@ def test(test_data_loader, model : iresnet50):
             voutputs = model(vinputs)
                 
             sim_scores = []
+            counter = 1
             for i in range(0,len(vinputs)):
                 sim_score_identity = []
                 sim_score_mated = []
                 sim_score_non_mated =[]
                 sim_score_age_mated = []
                 for j in range(i+1, len(vinputs)):
-                    counter = 1
                     if vlabels[i] == vlabels[j] and counter < 3: #mated
                         print("mated match", "counter: ", counter)
                         output1 = voutputs[i]
