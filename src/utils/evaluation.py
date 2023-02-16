@@ -70,11 +70,14 @@ def test(test_data_loader, model : iresnet50):
 
             # find identities
             identity_start_indicies = []
+            identities = []
             for i in range(0, len(voutputs)):
-                if vlabels[i] not in identity_start_indicies:
+                if vlabels[i] not in identities:
                     print(vlabels[i])
                     identity_start_indicies.append(i)
-            print("identities: ", identity_start_indicies)
+                    identities.append(vlabels[1])
+            print("identity indicies: ", identity_start_indicies)
+            print("identities: ", identities )
 
             sim_scores = []
             for identity_index in identity_start_indicies:
