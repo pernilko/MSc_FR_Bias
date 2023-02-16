@@ -75,7 +75,7 @@ def test(test_data_loader, model : iresnet50):
                 if vlabels[i] not in identities:
                     print(vlabels[i])
                     identity_start_indicies.append(i)
-                    identities.append(vlabels[1])
+                    identities.append(vlabels[i])
             print("identity indicies: ", identity_start_indicies)
             print("identities: ", identities )
 
