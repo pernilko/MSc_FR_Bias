@@ -110,7 +110,9 @@ def test(test_data_loader, model : iresnet50):
                         sim_score_non_mated.append(distance)
                         #sim_score_identity.append(distance)
                 
-                sim_score_identity.append(np.mean(sim_score_age_mated), np.mean(sim_score_age_mated), np.mean(sim_score_non_mated))
+                sim_score_identity.append(np.mean(sim_score_mated))
+                sim_score_identity.append(np.mean(sim_score_age_mated))
+                sim_score_identity.append(np.mean(sim_score_non_mated))
                 sim_scores.append(sim_score_identity)
             '''
             sim_scores = []
