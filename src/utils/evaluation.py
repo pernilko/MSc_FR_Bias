@@ -73,11 +73,12 @@ def test(test_data_loader, model : iresnet50):
             for i in range(0, len(voutputs)):
                 if vlabels[i] not in identity_start_indicies:
                     identity_start_indicies.append(i)
-            
+            print("identities: ", identity_start_indicies)
+
             sim_scores = []
             for identity_index in identity_start_indicies:
                 sim_score_identity = []
-                for mated_img in range(identity_index + 1,identity_index + 4):
+                for mated_img in range(identity_index + 1,identity_index + 3):
                     if vlabels[identity_index] == vlabels[mated_img] and mated_img < identity_index + 3:
                         print("mated match")
                         output1 = voutputs[identity_index]
