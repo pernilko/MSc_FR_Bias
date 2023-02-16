@@ -64,9 +64,6 @@ def test(test_data_loader, model : iresnet50):
     sim_scores = []
     for i, data in enumerate(test_data_loader):
             vinputs, vlabels = data
-            for label in vlabels:
-                print(label)
-            
             voutputs = model(vinputs)
 
             # find identities
@@ -74,11 +71,11 @@ def test(test_data_loader, model : iresnet50):
             identities = []
             for i in range(0, len(voutputs)):
                 if vlabels[i] not in identities:
-                    print(vlabels[i])
+                    #print(vlabels[i])
                     identity_start_indicies.append(i)
                     identities.append(vlabels[i])
-            print("identity indicies: ", identity_start_indicies)
-            print("identities: ", identities )
+            #print("identity indicies: ", identity_start_indicies)
+            #print("identities: ", identities )
 
             
             for identity_index in identity_start_indicies:
@@ -92,6 +89,7 @@ def test(test_data_loader, model : iresnet50):
                         output1 = voutputs[identity_index]
                         output2 = voutputs[mated_img]
                         distance = calculate_similarity_score(output1, output2)
+                        print("mated dist: " ,distance)
                         sim_score_mated.append(distance)
                         #sim_score_identity.append(distance)
                     if vlabels[identity_index] == vlabels[mated_img] and mated_img >= identity_index + 3:
@@ -161,18 +159,13 @@ def test(test_data_loader, model : iresnet50):
                 sim_score_identity.append(np.mean(sim_score_non_mated))
                 sim_scores.append(sim_score_identity)
     '''
-    print("sim scores: ", sim_scores, "end sim scores")
-    create_dataframe(sim_scores)
+    print("sim scores mated: ", sim_scores, "end sim scores")
+    return sim_scores
 
 def create_dataframe(similarity_scores):
-    for score in similarity_scores:
-        print("df: ", score)
-        '''
-        mated_similarity = calculate_similarity_score(identity, identity)
-        aged_similatiry = 0.
-        non_mated_similarity = 0.
-        np.append(sim_scores, (mated_similarity, aged_similatiry, non_mated_similarity))
-        '''
+    df = pd.DataFrame(similarity_scores, columns=['mated', '20vs65', 'non-mated'])
+    return df
+        
         
     # for each identity:
         # find sim score for mated sample
@@ -187,14 +180,17 @@ def create_distribution_plot(df : pd.DataFrame, output_filename : str):
     # Each row must contain one identity with values pertaining to the three columns, 
     # i.e. the identitiy's similarity score for a mated sample, sim score compared to mated but older, and non-mated.
 
+    '''
     similarity_id_1 = [0.89, 0.66, 0.001]
     similarity_id_2 = [0.9, 0.56, 0.1]
     similarity_id_3 = [0.83, 0.75, 0.2]
     similarity_id_4 = [0.86, 0.67, 0.02]
     df = pd.DataFrame(np.array((similarity_id_1, similarity_id_2, similarity_id_3, similarity_id_4)),
                    columns=['mated', '20vs50', 'non-mated'])
-    print(df.head())
+    '''
+    
+    #print(df.head())
     sns.displot(df, kind="kde")
-    plt.savefig('plot_test.png')
+    plt.savefig(output_filename)
 
 #create_distribution_plot()

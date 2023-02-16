@@ -152,7 +152,9 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
        
         if epoch + 1 == 10:    
-            evaluation.test(test_data_loader, model)
+            sim_scores = evaluation.test(test_data_loader, model)
+            df = evaluation.create_dataframe(sim_scores)
+            evaluation.create_distribution_plot(df,"density_similarity_plot.png")
         
         epoch_number += 1
     return model
