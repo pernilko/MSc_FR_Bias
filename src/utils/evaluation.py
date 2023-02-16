@@ -67,7 +67,41 @@ def test(test_data_loader, model : iresnet50):
                 print(label)
             
             voutputs = model(vinputs)
+
+            # find identities
+            identity_start_indicies = []
+            for i in range(0, len(voutputs)):
+                if vlabels[i] not in identity_start_indicies:
+                    identity_start_indicies.append(i)
+            
+            sim_scores = []
+            for identity_index in identity_start_indicies:
+                sim_score_identity = []
+                for mated_img in range(identity_index + 1,identity_index + 4):
+                    if vlabels[identity_index] == vlabels[mated_img] and mated_img < identity_index + 3:
+                        print("mated match")
+                        output1 = voutputs[identity_index]
+                        output2 = voutputs[mated_img]
+                        distance = calculate_similarity_score(output1, output2)
+                        sim_score_identity.append(distance)
+                    if vlabels[identity_index] == vlabels[mated_img] and mated_img >= identity_index + 3:
+                        print("age-mated match")
+                        output1 = voutputs[identity_index]
+                        output2 = voutputs[mated_img]
+                        distance = calculate_similarity_score(output1, output2)
+                        sim_score_identity.append(distance)
+                for non_mated_img in identity_start_indicies:
+                    if non_mated_img != identity_index:
+                        print("non-mated match")
+                        output1 = voutputs[identity_index]
+                        output2 = voutputs[non_mated_img]
+                        distance = calculate_similarity_score(output1, output2)
+                        sim_score_identity.append(distance)
+
+
                 
+                sim_scores.append(sim_score_identity)
+            '''
             sim_scores = []
             counter = 1
             for i in range(0,len(vinputs)):
@@ -113,7 +147,7 @@ def test(test_data_loader, model : iresnet50):
                 sim_score_identity.append(np.mean(sim_score_age_mated))
                 sim_score_identity.append(np.mean(sim_score_non_mated))
                 sim_scores.append(sim_score_identity)
-
+    '''
     print("sim scores: ", sim_scores, "end sim scores")
     create_dataframe(sim_scores)
 
