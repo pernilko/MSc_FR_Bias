@@ -61,6 +61,7 @@ def calculate_similarity_score(orginal_img, img_to_compare):
 
 def test(test_data_loader, model : iresnet50):
 
+    sim_scores = []
     for i, data in enumerate(test_data_loader):
             vinputs, vlabels = data
             for label in vlabels:
@@ -79,32 +80,37 @@ def test(test_data_loader, model : iresnet50):
             print("identity indicies: ", identity_start_indicies)
             print("identities: ", identities )
 
-            sim_scores = []
+            
             for identity_index in identity_start_indicies:
                 sim_score_identity = []
+                sim_score_mated = []
+                sim_score_non_mated = []
+                sim_score_age_mated = []
                 for mated_img in range(identity_index + 1,identity_index + 4):
                     if vlabels[identity_index] == vlabels[mated_img] and mated_img < identity_index + 3:
                         print("mated match")
                         output1 = voutputs[identity_index]
                         output2 = voutputs[mated_img]
                         distance = calculate_similarity_score(output1, output2)
-                        sim_score_identity.append(distance)
+                        sim_score_mated.append(distance)
+                        #sim_score_identity.append(distance)
                     if vlabels[identity_index] == vlabels[mated_img] and mated_img >= identity_index + 3:
                         print("age-mated match")
                         output1 = voutputs[identity_index]
                         output2 = voutputs[mated_img]
                         distance = calculate_similarity_score(output1, output2)
-                        sim_score_identity.append(distance)
+                        sim_score_age_mated.append(distance)
+                        #sim_score_identity.append(distance)
                 for non_mated_img in identity_start_indicies:
                     if non_mated_img != identity_index:
                         print("non-mated match")
                         output1 = voutputs[identity_index]
                         output2 = voutputs[non_mated_img]
                         distance = calculate_similarity_score(output1, output2)
-                        sim_score_identity.append(distance)
-
-
+                        sim_score_non_mated.append(distance)
+                        #sim_score_identity.append(distance)
                 
+                sim_score_identity.append(np.mean(sim_score_age_mated), np.mean(sim_score_age_mated), np.mean(sim_score_non_mated))
                 sim_scores.append(sim_score_identity)
             '''
             sim_scores = []
