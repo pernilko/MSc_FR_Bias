@@ -100,7 +100,7 @@ def test(test_data_loader, model : iresnet50):
                         sim_score_age_mated.append(distance)
                         #sim_score_identity.append(distance)
                 for non_mated_img in identity_start_indicies:
-                    if non_mated_img != identity_index:
+                    if vlabels[non_mated_img] != vlabels[identity_index]:
                         print("non-mated match")
                         output1 = voutputs[identity_index]
                         output2 = voutputs[non_mated_img]
