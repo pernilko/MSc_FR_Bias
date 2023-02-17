@@ -11,10 +11,13 @@ import os
 import numpy as np
 
 '''
-Method loads pretrained model
-Input: filename -> name of file (.pt or .pth) containing the model. 
-Input: device -> use cpu or cuda
-Return: IResNet model
+Method for loading the pretrained ArcFace model
+
+Parameters:
+    filename (string) : path for the file containing the pre-trained ArcFace model. Should be .pt or .pth file 
+    device (torch.device) : specifies whether to use cpu or cuda
+Return: 
+    model (Iresnet)
 '''
 def load_pretrained_model(filename : str, device : torch.device):
     loaded_model = torch.load(filename,  map_location = device) #torch.device('cpu')
@@ -101,46 +104,6 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
-             
-            '''Sim scores
-            if epoch + 1 == 10:    
-                sim_scores = []
-                for i in range(0,len(vinputs)):
-                    sim_score_identity = []
-                    sim_score_mated = []
-                    sim_score_non_mated =[]
-                    sim_score_age_mated = []
-                    for j in range(i+1, len(vinputs)):
-                        counter = 1
-                        if vlabels[i] == vlabels[j] and counter < 3: #mated
-                            print("mated match", "counter: ", counter)
-                            output1 = voutputs[i]
-                            output2 = voutputs[j]
-                            distance = evaluation.calculate_similarity_score(output1, output2)
-                            sim_score_mated.append(distance)
-
-                        if vlabels[i] != vlabels[j]: # non-mated
-                            print("non-mated match", "counter: ", counter)
-                            output1 = voutputs[i]
-                            output2 = voutputs[j]
-                            distance = evaluation.calculate_similarity_score(output1, output2)
-                            sim_score_non_mated.append(distance)
-                        if vlabels[i] == vlabels[j] and j > 2: #age-mated
-                            print("age-mated match", "counter: ", counter) 
-                            output1 = voutputs[i]
-                            output2 = voutputs[j]
-                            distance = evaluation.calculate_similarity_score(output1, output2)
-                            sim_score_age_mated.append(distance)
-                        counter = counter + 1
-                    sim_score_identity.append(np.mean(sim_score_age_mated))
-                    sim_score_identity.append(np.mean(sim_score_age_mated))
-                    sim_score_identity.append(np.mean(sim_score_non_mated))
-                    sim_scores.append(sim_score_identity)
-
-                print("sim scores: ", sim_scores, "end sim scores")
-                evaluation.create_dataframe(sim_scores)
-                '''
-        
         avg_vloss = running_vloss / (i + 1)
         print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
@@ -152,9 +115,9 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
        
         if epoch + 1 == 10:    
-            sim_scores = evaluation.test(test_data_loader, model)
+            sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
             df = evaluation.create_dataframe(sim_scores)
-            evaluation.create_distribution_plot(df,"density_similarity_plot.png")
+            evaluation.create_distribution_plot(df,"fine_tuned_arc_face_distribution_plot.png")
         
         epoch_number += 1
     return model
