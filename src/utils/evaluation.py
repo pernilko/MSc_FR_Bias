@@ -55,9 +55,31 @@ def performance_measure(actual_labels, predicted_labels):
 
     return(class_id, true_positives, false_positives, true_negatives, false_negatives)
 
+'''
 def calculate_similarity_score(orginal_img, img_to_compare):
-    similarity_score = np.linalg.norm(orginal_img.detach().numpy()-img_to_compare.detach().numpy())
+    similarity_score = 1- np.linalg.norm(orginal_img.detach().numpy()-img_to_compare.detach().numpy())
     return similarity_score
+'''
+
+def calculate_similarity_score(embeddings1, embeddings2, distance_type='Cosine'):
+    embeddings1=embeddings1.astype(np.float64)
+    embeddings2=embeddings2.astype(np.float64)
+    if distance_type=='Euclidian':
+        # Euclidian distance
+        embeddings1 = embeddings1/np.linalg.norm(embeddings1, axis=0, keepdims=True)
+        embeddings2 = embeddings2/np.linalg.norm(embeddings2, axis=0, keepdims=True)
+        diff = np.subtract(embeddings1, embeddings2)
+        dist = np.sum(np.square(diff),0)
+    elif distance_type=='Cosine':
+        # Distance based on cosine similarity
+        dot = np.sum(np.multiply(embeddings1, embeddings2), axis=0)
+        norm = np.linalg.norm(embeddings1, axis=0) * np.linalg.norm(embeddings2, axis=0)
+        similarity = dot/norm
+        similarity = min(1,similarity)
+        #dist=1-similarity
+    else:
+        raise 'Undefined distance metric %d' # distance_metric 
+    return similarity
 
 def test(test_data_loader, model : iresnet50):
 
