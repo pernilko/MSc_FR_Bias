@@ -125,6 +125,9 @@ def compute_similarity_scores_for_test_dataset(test_data_loader, model : iresnet
                         sim_score_non_mated.append(distance)
                         
                 
+                print(sim_score_mated)
+                print(sim_score_age_mated)
+                print(sim_score_non_mated)
                 sim_score_identity.append(np.mean(sim_score_mated))
                 sim_score_identity.append(np.mean(sim_score_age_mated))
                 sim_score_identity.append(np.mean(sim_score_non_mated))
