@@ -35,6 +35,7 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
 
     # Fetching arcface model
     model = load_arc_face_model(model_filename, device)
+    model.train(False)
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
