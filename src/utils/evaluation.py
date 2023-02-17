@@ -62,6 +62,8 @@ def calculate_similarity_score(orginal_img, img_to_compare):
 '''
 
 def calculate_similarity_score(embeddings1, embeddings2, distance_type='Cosine'):
+    embeddings1 = embeddings1.detach().numpy()
+    embeddings2 = embeddings2.detach().numpy()
     if distance_type=='Euclidian':
         # Euclidian distance
         embeddings1 = embeddings1/np.linalg.norm(embeddings1, axis=0, keepdims=True)
