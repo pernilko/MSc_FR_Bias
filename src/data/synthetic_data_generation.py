@@ -1,10 +1,8 @@
 import os
 import time
 import pickle
-
 import torch
 import torch.nn.functional as F
-
 import PIL.Image
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,7 +15,6 @@ from models.cusp import legacy
 from models.cusp.torch_utils import persistence
 import models.cusp.training
 from models.cusp import dnnlib
-
 from models.cusp.training.networks import VGG, module_no_grad
 from models.cusp.torch_utils import misc
 
@@ -107,7 +104,16 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     return to_return
 
 '''
-Method
+Method prepares data for applying age editing
+Parameters:
+    side (int) : 
+    batch_of_filenames () :
+    data_labels () : 
+    g_ema () :
+Return:
+    out_tensor () :
+    images_as_tensor () :
+    labels_exp () :
 '''
 def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
     images = []
@@ -118,7 +124,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
 
     images_as_tensor = (torch.tensor(np.array(images))/256*2-1).cuda()
 
-    aging_steps = 4
+    aging_steps = 8
 
     number_of_images = images_as_tensor.shape[0]
     images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
@@ -144,14 +150,29 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
     return out_tensor, images_as_tensor, labels_exp
 
 '''
-Method
+Method for converting tensor to uint8
+
+Parameters:
+    img_tensor () : tensor to be converted to uint8
+Return:
+    img_tensor (uint8) : converted tensor
 '''
 def to_uint8(img_tensor):
     img_tensor = (img_tensor.detach().cpu().numpy().transpose((1,2,0))+1)*(256/2)
     img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
     return img_tensor
+
+
 '''
 Method plots and saves plots of generated images
+
+Parameters:
+    batch_of_filenames () :
+    img_in_tensor () :
+    img_out_tensor () :
+    labels_exp () :
+    aging_steps () :
+
 '''
 def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
     # For every input image
@@ -177,10 +198,13 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
 '''
 Method generates synthetic face images of input images.
 The method applies age editing to all input images, and generates new images with different ages of each identity.
-Input:
+
+Parameters:
+    images_path (string) : path for the data which age editing should be applied to
 Return:
+    ---
 '''
-def run(images_path : str):
+def run(images_path : str, aging_steps : int):
 
     FFHQ_LS_KEY = "lats"  # Model trained on LATS dataset
     FFHQ_RR_KEY = "hrfae" # Model trained on HRFAE dataset
@@ -193,7 +217,7 @@ def run(images_path : str):
     FFHQ_RR_KEY: dict(
         gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
         side=224, 
-        classes=(20,65))
+        classes=(0,65))
     }
 
     batch_of_filenames = read_image_filenames(images_path)
@@ -204,14 +228,21 @@ def run(images_path : str):
     out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema)
 
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
-    generated_images_path = "datasets/cusp_generated/"
-    create_dataset(generated_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, 4)
+    generated_images_path = "datasets/cusp_generated/v2/"
+    create_dataset(generated_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
 
 
 '''
 Method creates dataset of generated images, and saves the images to folder.
-Input:
-Return:
+
+Parameters:
+    synthetic_images_path (string) : 
+    batch_of_filenames (string) : 
+    img_in_tensor () : 
+    img_out_tensor () : 
+    labels_exp () : 
+    aging_steps (int) : 
+
 '''
 def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
 
@@ -239,6 +270,6 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
 
 
 
-run("models/cusp/synthetic_images/")
+run("models/cusp/synthetic_images/", 8)
 
 
