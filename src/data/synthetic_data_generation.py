@@ -42,9 +42,9 @@ def load_cusp(device : torch.device, weights_path : str):
     #weights_path = 'data/cusp_network.pkl'
     vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 
-    with torch.cuda.device(0):
-        with open(weights_path, 'rb') as f:
-            data = legacy.load_network_pkl(f)
+    
+    with open(weights_path, 'rb') as f:
+        data = legacy.load_network_pkl(f)
     
     g_ema = data['G_ema'] # exponential movign average model
 
@@ -218,7 +218,7 @@ def run(images_path : str, aging_steps : int):
     FFHQ_RR_KEY: dict(
         gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
         side=224, 
-        classes=(0,65))
+        classes=(1,8))
     }
 
     batch_of_filenames = read_image_filenames(images_path)
