@@ -42,9 +42,9 @@ def load_cusp(device : torch.device, weights_path : str):
     #weights_path = 'data/cusp_network.pkl'
     vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 
-    with open(weights_path, 'rb') as f:
-        torch.cuda.set_device(0)
-        data = legacy.load_network_pkl(f)
+    with torch.cuda.device(0):
+        with open(weights_path, 'rb') as f:
+            data = legacy.load_network_pkl(f)
     
     g_ema = data['G_ema'] # exponential movign average model
 
