@@ -221,7 +221,7 @@ def run(images_path : str, aging_steps : int):
     }
 
     batch_of_filenames = read_image_filenames(images_path)
-    g_ema = load_cusp(torch.device('cuda', 0), 'cusp-network-ls.pkl')
+    g_ema = load_cusp(torch.device('cuda', 0), 'data/cusp-network-ls.pkl')
     data_labels_range = configs[FFHQ_LS_KEY]['classes']
     side_config = configs[FFHQ_LS_KEY]['side']
 
