@@ -37,9 +37,9 @@ Method loads the pre-trained CUSP model
 Input: device 
 Output: g_ema
 '''
-def load_cusp(device : torch.device):
+def load_cusp(device : torch.device, weights_path : str):
 
-    weights_path = 'data/cusp_network.pkl'
+    #weights_path = 'data/cusp_network.pkl'
     vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 
     with open(weights_path, 'rb') as f:
@@ -213,7 +213,7 @@ def run(images_path : str, aging_steps : int):
     FFHQ_LS_KEY: dict(
         gdrive_id="1sWSH3tHgm9DkHrc19hoEMrR-KQgnaFuw",
         side=256, 
-        classes=(1,8)),
+        classes=(0,70)),
     FFHQ_RR_KEY: dict(
         gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
         side=224, 
@@ -221,9 +221,9 @@ def run(images_path : str, aging_steps : int):
     }
 
     batch_of_filenames = read_image_filenames(images_path)
-    g_ema = load_cusp(torch.device('cuda', 0))
-    data_labels_range = configs[FFHQ_RR_KEY]['classes']
-    side_config = configs[FFHQ_RR_KEY]['side']
+    g_ema = load_cusp(torch.device('cuda', 0), 'data/cusp_network-ls.pkl')
+    data_labels_range = configs[FFHQ_LS_KEY]['classes']
+    side_config = configs[FFHQ_LS_KEY]['side']
 
     out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema)
 
