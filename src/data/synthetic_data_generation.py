@@ -214,11 +214,11 @@ def run(images_path : str, aging_steps : int):
     FFHQ_LS_KEY: dict(
         gdrive_id="1sWSH3tHgm9DkHrc19hoEMrR-KQgnaFuw",
         side=256, 
-        classes=(0,70)),
+        classes=(1,8)),
     FFHQ_RR_KEY: dict(
         gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
         side=224, 
-        classes=(1,8))
+        classes=(20,65))
     }
 
     batch_of_filenames = read_image_filenames(images_path)
