@@ -65,7 +65,7 @@ Method
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
 
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=70).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
@@ -214,7 +214,7 @@ def run(images_path : str, aging_steps : int):
     FFHQ_LS_KEY: dict(
         gdrive_id="1sWSH3tHgm9DkHrc19hoEMrR-KQgnaFuw",
         side=256, 
-        classes=(1,65)),
+        classes=(0,70)),
     FFHQ_RR_KEY: dict(
         gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
         side=224, 
@@ -229,7 +229,7 @@ def run(images_path : str, aging_steps : int):
     out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema)
 
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
-    generated_images_path = "datasets/cusp_generated/v2/"
+    generated_images_path = "datasets/cusp_generated_v2/"
     create_dataset(generated_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
 
 
