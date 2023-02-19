@@ -63,7 +63,7 @@ Method
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
     print("num classes: ", G.attr_map.fc0.init_args[0])
     print("label: " ,torch.tensor(label))
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=61).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
@@ -304,7 +304,7 @@ weights_path_rr = 'data/cusp-network.pkl'
 weights_path_ls = 'data/cusp-network-ls.pkl' # LifeSpan 
 vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 input_images_path = "models/cusp/synthetic_images/"
-output_images_path = "datasets/cusp_generated/"
+output_images_path = "datasets/cusp_generated_v2/"
 aging_steps = 4
 device = torch.device('cuda', 0)
 run(input_images_path, aging_steps, output_images_path, weights_path_ls, device)
