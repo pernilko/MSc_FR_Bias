@@ -68,6 +68,7 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     _, c_out_skip = G.content_enc(img)
 
     s_out = G.style_enc(img)[0].mean((2,3))
+    print("s_out: ", s_out)
 
     truncation_psi = 1
     truncation_cutoff = None
