@@ -247,7 +247,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     age_labels_rr = []
     age_bins = [0, 1 , 2, 3, 4, 5, 6, 7]
     for age_bin in age_bins:
-        if age_bin < 2:
+        if age_bin < 4:
             age = get_random_age(age_bin)
             age_labels_ls.append(age)
         else:
