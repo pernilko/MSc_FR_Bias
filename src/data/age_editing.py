@@ -62,7 +62,7 @@ Method
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=66).to(img.device)
-    #G.attr_map.fc0.init_args[0]
+
     _, c_out_skip = G.content_enc(img)
 
     s_out = G.style_enc(img)[0].mean((2,3))
@@ -71,7 +71,7 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     truncation_cutoff = None
     s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
 
-    a_out = G.attr_map(ohe_label.to(s_out.device), 33, 44, 1000)
+    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff,66)
 
     w = G.__interleave_attr_style__(a_out, s_out)
 
