@@ -222,7 +222,7 @@ Parameters:
 Return:
     ---
 '''
-def run(images_path : str, aging_steps : int, output_images_path : str, weights_path : str, device : torch.device):
+def run(images_path : str, aging_steps : int, output_images_path : str, weights_path_ls : str,  weights_path_rr : str, device : torch.device):
 
     FFHQ_LS_KEY = "lats"  # Model trained on LATS dataset
     FFHQ_RR_KEY = "hrfae" # Model trained on HRFAE dataset
@@ -255,10 +255,12 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     batch_of_filenames = read_image_filenames(images_path)
 
      # LS
+    g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  2
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config, batch_of_filenames, age_labels_ls, g_ema, aging_steps_ls)
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config, batch_of_filenames, age_labels_ls, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     # RR
+    g_ema_ls = load_cusp(device, weights_path_rr)
     aging_steps_rr = 6
     out_tensor_rr, images_as_tensor_rr, labels_exp_rr = prep_data(side_config, batch_of_filenames, age_labels_rr, g_ema, aging_steps_rr)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_rr, out_tensor_rr, labels_exp_rr, aging_steps_rr)
@@ -309,6 +311,6 @@ input_images_path = "models/cusp/synthetic_images/"
 output_images_path = "datasets/cusp_generated_v2/"
 aging_steps = 4
 device = torch.device('cuda', 0)
-run(input_images_path, aging_steps, output_images_path, weights_path_ls, device)
+run(input_images_path, aging_steps, output_images_path, weights_path_ls, weights_path_rr, device)
 
 
