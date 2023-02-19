@@ -132,7 +132,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     print(np.array(data_labels))
     labels_exp = torch.tensor(np.repeat(np.array(data_labels)[:,None],number_of_images,1).T.reshape(-1))
 
-    batch_size = 12
+    batch_size = 16
 
     out_tensor_exp = torch.cat([generate_synthetic_data(
     g_ema,
@@ -307,6 +307,6 @@ input_images_path = "models/cusp/synthetic_images/"
 output_images_path = "datasets/cusp_generated/"
 aging_steps = 4
 device = torch.device('cuda', 0)
-run(input_images_path, aging_steps, output_images_path, weights_path_rr, device)
+run(input_images_path, aging_steps, output_images_path, weights_path_ls, device)
 
 
