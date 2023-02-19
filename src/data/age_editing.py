@@ -43,7 +43,8 @@ def load_cusp(device : torch.device, weights_path : str):
     with open(weights_path, 'rb') as f:
         data = legacy.load_network_pkl(f)
     
-    g_ema = data['G'] # exponential movign average model
+    g_ema = data['G_ema'] # exponential movign average model
+    print("g_ema: ", g_ema)
 
     vgg = VGG()
     vgg_state_dict = torch.load(vgg_path)
@@ -52,6 +53,7 @@ def load_cusp(device : torch.device, weights_path : str):
     module_no_grad(vgg) 
 
     g_ema.skip_grad_blur.model.classifier = vgg  
+    print("gma 2: ", g_ema)
 
     g_ema = g_ema.to(device).eval().requires_grad_(False)
 
