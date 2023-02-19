@@ -61,8 +61,7 @@ def load_cusp(device : torch.device, weights_path : str):
 Method 
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=66).to(img.device)
-    # G.attr_map.fc0.init_args[0]
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
@@ -71,6 +70,16 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     truncation_psi = 1
     truncation_cutoff = None
     s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
+
+    #test
+    cutoff = torch.empty([], dtype=torch.int64, device=s_out.device).random_(1, a_out.shape[1])
+    perms = torch.randperm(s_out.shape[0])
+    s_out[:, cutoff*2:] = s_out[perms, cutoff*2:]
+  
+    c_out_skip = c_out_skip[::-1]
+    c_out_skip[cutoff:] = [e[perms] for e in c_out_skip[cutoff:]]
+    c_out_skip = c_out_skip[::-1]
+    #test end
 
     a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
 
