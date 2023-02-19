@@ -272,7 +272,7 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
 
 
 
-
-run("models/cusp/synthetic_images/", 8)
+aging_steps = 4
+run("models/cusp/synthetic_images/", aging_steps)
 
 
