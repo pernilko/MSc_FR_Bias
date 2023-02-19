@@ -61,14 +61,11 @@ def load_cusp(device : torch.device, weights_path : str):
 Method 
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    print("num classes: ", G.attr_map.fc0.init_args[0])
-    print("label: " ,torch.tensor(label))
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=61).to(img.device)
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
     s_out = G.style_enc(img)[0].mean((2,3))
-    print("g attr_map: ", G.attr_map)
 
     truncation_psi = 1
     truncation_cutoff = None
@@ -244,25 +241,29 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     g_ema = load_cusp(device, weights_path)
     side_config = configs[FFHQ_RR_KEY]['side']
 
-    age_labels = []
+    age_labels_ls = []
+    age_labels_rr = []
     age_bins = [0, 1 , 2, 3, 4, 5, 6, 7]
     for age_bin in age_bins:
-        age = get_random_age(age_bin)
-        age_labels.append(age)
+        if age_bin < 2:
+            age = get_random_age(age_bin)
+            age_labels_ls.append(age)
+        else:
+            age = get_random_age(age_bin)
+            age_labels_rr.append(age)
 
     batch_of_filenames = read_image_filenames(images_path)
-    data_labels_range = configs[FFHQ_RR_KEY]['classes']
-    out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, age_labels, g_ema, aging_steps)
 
-
-   
-    
-    
-
-    
-
+     # LS
+    aging_steps_ls =  2
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config, batch_of_filenames, age_labels_ls, g_ema, aging_steps_ls)
+    create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
+    # RR
+    aging_steps_rr = 6
+    out_tensor_rr, images_as_tensor_rr, labels_exp_rr = prep_data(side_config, batch_of_filenames, age_labels_rr, g_ema, aging_steps_rr)
+    create_dataset(output_images_path, batch_of_filenames, images_as_tensor_rr, out_tensor_rr, labels_exp_rr, aging_steps_rr)
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
-    create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
+    #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
 
 
 '''
