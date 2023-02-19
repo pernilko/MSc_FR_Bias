@@ -44,7 +44,6 @@ def load_cusp(device : torch.device, weights_path : str):
         data = legacy.load_network_pkl(f)
     
     g_ema = data['G_ema'] # exponential movign average model
-    print("g_ema: ", g_ema)
 
     vgg = VGG()
     vgg_state_dict = torch.load(vgg_path)
@@ -52,8 +51,7 @@ def load_cusp(device : torch.device, weights_path : str):
     vgg.load_state_dict(vgg_state_dict)
     module_no_grad(vgg) 
 
-    g_ema.skip_grad_blur.model.classifier = vgg  
-    print("gma 2: ", g_ema)
+    g_ema.skip_grad_blur.model.classifier = vgg
 
     g_ema = g_ema.to(device).eval().requires_grad_(False)
 
@@ -63,7 +61,7 @@ def load_cusp(device : torch.device, weights_path : str):
 Method 
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    print(G.attr_map.fc0.init_args[0])
+    print(G.attr_map.fc0.init_args[1])
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
