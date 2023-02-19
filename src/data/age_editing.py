@@ -129,6 +129,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     print("num of images: ", number_of_images)
     images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
 
+    print(np.linspace(*data_labels,aging_steps,dtype=int))
     labels_exp = torch.tensor(np.repeat(data_labels[:,None],number_of_images,1).T.reshape(-1))
 
     batch_size = 12
@@ -249,8 +250,8 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
         age_labels.append(age)
 
     batch_of_filenames = read_image_filenames(images_path)
-    #data_labels_range = configs[FFHQ_RR_KEY]['classes']
-    out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, age_labels, g_ema, aging_steps)
+    data_labels_range = configs[FFHQ_RR_KEY]['classes']
+    out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema, aging_steps)
 
 
    
@@ -304,7 +305,7 @@ weights_path_ls = 'data/cusp-network-ls.pkl' # LifeSpan
 vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 input_images_path = "models/cusp/synthetic_images/"
 output_images_path = "datasets/cusp_generated/"
-aging_steps = 8
+aging_steps = 4
 device = torch.device('cuda', 0)
 run(input_images_path, aging_steps, output_images_path, weights_path_rr, device)
 
