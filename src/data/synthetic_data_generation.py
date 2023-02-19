@@ -66,7 +66,7 @@ Method
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
     print("num classes: ", G.attr_map.fc0.init_args[0])
     print("label: " ,torch.tensor(label))
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=71).to(img.device)
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
@@ -126,9 +126,10 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema):
 
     images_as_tensor = (torch.tensor(np.array(images))/256*2-1).cuda()
 
-    aging_steps = 8
+    aging_steps = 4
 
     number_of_images = images_as_tensor.shape[0]
+    print("num of images: ", number_of_images)
     images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
 
     labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
@@ -215,22 +216,22 @@ def run(images_path : str, aging_steps : int):
     FFHQ_LS_KEY: dict(
         gdrive_id="1sWSH3tHgm9DkHrc19hoEMrR-KQgnaFuw",
         side=256, 
-        classes=(0,70)),
+        classes=(1,8)),
     FFHQ_RR_KEY: dict(
         gdrive_id="17BOTEa6z3r6JFVs1KDutDxWEkTWbzaeD",
-        side=224, 
+        side=224,
         classes=(20,65))
     }
 
     batch_of_filenames = read_image_filenames(images_path)
-    g_ema = load_cusp(torch.device('cuda', 0), 'data/cusp-network-ls.pkl')
-    data_labels_range = configs[FFHQ_LS_KEY]['classes']
-    side_config = configs[FFHQ_LS_KEY]['side']
+    g_ema = load_cusp(torch.device('cuda', 0), 'data/cusp-network.pkl')
+    data_labels_range = configs[FFHQ_RR_KEY]['classes']
+    side_config = configs[FFHQ_RR_KEY]['side']
 
     out_tensor, images_as_tensor, labels_exp = prep_data(side_config, batch_of_filenames, data_labels_range, g_ema)
 
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
-    generated_images_path = "datasets/cusp_generated_v2/"
+    generated_images_path = "datasets/cusp_generated/"
     create_dataset(generated_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
 
 
