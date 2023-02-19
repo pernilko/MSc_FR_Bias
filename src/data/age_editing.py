@@ -245,21 +245,20 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
 
     age_labels_ls = []
     age_labels_rr = []
-    age_labels = []
     age_bins = [0, 1 , 2, 3, 4, 5, 6, 7]
     for age_bin in age_bins:
         if age_bin < 2:
             age = get_random_age(age_bin)
             age_labels_ls.append(age)
-            age_labels.append(age)
         else:
             age = get_random_age(age_bin)
             age_labels_rr.append(age)
-            age_labels.append(age)
 
     batch_of_filenames = read_image_filenames(images_path)
 
-    '''
+    print("ages ls: ", age_labels_ls)
+    print("ages rr: ", age_labels_rr)
+
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  2
@@ -270,13 +269,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     aging_steps_rr = 6
     out_tensor_rr, images_as_tensor_rr, labels_exp_rr = prep_data(side_config_rr, batch_of_filenames, age_labels_rr, g_ema_rr, aging_steps_rr)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_rr, out_tensor_rr, labels_exp_rr, aging_steps_rr)
-    '''
 
-    g_ema_ls = load_cusp(device, weights_path_ls)
-    aging_steps_ls =  8
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_labels, g_ema_ls, aging_steps_ls)
-    create_dataset("datasets/cusp_generated_v3/", batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
-    
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
 
