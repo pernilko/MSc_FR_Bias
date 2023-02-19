@@ -130,7 +130,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
 
     print(data_labels)
-    labels_exp = torch.tensor(np.repeat(data_labels[:,None],number_of_images,1).T.reshape(-1))
+    labels_exp = torch.tensor(np.repeat(data_labels,number_of_images,1).T.reshape(-1))
 
     batch_size = 12
 
