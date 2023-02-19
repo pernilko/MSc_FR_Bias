@@ -43,7 +43,7 @@ def load_cusp(device : torch.device, weights_path : str):
     with open(weights_path, 'rb') as f:
         data = legacy.load_network_pkl(f)
     
-    g_ema = data['G_ema'] # exponential movign average model
+    g_ema = data['G'] # exponential movign average model
 
     vgg = VGG()
     vgg_state_dict = torch.load(vgg_path)
@@ -61,7 +61,7 @@ def load_cusp(device : torch.device, weights_path : str):
 Method 
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=66).to(img.device)
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
@@ -71,7 +71,7 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     truncation_cutoff = None
     s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
 
-    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff,66)
+    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
 
     w = G.__interleave_attr_style__(a_out, s_out)
 
