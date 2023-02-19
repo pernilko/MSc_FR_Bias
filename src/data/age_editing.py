@@ -238,8 +238,10 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
         classes=(20,65))
     }
 
-    g_ema = load_cusp(device, weights_path)
-    side_config = configs[FFHQ_RR_KEY]['side']
+    #g_ema = load_cusp(device, weights_path)
+    side_config_rr = configs[FFHQ_RR_KEY]['side']
+    side_config_ls = configs[FFHQ_LS_KEY]['side']
+
 
     age_labels_ls = []
     age_labels_rr = []
@@ -257,12 +259,12 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
      # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  2
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config, batch_of_filenames, age_labels_ls, g_ema_ls, aging_steps_ls)
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_labels_ls, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     # RR
-    g_ema_ls = load_cusp(device, weights_path_rr)
+    g_ema_rr = load_cusp(device, weights_path_rr)
     aging_steps_rr = 6
-    out_tensor_rr, images_as_tensor_rr, labels_exp_rr = prep_data(side_config, batch_of_filenames, age_labels_rr, g_ema, aging_steps_rr)
+    out_tensor_rr, images_as_tensor_rr, labels_exp_rr = prep_data(side_config_rr, batch_of_filenames, age_labels_rr, g_ema_rr, aging_steps_rr)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_rr, out_tensor_rr, labels_exp_rr, aging_steps_rr)
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
