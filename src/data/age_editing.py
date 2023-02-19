@@ -71,6 +71,8 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     truncation_cutoff = None
     s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
 
+    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
+    
     #test
     cutoff = torch.empty([], dtype=torch.int64, device=s_out.device).random_(1, a_out.shape[1])
     perms = torch.randperm(s_out.shape[0])
@@ -80,8 +82,6 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     c_out_skip[cutoff:] = [e[perms] for e in c_out_skip[cutoff:]]
     c_out_skip = c_out_skip[::-1]
     #test end
-
-    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
 
     w = G.__interleave_attr_style__(a_out, s_out)
 
