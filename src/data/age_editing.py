@@ -63,8 +63,8 @@ Method
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
     #print(G.attr_map.fc0.init_args[0])
+    G.z_dim = 12
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
-
     c_out, c_out_skip = G.content_enc(img)
     
     s_out = G.style_enc(img)[0].mean((2,3))
@@ -267,7 +267,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     print("ages ls: ", age_labels_ls)
     print("ages rr: ", age_labels_rr)
 
-    age_range_ls = (1,19)
+    age_range_ls = (11,15)
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  4
