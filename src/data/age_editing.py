@@ -14,6 +14,7 @@ from models.cusp import dnnlib
 from models.cusp.training.networks import VGG, module_no_grad
 from models.cusp.torch_utils import misc
 import random
+from models.cusp.generate import generate_images
 
 
 '''
@@ -41,9 +42,9 @@ def load_cusp(device : torch.device, weights_path : str):
 
     
     with open(weights_path, 'rb') as f:
-        data = legacy.load_network_pkl(f)
+        g_ema = legacy.load_network_pkl(f)['G_ema'].to(device)
     
-    g_ema = data['G_ema'] # exponential movign average model
+    #g_ema = data['G_ema'] # exponential movign average model
 
     vgg = VGG()
     vgg_state_dict = torch.load(vgg_path)
@@ -72,7 +73,7 @@ def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=N
     truncation_cutoff = None
     s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
 
-    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
+    a_out = G(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
 
     w = G.__interleave_attr_style__(a_out, s_out)
 
@@ -260,6 +261,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     print("ages ls: ", age_labels_ls)
     print("ages rr: ", age_labels_rr)
 
+    
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  4
@@ -273,7 +275,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
 
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
-
+    
 
 '''
 Method creates dataset of generated images, and saves the images to folder.
