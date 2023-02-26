@@ -62,14 +62,12 @@ def load_cusp(device : torch.device, weights_path : str):
 Method 
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    print(G.attr_map.fc0.init_args[0])
-    print(img)
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=-1).to(img.device)
+    #print(G.attr_map.fc0.init_args[0])
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
 
     c_out, c_out_skip = G.content_enc(img)
-    s_out = c_out.mean((2,3))
-
-   #s_out = G.style_enc(img)[0].mean((2,3))
+    
+    s_out = G.style_enc(img)[0].mean((2,3))
 
     truncation_psi = 1
     truncation_cutoff = None
@@ -128,17 +126,15 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     #aging_steps = 8
 
     number_of_images = images_as_tensor.shape[0]
-    print("num of images: ", number_of_images)
-    print("shape img ", images_as_tensor.shape)
     images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
-    print("shape tensor exp: ", images_as_tensor_exp.shape)
+    #print("shape tensor exp: ", images_as_tensor_exp.shape)
 
     print(np.array(data_labels))
     #labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
     labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
 
 
-    print("labels exp: ",labels_exp)
+    #print("labels exp: ",labels_exp)
     batch_size = 16
 
     out_tensor_exp = torch.cat([generate_synthetic_data(
