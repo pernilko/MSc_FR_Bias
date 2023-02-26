@@ -134,7 +134,9 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     print("shape tensor exp: ", images_as_tensor_exp.shape)
 
     print(np.array(data_labels))
-    labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+    #labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+    labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+
 
     print("labels exp: ",labels_exp)
     batch_size = 16
@@ -249,6 +251,9 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     side_config_rr = configs[FFHQ_RR_KEY]['side']
     side_config_ls = configs[FFHQ_LS_KEY]['side']
 
+    t = configs[FFHQ_LS_KEY]['classes']
+    print("t ", t)
+
 
     age_labels_ls = []
     age_labels_rr = []
@@ -266,11 +271,11 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     print("ages ls: ", age_labels_ls)
     print("ages rr: ", age_labels_rr)
 
-    
+    age_range_ls = (1,19)
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  4
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_labels_ls, g_ema_ls, aging_steps_ls)
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_range_ls, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     # RR
     g_ema_rr = load_cusp(device, weights_path_rr)
