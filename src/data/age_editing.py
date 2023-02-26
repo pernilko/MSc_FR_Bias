@@ -316,7 +316,7 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
 
 
 weights_path_rr = 'data/cusp-network.pkl' 
-weights_path_ls = 'data/archive/data.pkl' #data/cusp-network-ls.pkl # LifeSpan 
+weights_path_ls = 'data/archive/resnet_ffhq_ls.pt' #data/cusp-network-ls.pkl # LifeSpan 
 vgg_path = "data/dex_imdb_wiki.caffemodel.pt"
 input_images_path = "models/cusp/synthetic_images/"
 output_images_path = "datasets/cusp_generated_v2/"
