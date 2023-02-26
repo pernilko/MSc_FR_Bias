@@ -62,7 +62,7 @@ Method
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
     print(G.attr_map.fc0.init_args[0])
-    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
+    ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=-1).to(img.device)
 
     _, c_out_skip = G.content_enc(img)
 
