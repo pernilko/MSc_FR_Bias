@@ -62,7 +62,6 @@ def load_cusp(device : torch.device, weights_path : str):
 Method 
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    print(G.attr_map.fc0.init_args.z_dim)
     print(G.attr_map.fc0.init_args[0])
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
     c_out, c_out_skip = G.content_enc(img)
@@ -130,8 +129,8 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     #print("shape tensor exp: ", images_as_tensor_exp.shape)
 
     print(np.array(data_labels))
-    #labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
-    labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+    labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+    #labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
 
 
     #print("labels exp: ",labels_exp)
@@ -267,11 +266,11 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     print("ages ls: ", age_labels_ls)
     print("ages rr: ", age_labels_rr)
 
-    age_range_ls = (11,15)
+    #age_range_ls = (1,10)
     # LS
-    g_ema_ls = load_cusp(device, weights_path_ls)
+    g_ema_ls = load_cusp(device, weights_path_rr)
     aging_steps_ls =  4
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_range_ls, g_ema_ls, aging_steps_ls)
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_labels_ls, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     # RR
     g_ema_rr = load_cusp(device, weights_path_rr)
