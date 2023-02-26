@@ -272,6 +272,8 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     aging_steps_ls =  4
     out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, test_range, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
+    
+    '''
     # RR
     g_ema_rr = load_cusp(device, weights_path_rr)
     aging_steps_rr = 4
@@ -280,7 +282,8 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
 
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
-
+    '''
+    
     
 
 '''
