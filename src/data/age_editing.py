@@ -269,7 +269,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
 
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
-    aging_steps_ls =  4
+    aging_steps_ls =  10
     out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, test_range, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     
