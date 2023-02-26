@@ -265,10 +265,12 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     print("ages ls: ", age_labels_ls)
     print("ages rr: ", age_labels_rr)
 
+    test_range = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
     aging_steps_ls =  4
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_labels_ls, g_ema_ls, aging_steps_ls)
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, test_range, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     # RR
     g_ema_rr = load_cusp(device, weights_path_rr)
