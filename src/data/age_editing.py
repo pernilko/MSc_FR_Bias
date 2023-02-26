@@ -63,17 +63,19 @@ Method
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
     print(G.attr_map.fc0.init_args[0])
+    print(img)
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=-1).to(img.device)
 
-    _, c_out_skip = G.content_enc(img)
+    c_out, c_out_skip = G.content_enc(img)
+    s_out = c_out.mean((2,3))
 
-    s_out = G.style_enc(img)[0].mean((2,3))
+   #s_out = G.style_enc(img)[0].mean((2,3))
 
     truncation_psi = 1
     truncation_cutoff = None
     s_out = G.style_map(s_out, None, truncation_psi, truncation_cutoff)
 
-    a_out = G(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
+    a_out = G.attr_map(ohe_label.to(s_out.device), None, truncation_psi, truncation_cutoff)
 
     w = G.__interleave_attr_style__(a_out, s_out)
 
@@ -275,6 +277,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
 
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
+
     
 
 '''
