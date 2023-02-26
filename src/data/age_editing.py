@@ -131,8 +131,8 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     #print("shape tensor exp: ", images_as_tensor_exp.shape)
 
     print(np.array(data_labels))
-    labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
-    #labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+    #labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
+    labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
 
 
     #print("labels exp: ",labels_exp)
@@ -217,7 +217,7 @@ def get_random_age(age_bin : int):
     elif age_bin == 6:
         return random.randint(40, 50)
     else:
-        return random.randint(50, 65)
+        return random.randint(50, 70)
 
 '''
 Method generates synthetic face images of input images.
@@ -248,7 +248,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     side_config_rr = configs[FFHQ_RR_KEY]['side']
     side_config_ls = configs[FFHQ_LS_KEY]['side']
 
-
+    '''
     age_labels_ls = []
     age_labels_rr = []
     age_bins = [0, 1 , 2, 3, 4, 5, 6, 7]
@@ -260,17 +260,19 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
             age = get_random_age(age_bin)
             age_labels_rr.append(age)
 
+    '''
+
     batch_of_filenames = read_image_filenames(images_path)
 
-    print("ages ls: ", age_labels_ls)
-    print("ages rr: ", age_labels_rr)
+    #print("ages ls: ", age_labels_ls)
+    #print("ages rr: ", age_labels_rr)
 
-    test_range = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    age_range = (1,9)
 
     # LS
     g_ema_ls = load_cusp(device, weights_path_ls)
-    aging_steps_ls =  10
-    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, test_range, g_ema_ls, aging_steps_ls)
+    aging_steps_ls =  8
+    out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_range, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
     
     '''
@@ -283,7 +285,26 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
     '''
-    
+
+def age_cluster_get_random_age(class_idx : int):
+    if class_idx == 1 or class_idx == 2:
+        age = get_random_age(0)
+    elif class_idx == 2 or class_idx == 3:
+        age = get_random_age(1)
+    elif class_idx == 4:
+        age = get_random_age(2)
+    elif class_idx == 5:
+        age = get_random_age(3)
+    elif class_idx == 6:
+        age = get_random_age(4)
+    elif class_idx == 7:
+        age = get_random_age(5)
+    elif class_idx == 8:
+        age = get_random_age(6)
+    elif class_idx == 9:
+        age = get_random_age(7)
+
+    return age
     
 
 '''
@@ -317,7 +338,7 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
             if l != 'Input':
                 img = PIL.Image.fromarray(to_uint8(im))
-                path = synthetic_images_path + os.path.basename(fname)[:-4] + "/"+  os.path.basename(fname)[:-4] + "_"+ l + '.png'
+                path = synthetic_images_path + os.path.basename(fname)[:-4] + "/"+  os.path.basename(fname)[:-4] + "_"+ age_cluster_get_random_age(int(l)) + '.png'
                 img.save(path)
 
 
