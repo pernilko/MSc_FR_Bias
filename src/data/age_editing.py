@@ -275,7 +275,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     aging_steps_ls =  8
     out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_range, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
-    plot_output(batch_of_filenames,images_as_tensor_ls,out_tensor_ls,labels_exp_ls,aging_steps_ls)
+    #plot_output(batch_of_filenames,images_as_tensor_ls,out_tensor_ls,labels_exp_ls,aging_steps_ls)
     
     '''
     # RR

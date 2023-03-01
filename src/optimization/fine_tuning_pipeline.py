@@ -161,7 +161,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
 frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
-input_images_path = "datasets/cusp_generated/"
+input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
 
 fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, input_images_path, name_of_fine_tuned_model)
