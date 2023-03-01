@@ -186,18 +186,19 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
             batch_of_filenames,img_in_tensor,img_out_tensor, 
             labels_exp.numpy().reshape(-1,aging_steps)
             ):
+        if counter > 10:
+            return
         # Create figure
         fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
         
-        age_labels = ['Input'] + [f'Label "{i}"' for i in age_labels]
+        age_labels = ['Input'] + [f'Label "{str(age_cluster_get_random_age(int(i)))}"' for i in age_labels]
         # For every [input,step...]
         for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
             ax.axis('off')
             ax.imshow(to_uint8(im))
             ax.set_title(l)
 
-
-        plt.savefig(f"test_{counter}.png")
+        plt.savefig(f"{os.path.basename(fname)[:-4]}.png")
         counter = counter + 1
 
 
@@ -274,6 +275,7 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     aging_steps_ls =  8
     out_tensor_ls, images_as_tensor_ls, labels_exp_ls = prep_data(side_config_ls, batch_of_filenames, age_range, g_ema_ls, aging_steps_ls)
     create_dataset(output_images_path, batch_of_filenames, images_as_tensor_ls, out_tensor_ls, labels_exp_ls, aging_steps_ls)
+    plot_output(batch_of_filenames,images_as_tensor_ls,out_tensor_ls,labels_exp_ls,aging_steps_ls)
     
     '''
     # RR
