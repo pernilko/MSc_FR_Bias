@@ -84,8 +84,8 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
     epoch_number = 0
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    #loss_fn = torch.nn.CrossEntropyLoss()
-    loss_fn = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
+    loss_fn = torch.nn.CrossEntropyLoss()
+    #loss_fn = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
 
     for epoch in range(number_of_epochs):
         print('EPOCH {}:'.format(epoch_number + 1))
