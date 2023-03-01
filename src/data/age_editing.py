@@ -142,8 +142,8 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     g_ema,
     mini_im,
     mini_label,
-    global_blur_val=0.2, # CUSP global blur
-    mask_blur_val=0.8)   # CUSP masked blur
+    global_blur_val=0.1, # CUSP global blur
+    mask_blur_val=0.3)   # CUSP masked blur
     for mini_im, mini_label
     in zip(
         images_as_tensor_exp.split(batch_size),

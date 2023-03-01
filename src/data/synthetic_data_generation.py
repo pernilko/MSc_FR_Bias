@@ -184,6 +184,8 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
             batch_of_filenames,img_in_tensor,img_out_tensor, 
             labels_exp.numpy().reshape(-1,aging_steps)
             ):
+        if counter > 10:
+            return
         # Create figure
         fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
         
@@ -194,8 +196,7 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
             ax.imshow(to_uint8(im))
             ax.set_title(l)
 
-
-        plt.savefig(f"test_{counter}.png")
+        plt.savefig(f"{os.path.basename(fname)[:-4]}.png")
         counter = counter + 1
 
 '''
@@ -233,6 +234,7 @@ def run(images_path : str, aging_steps : int):
     #plot_output(batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps=4)
     generated_images_path = "datasets/cusp_generated/"
     create_dataset(generated_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
+    plot_output(batch_of_filenames,images_as_tensor,out_tensor,labels_exp,aging_steps)
 
 
 '''
