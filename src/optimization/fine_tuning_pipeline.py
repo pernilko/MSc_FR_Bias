@@ -9,6 +9,7 @@ from data.data_preprocessing import load_dataset, load_test_dataset
 from torchvision import transforms, datasets
 import os
 import numpy as np
+from models.insightface2.recognition.arcface_torch.losses import CombinedMarginLoss
 
 '''
 Method for loading the pretrained ArcFace model
@@ -83,7 +84,8 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
     epoch_number = 0
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    loss_fn = torch.nn.CrossEntropyLoss()
+    #loss_fn = torch.nn.CrossEntropyLoss()
+    loss_fn = CombinedMarginLoss()
 
     for epoch in range(number_of_epochs):
         print('EPOCH {}:'.format(epoch_number + 1))
@@ -129,7 +131,7 @@ Input:
 Input:
 Return 
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -143,7 +145,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     batch_size = 20
     # Load training and validation dataset
     training_data_loader, validation_data_loader = load_dataset(path, batch_size, tsfm)
-    test_data_loader = load_test_dataset(path, batch_size, tsfm)
+    test_data_loader = load_test_dataset(test_images_path, batch_size, tsfm)
 
 
     # Train the unfrozen layers
@@ -163,5 +165,6 @@ frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
 input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
+test_images_path = "datasets/cusp_generated/"
 
-fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, input_images_path, name_of_fine_tuned_model)
+fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, input_images_path, name_of_fine_tuned_model, test_images_path)
