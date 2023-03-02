@@ -92,10 +92,10 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
     num_of_classes = 0
     for i, data in enumerate(training_data_loader):
         inps, labels = data
-        print("num of classes: ", len(labels))
         num_of_classes = num_of_classes + len(labels)
+    print("num of classes: ", num_of_classes)
     
-    module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes)
+    module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes,1, False)
     module_partial_fc.train().cuda()
 
 
