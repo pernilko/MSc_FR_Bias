@@ -10,6 +10,7 @@ from torchvision import transforms, datasets
 import os
 import numpy as np
 from models.insightface2.recognition.arcface_torch.losses import CombinedMarginLoss
+from models.insightface2.recognition.arcface_torch.partial_fc_v2 import PartialFC_V2
 
 '''
 Method for loading the pretrained ArcFace model
@@ -85,14 +86,25 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
     best_vloss = 1_000_000.
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     loss_fn = torch.nn.CrossEntropyLoss()
-    #loss_fn = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
+    margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
+
+
+    num_of_classes = 0
+    for i, data in enumerate(training_data_loader):
+        inps, labels = data
+        print("num of classes: ", len(labels))
+        num_of_classes = num_of_classes + len(labels)
+    
+    module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes)
+    module_partial_fc.train().cuda()
+
 
     for epoch in range(number_of_epochs):
         print('EPOCH {}:'.format(epoch_number + 1))
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size)
+        avg_loss = train_one_epoch(training_data_loader, optimizer, model, module_partial_fc, batch_size)
 
         # We don't need gradients on to do reporting
         model.train(False)
