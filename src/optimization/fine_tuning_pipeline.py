@@ -11,6 +11,8 @@ import os
 import numpy as np
 from models.insightface2.recognition.arcface_torch.losses import CombinedMarginLoss
 from models.insightface2.recognition.arcface_torch.partial_fc_v2 import PartialFC_V2
+from pytorch_metric_learning import losses
+
 
 '''
 Method for loading the pretrained ArcFace model
@@ -84,19 +86,22 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
 def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader):
     epoch_number = 0
     best_vloss = 1_000_000.
-    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+    #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     loss_fn = torch.nn.CrossEntropyLoss()
-    margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
-
+    #margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
 
     num_of_classes = 0
     for i, data in enumerate(training_data_loader):
         inps, labels = data
         num_of_classes = num_of_classes + len(labels)
+        print(labels)
     print("num of classes: ", num_of_classes)
+
+    loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
+    optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
     
-    module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes,1, False)
-    module_partial_fc.train().cuda()
+    #module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes,1, False)
+    #module_partial_fc.train().cuda()
 
 
     for epoch in range(number_of_epochs):
@@ -104,7 +109,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
-        avg_loss = train_one_epoch(training_data_loader, optimizer, model, module_partial_fc, batch_size)
+        avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size)
 
         # We don't need gradients on to do reporting
         model.train(False)
