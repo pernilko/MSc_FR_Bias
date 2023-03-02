@@ -90,11 +90,16 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
     loss_fn = torch.nn.CrossEntropyLoss()
     #margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
 
-    num_of_classes = 0
+    uniq_labels = []
     for i, data in enumerate(training_data_loader):
         inps, labels = data
-        num_of_classes = num_of_classes + len(labels)
-        print(labels)
+        labels_batch = torch.unique(labels).tolist()
+        for lab in labels_batch:
+            if lab not in uniq_labels:
+                uniq_labels.append(lab)
+
+    print("labels: ", uniq_labels)
+    num_of_classes = len(uniq_labels)
     print("num of classes: ", num_of_classes)
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
