@@ -51,7 +51,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
     for img_tensor in inp_images_tensor:
 
-        img_tensor = img_tensor.resize((128, 128))
+        #img_tensor = img_tensor.resize((128, 128))
         # normalize image to have values between -1 and 1
         img_tensor = (np.array(img_tensor) / 127.5) - 1.0
 
