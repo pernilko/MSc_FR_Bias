@@ -25,7 +25,7 @@ def create_dataset(outdir : str):
 def get_images(batch_of_filenames, side : int):
     images = []
     for file in batch_of_filenames:
-        img = np.array(PIL.Image.open(file).resize((side, side)).convert('L'), dtype=np.float32)
+        img = np.array(PIL.Image.open(file).resize((side, side)), dtype=np.float32).transpose((2,0,1))
         images.append(img)
     return images
 
@@ -46,17 +46,17 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     print(G)
 
     batch_of_filenames = read_image_filenames(input_images_path)
-    input_images = get_images(batch_of_filenames,128)
+    input_images = get_images(batch_of_filenames,256)
     inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
 
     for img_tensor in inp_images_tensor:
 
         #img_tensor = img_tensor.resize((128, 128))
         # normalize image to have values between -1 and 1
-        img_tensor = torch.tensor((np.array(img_tensor) / 127.5) - 1.0)
+        #img_tensor = torch.tensor((np.array(img_tensor) / 127.5) - 1.0)
 
         print("img tensor: ", img_tensor)
-        z = img_tensor.to(device)
+        z = torch.from_numpy(np.random.randn(1, G.z_dim)).to(device)
         print(z.ndim)
         print(G.z_dim)
         fov_deg = 18.837
@@ -81,7 +81,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         age = 2
         age = [normalize(age, rmin=0, rmax=100)]
         print("age: ", age)
-        c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
+        c = img_tensor
         c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
         ws = G.mapping(z, c.float(), truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
         img = G.synthesis(ws, c_params.float())['image']
