@@ -64,12 +64,13 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
             conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
-            #ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
-            #img = G.synthesis(ws, camera_params)['image']
+            ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
+            img = G.synthesis(ws, camera_params)['image']
 
-            #img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            #imgs.append(img)
+            img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+            imgs.append(img)
 
+        '''
         age = 2
         age = [normalize(age, rmin=0, rmax=100)]
         print("age: ", age)
@@ -81,6 +82,8 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
         os.makedirs(outdir, exist_ok=True)
         pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_test.png')
+        '''
+        
         return
     
 
