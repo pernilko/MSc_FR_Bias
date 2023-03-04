@@ -25,7 +25,7 @@ def create_dataset(outdir : str):
 def get_images(batch_of_filenames, side : int):
     images = []
     for file in batch_of_filenames:
-        img = np.array(PIL.Image.open(file).resize((side, side)), dtype=np.float32).transpose((2,0,1))
+        img = np.array(PIL.Image.open(file).resize((side, side)).convert('L'), dtype=np.float32).transpose((2,0,1))
         images.append(img)
     return images
 
