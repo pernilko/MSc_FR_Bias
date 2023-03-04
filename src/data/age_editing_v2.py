@@ -40,6 +40,7 @@ def read_image_filenames(images_path : str):
 
 def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str):
 
+    print("starting age editing with e3gd")
     # Load pre-trained model and input images
     G = load_model(device, network_pkl)
     batch_of_filenames = read_image_filenames(input_images_path)
@@ -48,6 +49,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
     for img_tensor in inp_images_tensor:
 
+        print("img tensor: ", img_tensor)
         z = img_tensor.to(device)
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
@@ -83,14 +85,14 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     
 
 
-    device = torch.device('cuda:0')
-    network_pkl = "data/eg3d_age_network.pkl"
-    images_input_path = "models/cusp/synthetic_images/"
-    truncation_psi = 0.2
-    truncation_cutoff = 0.8
-    outdir = "datasets/eg3d_generated/"
+device = torch.device('cuda:0')
+network_pkl = "data/eg3d_age_network.pkl"
+images_input_path = "models/cusp/synthetic_images/"
+truncation_psi = 0.2
+truncation_cutoff = 0.8
+outdir = "datasets/eg3d_generated/"
 
-    age_editing_e(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir)
+age_editing_e(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir)
 
 
 
