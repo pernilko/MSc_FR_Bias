@@ -43,7 +43,6 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     print("starting age editing with e3gd")
     # Load pre-trained model and input images
     G = load_model(device, network_pkl)
-    print(G)
 
     batch_of_filenames = read_image_filenames(input_images_path)
     input_images = get_images(batch_of_filenames,256)
@@ -51,14 +50,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
     for img_tensor in inp_images_tensor:
 
-        #img_tensor = img_tensor.resize((128, 128))
-        # normalize image to have values between -1 and 1
-        #img_tensor = torch.tensor((np.array(img_tensor) / 127.5) - 1.0)
-
-        print("img tensor: ", img_tensor)
         z = torch.from_numpy(np.random.randn(1, G.z_dim)).to(device)
-        print(z.ndim)
-        print(G.z_dim)
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
 
@@ -72,11 +64,11 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
             conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
-            ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
-            img = G.synthesis(ws, camera_params)['image']
+            #ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
+            #img = G.synthesis(ws, camera_params)['image']
 
-            img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            imgs.append(img)
+            #img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+            #imgs.append(img)
 
         age = 2
         age = [normalize(age, rmin=0, rmax=100)]
