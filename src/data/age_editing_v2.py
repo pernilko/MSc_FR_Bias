@@ -50,7 +50,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
     for img_tensor in inp_images_tensor:
 
-        z = torch.from_numpy(np.random.randn(1, G.z_dim)).to(device)
+        z = torch.from_numpy(np.random.RandomState(1).randn(1, G.z_dim)).to(device)
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
 
