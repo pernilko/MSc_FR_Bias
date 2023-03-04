@@ -53,6 +53,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
         print("img tensor: ", img_tensor)
         z = img_tensor.to(device)
+        z = z.view(3,512)
         print(z.shape)
         print(G.z_dim)
         fov_deg = 18.837
