@@ -146,3 +146,22 @@ def create_distribution_plot(df : pd.DataFrame, output_filename : str):
     
     sns.displot(df, kind="kde")
     plt.savefig(output_filename)
+
+def G(x, y):
+    n = len(y)
+    g = ((n)/(n-1))
+    return g
+
+# FMNR
+def B(threshold):
+    b = 0
+    return b
+
+# FMR
+def A(threshold : float):
+    a = 0
+    return a
+
+def GARBE(A, B, alpha = 0.5):
+    return alpha*A + (1-alpha)*B
+
