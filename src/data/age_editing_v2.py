@@ -43,6 +43,8 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     print("starting age editing with e3gd")
     # Load pre-trained model and input images
     G = load_model(device, network_pkl)
+    print(G)
+
     batch_of_filenames = read_image_filenames(input_images_path)
     input_images = get_images(batch_of_filenames,256)
     inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
@@ -50,7 +52,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     for img_tensor in inp_images_tensor:
 
         print("img tensor: ", img_tensor)
-        z = img_tensor.to(device)
+        z = img_tensor.to(device).mode(2)
         print(z.ndim)
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
