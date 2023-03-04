@@ -46,14 +46,14 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     print(G)
 
     batch_of_filenames = read_image_filenames(input_images_path)
-    input_images = get_images(batch_of_filenames,256)
+    input_images = get_images(batch_of_filenames,128)
     inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
 
     for img_tensor in inp_images_tensor:
 
-        img_tensor = img_tensor.resize((128, 128))
+        #img_tensor = img_tensor.resize((128, 128))
         # normalize image to have values between -1 and 1
-        img_tensor = (np.array(img_tensor) / 127.5) - 1.0
+        #img_tensor = (np.array(img_tensor) / 127.5) - 1.0
 
         print("img tensor: ", img_tensor)
         z = img_tensor.to(device)
