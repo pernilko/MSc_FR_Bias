@@ -69,6 +69,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
         conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)    
 
+        '''
         age = 2
         age = [normalize(age, rmin=0, rmax=100)]
         c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
@@ -78,13 +79,24 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
         ws = G.mapping(z, c.float(), truncation_psi=1, truncation_cutoff=0)
         img = G.synthesis(ws, c_params.float())['image']
-        img2 = G(img_tensor,20)
-        print(img2)
         img = img.permute(0, 2, 3, 1) * 127.5 + 128
         img = img.clamp(0, 255).to(torch.uint8)
         pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
 
         pil_img.save("test_img_e3gd.png")
+        '''
+        ages = [0, 6, 11, 16, 21, 31, 41, 51, 61, 71]
+        for age in ages:
+            age = [normalize(age, rmin=0, rmax=100)]
+            c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
+            c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
+            ws = G.mapping(z, c.float(), truncation_psi=1, truncation_cutoff=0)
+            img = G.synthesis(ws, c_params.float())['image']
+            img = img.permute(0, 2, 3, 1) * 127.5 + 128
+            img = img.clamp(0, 255).to(torch.uint8)
+            pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
+
+            pil_img.save(f"test_img_{age}.png")
         
         return
     
