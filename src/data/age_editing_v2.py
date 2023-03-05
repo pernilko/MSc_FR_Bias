@@ -26,6 +26,8 @@ def get_images(batch_of_filenames, side : int):
     images = []
     for file in batch_of_filenames:
         img = PIL.Image.open(file).convert('L')
+        img2 = PIL.Image.open(file)
+        print("rgb img: ", img2.size)
         print(img.size)
         img = np.array(img.resize((side, side)), dtype=np.float32)
         print(img.shape)
