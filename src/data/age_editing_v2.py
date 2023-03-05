@@ -34,7 +34,7 @@ def get_images(batch_of_filenames, side : int):
         #print("grey scale: ", img.shape)
         #print("rgb: ", img2.shape)
         #img = img.transpose((2,0,1))
-        images.append(img)
+        images.append(img2)
     return images
 
 def read_image_filenames(images_path : str):
