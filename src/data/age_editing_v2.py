@@ -51,44 +51,26 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     for img_tensor in inp_images_tensor:
 
         z = torch.from_numpy(np.random.RandomState(1).randn(1, G.z_dim)).to(device)
+
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
-        print(intrinsics.shape)
+        cam_pivot = torch.tensor(G.rendering_kwargs.get('avg_camera_pivot', [0,0,0]), device=device)
+        cam_radius = G.rendering_kwargs.get('avg_camera_radius', 2.7)
+        cam2world_pose = LookAtPoseSampler.sample(np.pi/2 + 0, np.pi/2 + 0, cam_pivot, radius=cam_radius, device=device)
+        conditioning_cam2world_pose = LookAtPoseSampler.sample(np.pi/2, np.pi/2, cam_pivot, radius=cam_radius, device=device)
+        camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
+        conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)    
 
-        imgs = []
-        angle_p = -0.2
-        for angle_y, angle_p in [(.4, angle_p), (0, angle_p), (-.4, angle_p)]:
-            cam_pivot = torch.tensor(G.rendering_kwargs.get('avg_camera_pivot', [0, 0, 0]), device=device)
-            cam_radius = G.rendering_kwargs.get('avg_camera_radius', 2.7)
-            cam2world_pose = LookAtPoseSampler.sample(np.pi/2 + angle_y, np.pi/2 + angle_p, cam_pivot, radius=cam_radius, device=device)
-            conditioning_cam2world_pose = LookAtPoseSampler.sample(np.pi/2, np.pi/2, cam_pivot, radius=cam_radius, device=device)
-            print(conditioning_cam2world_pose.shape)
-
-            camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
-            conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
-
-            print(conditioning_params.shape)
-            print(conditioning_params.shape)
-
-            ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
-            img = G.synthesis(ws, camera_params)['image']
-
-            img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            imgs.append(img)
-
-        '''
         age = 2
         age = [normalize(age, rmin=0, rmax=100)]
-        print("age: ", age)
-        c = img_tensor
+        c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
         c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
         ws = G.mapping(z, c.float(), truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
         img = G.synthesis(ws, c_params.float())['image']
         img.permute((0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
+        pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
 
-        os.makedirs(outdir, exist_ok=True)
-        pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed_test.png')
-        '''
+        pil_img.save("test_img_e3gd.png")
         
         return
     
