@@ -5,6 +5,7 @@ import PIL.Image
 from models.eg3dAge.eg3d.camera_utils import LookAtPoseSampler, FOV_to_intrinsics
 from models.eg3dAge.eg3d import dnnlib
 from models.eg3dAge.eg3d import legacy
+import matplotlib.pyplot as plt
 
 
 def normalize(x, rmin = 0, rmax = 75, tmin = -1, tmax = 1):
@@ -45,6 +46,19 @@ def read_image_filenames(images_path : str):
     ]
     return batch_of_filenames
 
+def plot_output(identity_imgs, ages, identity_name):
+    
+    # For every input image
+    for img in identity_imgs:
+        fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
+        age_labels = [f'Label "{str(i)}"' for i in age_labels]
+        for ax,im,l in zip(axs, img, age_labels):
+            ax.axis('off')
+            ax.imshow(im)
+            ax.set_title(l)
+
+        plt.savefig(f"{identity_name}.png")
+
 
 def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
 
@@ -57,6 +71,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
     #input_images = get_images(batch_of_filenames,256)
     #inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
 
+    counter = 0
     for seed in seeds:
 
         z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
@@ -71,6 +86,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)    
 
         ages = [0, 6, 11, 16, 21, 31, 41, 51, 61, 71]
+        imgs = []
         for age in ages:
             original_age = age
             age = [normalize(age, rmin=0, rmax=100)]
@@ -80,10 +96,15 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             img = G.synthesis(ws, c_params.float())['image']
             img = img.permute(0, 2, 3, 1) * 127.5 + 128
             img = img.clamp(0, 255).to(torch.uint8)
+            imgs.append(img)
             pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
 
             os.makedirs(f"{outdir}/seed{seed:04d}/", exist_ok=True)
             pil_img.save(f"{outdir}/seed{seed:04d}/seed{seed:04d}_{original_age}.png")
+        
+        if counter < 5:
+            plot_output(imgs, ages, f"{seed:04d}")
+        counter = counter + 1
     
 
 
