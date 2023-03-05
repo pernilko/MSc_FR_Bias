@@ -76,7 +76,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             age = [normalize(age, rmin=0, rmax=100)]
             c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
             c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
-            ws = G.mapping(z, c.float(), truncation_psi=0.5, truncation_cutoff=0.2)
+            ws = G.mapping(z, c.float(), truncation_psi=0.5, truncation_cutoff=0)
             img = G.synthesis(ws, c_params.float())['image']
             img = img.permute(0, 2, 3, 1) * 127.5 + 128
             img = img.clamp(0, 255).to(torch.uint8)
