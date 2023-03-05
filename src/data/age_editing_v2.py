@@ -54,12 +54,16 @@ def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
         age_labels = [f'Label "{str(i)}"' for i in ages]
         for ax,im,l in zip(axs, img, age_labels):
             ax.axis('off')
-            ax.imshow(im)
+            ax.imshow(to_uint8(im))
             ax.set_title(l)
 
         os.makedirs(out_plot_dir, exist_ok=True)
         plt.savefig(f"{out_plot_dir}/{identity_name}.png")
 
+def to_uint8(img_tensor):
+    img_tensor = (img_tensor.detach().cpu().numpy().transpose((1,2,0))+1)*(256/2)
+    img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
+    return img_tensor
 
 def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
 
@@ -98,7 +102,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             img = img.permute(0, 2, 3, 1) * 127.5 + 128
             img = img.clamp(0, 255).to(torch.uint8)
             pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
-            imgs.append(pil_img)
+            imgs.append(img[0])
 
             os.makedirs(f"{outdir}/seed{seed:04d}/", exist_ok=True)
             pil_img.save(f"{outdir}/seed{seed:04d}/seed{seed:04d}_{original_age}.png")
