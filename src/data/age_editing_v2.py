@@ -47,18 +47,17 @@ def read_image_filenames(images_path : str):
     return batch_of_filenames
 
 def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
-    print(len(identity_imgs))
     # For every input image
-    for img in identity_imgs:
-        fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
-        age_labels = [f'Label "{str(i)}"' for i in ages]
-        for ax,l in zip(axs, age_labels):
-            ax.axis('off')
-            ax.imshow(img)
-            ax.set_title(l)
+    
+    fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
+    age_labels = [f'Label "{str(i)}"' for i in ages]
+    for ax, img, l in zip(axs, identity_imgs, age_labels):
+        ax.axis('off')
+        ax.imshow(img)
+        ax.set_title(l)
 
-        os.makedirs(out_plot_dir, exist_ok=True)
-        plt.savefig(f"{out_plot_dir}/{identity_name}.png")
+    os.makedirs(out_plot_dir, exist_ok=True)
+    plt.savefig(f"{out_plot_dir}/{identity_name}.png")
 
 def to_uint8(img_tensor):
     img_tensor = (img_tensor.detach().cpu().numpy())
