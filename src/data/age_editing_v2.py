@@ -46,7 +46,7 @@ def read_image_filenames(images_path : str):
     ]
     return batch_of_filenames
 
-def plot_output(identity_imgs, ages, identity_name):
+def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
     
     # For every input image
     for img in identity_imgs:
@@ -57,7 +57,8 @@ def plot_output(identity_imgs, ages, identity_name):
             ax.imshow(im)
             ax.set_title(l)
 
-        plt.savefig(f"{identity_name}.png")
+        os.makedirs(out_plot_dir, exist_ok=True)
+        plt.savefig(f"{out_plot_dir}/{identity_name}.png")
 
 
 def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
@@ -103,7 +104,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             pil_img.save(f"{outdir}/seed{seed:04d}/seed{seed:04d}_{original_age}.png")
         
         if counter < 5:
-            plot_output(imgs, ages, f"{seed:04d}")
+            plot_output(imgs, ages, f"{seed:04d}", "synthetic_img_plots/")
         counter = counter + 1
     
 
