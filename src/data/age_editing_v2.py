@@ -54,7 +54,7 @@ def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
         age_labels = [f'Label "{str(i)}"' for i in ages]
         for ax,im,l in zip(axs, img, age_labels):
             ax.axis('off')
-            ax.imshow(to_uint8(im))
+            ax.imshow(im)
             ax.set_title(l)
 
         os.makedirs(out_plot_dir, exist_ok=True)
