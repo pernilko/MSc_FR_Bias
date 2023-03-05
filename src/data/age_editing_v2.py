@@ -53,6 +53,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         z = torch.from_numpy(np.random.RandomState(1).randn(1, G.z_dim)).to(device)
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
+        print(intrinsics.shape)
 
         imgs = []
         angle_p = -0.2
@@ -61,11 +62,12 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             cam_radius = G.rendering_kwargs.get('avg_camera_radius', 2.7)
             cam2world_pose = LookAtPoseSampler.sample(np.pi/2 + angle_y, np.pi/2 + angle_p, cam_pivot, radius=cam_radius, device=device)
             conditioning_cam2world_pose = LookAtPoseSampler.sample(np.pi/2, np.pi/2, cam_pivot, radius=cam_radius, device=device)
+            print(conditioning_cam2world_pose.shape)
+
             camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
             conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
             print(conditioning_params.shape)
-            print(conditioning_params.reshape(-1,26))
             print(conditioning_params.shape)
 
             ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
