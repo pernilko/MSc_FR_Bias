@@ -52,9 +52,9 @@ def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
     for img in identity_imgs:
         fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
         age_labels = [f'Label "{str(i)}"' for i in ages]
-        for ax,im,l in zip(axs, img, age_labels):
+        for ax,l in zip(axs, age_labels):
             ax.axis('off')
-            ax.imshow(to_uint8(im))
+            ax.imshow(img)
             ax.set_title(l)
 
         os.makedirs(out_plot_dir, exist_ok=True)
@@ -102,7 +102,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             img = img.permute(0, 2, 3, 1) * 127.5 + 128
             img = img.clamp(0, 255).to(torch.uint8)
             pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
-            imgs.append(img[0])
+            imgs.append(pil_img)
 
             os.makedirs(f"{outdir}/seed{seed:04d}/", exist_ok=True)
             pil_img.save(f"{outdir}/seed{seed:04d}/seed{seed:04d}_{original_age}.png")
