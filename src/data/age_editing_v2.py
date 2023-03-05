@@ -51,7 +51,7 @@ def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
     # For every input image
     for img in identity_imgs:
         fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
-        age_labels = [f'Label "{str(i)}"' for i in age_labels]
+        age_labels = [f'Label "{str(i)}"' for i in ages]
         for ax,im,l in zip(axs, img, age_labels):
             ax.axis('off')
             ax.imshow(im)
