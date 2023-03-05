@@ -27,12 +27,12 @@ def get_images(batch_of_filenames, side : int):
     for file in batch_of_filenames:
         img = PIL.Image.open(file).convert('L')
         img2 = PIL.Image.open(file)
-        print("rgb img: ", img2.size)
-        print("grey scale: ", img.size)
+        #print("rgb img: ", img2.size)
+        #print("grey scale: ", img.size)
         img = np.array(img.resize((side, side)), dtype=np.float32)
         img2 = np.array(img2.resize((side, side)), dtype=np.float32)
-        print("grey scale: ", img.shape)
-        print("rgb: ", img2.shape)
+        #print("grey scale: ", img.shape)
+        #print("rgb: ", img2.shape)
         #img = img.transpose((2,0,1))
         images.append(img)
     return images
@@ -71,8 +71,10 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
 
         age = 2
         age = [normalize(age, rmin=0, rmax=100)]
-        #c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
-        c = img_tensor
+        c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
+        print(c)
+        print(c.shape)
+        #c = img_tensor
         c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
         ws = G.mapping(z, c.float(), truncation_psi=1, truncation_cutoff=0)
         img = G.synthesis(ws, c_params.float())['image']
