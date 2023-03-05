@@ -27,6 +27,7 @@ def get_images(batch_of_filenames, side : int):
     for file in batch_of_filenames:
         img = PIL.Image.open(file).convert('L')
         img = np.array(img.resize((side, side)), dtype=np.float32)
+        print(img.shape)
         img = img.transpose((2,0,1))
         images.append(img)
     return images
