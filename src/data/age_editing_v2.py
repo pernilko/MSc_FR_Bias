@@ -65,7 +65,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
 
             print(conditioning_params.shape)
-            print(conditioning_params.reshape(1,26))
+            print(conditioning_params.reshape(26))
             print(conditioning_params.shape)
 
             ws = G.mapping(z, conditioning_params, truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
