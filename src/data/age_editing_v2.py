@@ -28,9 +28,11 @@ def get_images(batch_of_filenames, side : int):
         img = PIL.Image.open(file).convert('L')
         img2 = PIL.Image.open(file)
         print("rgb img: ", img2.size)
-        print(img.size)
+        print("grey scale: ", img.size)
         img = np.array(img.resize((side, side)), dtype=np.float32)
-        print(img.shape)
+        img2 = np.array(img2.resize((side, side)), dtype=np.float32)
+        print("grey scale: ", img.shape)
+        print("rgb: ", img2.shape)
         img = img.transpose((2,0,1))
         images.append(img)
     return images
