@@ -46,19 +46,20 @@ def read_image_filenames(images_path : str):
     return batch_of_filenames
 
 
-def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str):
+def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list[int]):
 
     print("starting age editing with e3gd")
     # Load pre-trained model and input images
     G = load_model(device, network_pkl)
+    os.makedirs(outdir, exist_ok=True)
 
-    batch_of_filenames = read_image_filenames(input_images_path)
-    input_images = get_images(batch_of_filenames,256)
-    inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
+    #batch_of_filenames = read_image_filenames(input_images_path)
+    #input_images = get_images(batch_of_filenames,256)
+    #inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
 
-    for img_tensor in inp_images_tensor:
+    for seed in seeds:
 
-        z = torch.from_numpy(np.random.RandomState(1).randn(1, G.z_dim)).to(device)
+        z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
 
         fov_deg = 18.837
         intrinsics = FOV_to_intrinsics(fov_deg, device=device)
@@ -69,24 +70,9 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
         conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)    
 
-        '''
-        age = 2
-        age = [normalize(age, rmin=0, rmax=100)]
-        c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
-        print(c)
-        print(c.shape)
-        #c = img_tensor
-        c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
-        ws = G.mapping(z, c.float(), truncation_psi=1, truncation_cutoff=0)
-        img = G.synthesis(ws, c_params.float())['image']
-        img = img.permute(0, 2, 3, 1) * 127.5 + 128
-        img = img.clamp(0, 255).to(torch.uint8)
-        pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
-
-        pil_img.save("test_img_e3gd.png")
-        '''
         ages = [0, 6, 11, 16, 21, 31, 41, 51, 61, 71]
         for age in ages:
+            original_age = age
             age = [normalize(age, rmin=0, rmax=100)]
             c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
             c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
@@ -96,9 +82,7 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             img = img.clamp(0, 255).to(torch.uint8)
             pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
 
-            pil_img.save(f"test_img_{age}.png")
-        
-        return
+            pil_img.save(f"{outdir}/seed{seed:04d}/seed{seed:04d}_{original_age}.png")
     
 
 
@@ -108,8 +92,9 @@ images_input_path = "models/cusp/synthetic_images/"
 truncation_psi = 0.2
 truncation_cutoff = 0.8
 outdir = "datasets/eg3d_generated/"
+seeds = list(range(301))
 
-age_editing_e(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir)
+age_editing_e(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir, seeds)
 
 
 
