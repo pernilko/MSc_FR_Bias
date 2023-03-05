@@ -46,7 +46,7 @@ def read_image_filenames(images_path : str):
     return batch_of_filenames
 
 
-def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list[int]):
+def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
 
     print("starting age editing with e3gd")
     # Load pre-trained model and input images
