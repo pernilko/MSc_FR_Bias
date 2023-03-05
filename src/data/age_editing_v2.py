@@ -97,8 +97,8 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
             img = G.synthesis(ws, c_params.float())['image']
             img = img.permute(0, 2, 3, 1) * 127.5 + 128
             img = img.clamp(0, 255).to(torch.uint8)
-            imgs.append(img)
             pil_img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB')
+            imgs.append(np.array(pil_img, dtype=np.uint8))
 
             os.makedirs(f"{outdir}/seed{seed:04d}/", exist_ok=True)
             pil_img.save(f"{outdir}/seed{seed:04d}/seed{seed:04d}_{original_age}.png")
