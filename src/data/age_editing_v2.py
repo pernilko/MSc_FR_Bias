@@ -6,6 +6,7 @@ from models.eg3dAge.eg3d.camera_utils import LookAtPoseSampler, FOV_to_intrinsic
 from models.eg3dAge.eg3d import dnnlib
 from models.eg3dAge.eg3d import legacy
 import matplotlib.pyplot as plt
+import random
 
 
 def normalize(x, rmin = 0, rmax = 75, tmin = -1, tmax = 1):
@@ -20,31 +21,31 @@ def load_model(device : torch.device, network_pkl):
 
     return G
 
-def create_dataset(outdir : str):
-    os.makedirs(outdir, exist_ok=True)
+def get_random_age(age_bin : int):
+    if age_bin == 0:
+        return random.randint(0, 5)
+    elif age_bin == 1:
+        return random.randint(5, 10)
+    elif age_bin == 2:
+        return random.randint(10, 15)
+    elif age_bin == 3:
+        return random.randint(15, 20)
+    elif age_bin == 4:
+        return random.randint(20, 30)
+    elif age_bin == 5:
+        return random.randint(30, 40)
+    elif age_bin == 6:
+        return random.randint(40, 50)
+    else:
+        return random.randint(50, 70)
 
-def get_images(batch_of_filenames, side : int):
-    images = []
-    for file in batch_of_filenames:
-        img = PIL.Image.open(file).convert('L')
-        img2 = PIL.Image.open(file)
-        #print("rgb img: ", img2.size)
-        #print("grey scale: ", img.size)
-        img = np.array(img.resize((side, side)), dtype=np.float32)
-        img2 = np.array(img2.resize((side, side)), dtype=np.float32)
-        #print("grey scale: ", img.shape)
-        #print("rgb: ", img2.shape)
-        #img = img.transpose((2,0,1))
-        images.append(img2)
-    return images
-
-def read_image_filenames(images_path : str):
-    batch_of_filenames = [
-      os.path.join(images_path,f) 
-      for  f in next(iter(os.walk(images_path)))[2] 
-      if f[-4:] == '.png'
-    ]
-    return batch_of_filenames
+def get_random_age_list(number_of_ages : int):
+    ages = []
+    for i in range(number_of_ages):
+        age = get_random_age(i)
+        ages.append(age)
+    
+    return ages
 
 def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
     # For every input image
@@ -64,16 +65,12 @@ def to_uint8(img_tensor):
     img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
     return img_tensor
 
-def age_editing_e(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
+def age_editing_eg3d(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
 
     print("starting age editing with e3gd")
     # Load pre-trained model and input images
     G = load_model(device, network_pkl)
     os.makedirs(outdir, exist_ok=True)
-
-    #batch_of_filenames = read_image_filenames(input_images_path)
-    #input_images = get_images(batch_of_filenames,256)
-    #inp_images_tensor = (torch.tensor(np.array(input_images))/256*2-1)
 
     counter = 0
     for seed in seeds:
@@ -89,7 +86,8 @@ def age_editing_e(device : torch.device, network_pkl, input_images_path : str, t
         camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
         conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)    
 
-        ages = [0, 6, 11, 16, 21, 31, 41, 51, 61, 71]
+        #ages = [0, 6, 11, 16, 21, 31, 41, 51, 61, 71]
+        ages = get_random_age_list(8)
         imgs = []
         for age in ages:
             original_age = age
@@ -120,7 +118,4 @@ truncation_cutoff = 0.8
 outdir = "datasets/eg3d_generated/"
 seeds = list(range(301))
 
-age_editing_e(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir, seeds)
-
-
-
+age_editing_eg3d(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir, seeds)
