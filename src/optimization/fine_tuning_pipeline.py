@@ -12,6 +12,7 @@ import numpy as np
 from models.insightface2.recognition.arcface_torch.losses import CombinedMarginLoss
 from models.insightface2.recognition.arcface_torch.partial_fc_v2 import PartialFC_V2
 from pytorch_metric_learning import losses
+import argparse
 
 
 '''
@@ -182,6 +183,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     
 
 
+
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
 frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
@@ -189,4 +191,11 @@ input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
 test_images_path = "datasets/cusp_generated/"
 
-fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, input_images_path, name_of_fine_tuned_model, test_images_path)
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_img_path', type=str, default='0', help="path to input images")
+args = parser.parse_args()
+print("Argument: " + args.input_img_path)
+
+fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, args.input_img_path, name_of_fine_tuned_model, test_images_path)
+
+
