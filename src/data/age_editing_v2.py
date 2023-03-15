@@ -129,7 +129,7 @@ Return:
 
 
 '''
-def age_editing_eg3d(device : torch.device, network_pkl : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
+def age_editing_eg3d(device : torch.device, network_pkl : str,  outdir : str, seeds : list, truncation_psi : float = 0.5, truncation_cutoff : float = 0):
 
     print("starting age editing with eg3d")
     # Load pre-trained model and input images
@@ -158,7 +158,7 @@ def age_editing_eg3d(device : torch.device, network_pkl : str, truncation_psi : 
             age = [normalize(age, rmin=0, rmax=100)]
             c = torch.cat((conditioning_params, torch.tensor([age], device=device)), 1)
             c_params = torch.cat((camera_params, torch.tensor([age], device=device)), 1)
-            ws = G.mapping(z, c.float(), truncation_psi=0.5, truncation_cutoff=0)
+            ws = G.mapping(z, c.float(), truncation_psi=truncation_psi, truncation_cutoff=truncation_cutoff)
             img = G.synthesis(ws, c_params.float())['image']
             img = img.permute(0, 2, 3, 1) * 127.5 + 128
             img = img.clamp(0, 255).to(torch.uint8)
@@ -181,10 +181,10 @@ Running Age-EG3D generation
 device = torch.device('cuda:0')
 network_pkl = "data/eg3d_age_network.pkl"
 images_input_path = "models/cusp/synthetic_images/"
-truncation_psi = 0.2
-truncation_cutoff = 0.8
+truncation_psi = 0.5
+truncation_cutoff = 0
 outdir = "datasets/eg3d_generated/"
-seeds = list(range(301))
+seeds = list(range(1000))
 
 # Running Age-EG3D generation
-age_editing_eg3d(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir, seeds)
+age_editing_eg3d(device, network_pkl, images_input_path, outdir, seeds, truncation_psi, truncation_cutoff)
