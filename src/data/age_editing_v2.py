@@ -187,4 +187,4 @@ outdir = "datasets/eg3d_generated/"
 seeds = list(range(1000))
 
 # Running Age-EG3D generation
-age_editing_eg3d(device, network_pkl, images_input_path, outdir, seeds, truncation_psi, truncation_cutoff)
+age_editing_eg3d(device, network_pkl, outdir, seeds, truncation_psi, truncation_cutoff)
