@@ -163,7 +163,7 @@ def get_filenames_by_batch(batch_size : int, batch_number : int, filenames : lis
     return batch_of_filenames
 
 
-def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
+def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, outdir_plot : str):
     filenames = get_filename(test_data_loader)
     print(len(filenames))
 
@@ -241,7 +241,7 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
     print(sim_scores)
 
     df = create_dataframe_fg_net(sim_scores)
-    create_distribution_plot(df, "plots/test/")
+    create_distribution_plot(df, outdir_plot)
 
     return sim_scores
 
@@ -306,13 +306,14 @@ def GARBE(A, B, alpha = 0.5):
     return alpha*A + (1-alpha)*B
 
 '''
-'''
+
 
 tsfm = transforms.Compose([
         transforms.ToTensor(),
         transforms.Resize((98, 98))])
-orgranize_fgnet_dataset("datasets/fgnet/")
+outdir_plot = "plots/test/"
 data_loader = load_test_dataset("datasets/fgnet/", 1002, tsfm)
 model = iresnet50()
-compute_sim_scores_fg_net(data_loader, model)
+compute_sim_scores_fg_net(data_loader, model, outdir_plot)
+'''
 

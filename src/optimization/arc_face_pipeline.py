@@ -45,9 +45,11 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
 
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
-    sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
-    df = evaluation.create_dataframe(sim_scores)
-    evaluation.create_distribution_plot(df, plot_output_filename)
+    sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, output_plot_path)
+
+    #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
+    #df = evaluation.create_dataframe(sim_scores)
+    #evaluation.create_distribution_plot(df, plot_output_filename)
 
 
 '''
@@ -55,6 +57,6 @@ Running ArcFace pipeline
 '''
 model_path = "models/backbone.pth"
 device = torch.device('cuda', 0)
-test_dataset_path = "datasets/cusp_generated/"
-output_plot_path = "arc_face_distribution_plot.png"
+test_dataset_path = 'datasets/fgnet/' #"datasets/cusp_generated/"
+output_plot_path = "plots/arcface/"
 arc_face_pipeline(model_path,  device, test_dataset_path, output_plot_path)
