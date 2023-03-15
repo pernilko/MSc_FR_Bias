@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 import math
 import os
 from torchvision import transforms
+from data.data_preprocessing import orgranize_fgnet_dataset
 
 def evaluate_performance(model, test_data_loader):
 
@@ -298,10 +299,13 @@ def A(threshold : float):
 def GARBE(A, B, alpha = 0.5):
     return alpha*A + (1-alpha)*B
 
+'''
+'''
 
 tsfm = transforms.Compose([
         transforms.ToTensor(),
         transforms.Resize((98, 98))])
+orgranize_fgnet_dataset("datasets/fgnet/")
 data_loader = load_test_dataset("datasets/fgnet/", 1002, tsfm)
 model = iresnet50()
 compute_sim_scores_fg_net(data_loader, model)
