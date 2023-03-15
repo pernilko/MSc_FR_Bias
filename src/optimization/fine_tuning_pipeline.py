@@ -13,6 +13,7 @@ from models.insightface2.recognition.arcface_torch.losses import CombinedMarginL
 from models.insightface2.recognition.arcface_torch.partial_fc_v2 import PartialFC_V2
 from pytorch_metric_learning import losses
 import argparse
+from torch.utils.data import DataLoader
 
 
 '''
@@ -25,7 +26,7 @@ Return:
     model (Iresnet)
 '''
 def load_pretrained_model(filename : str, device : torch.device):
-    loaded_model = torch.load(filename,  map_location = device) #torch.device('cpu')
+    loaded_model = torch.load(filename,  map_location = device)
     model = iresnet50()
     model.load_state_dict(loaded_model, strict=True)
 
@@ -33,11 +34,14 @@ def load_pretrained_model(filename : str, device : torch.device):
 
 '''
 Method freezes specified layers, the remaining layers are unfrozen.
-Input: frozenParams -> list of strings containing the parameter keys of the parameters to freeze
-Input: frozenLayers -> list of strings containing the partial parameter keys of layers to be frozen
-Return: model
+Parameters:
+    frozenParams (list) : list of strings containing the parameter keys of the parameters to freeze
+    frozenLayers (list) : list of strings containing the partial parameter keys of layers to be frozen
+    model (Module) : the module for the model
+Return:
+    model () : the model with the appropriate 
 '''
-def unfreeze_model_layers(frozenParams: list, frozenLayers, model : m):
+def unfreeze_model_layers(frozenParams: list, frozenLayers : list, model : m):
 
     # Freeze all layer
     for param in model.parameters():
@@ -54,8 +58,18 @@ def unfreeze_model_layers(frozenParams: list, frozenLayers, model : m):
 
     return model
 
-
-def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch_size):
+'''
+Method for training one epoch of the model
+Parameters:
+    training_data_loader (DataLoader) : data loader containing the training data
+    optimizer () : the optimizer to be used during training
+    model () : the model that is being trained
+    loss_function () : the loss function
+    batch_size (int) : the size of the batch
+Return:
+    last_loss (float) : the last loss of the epoch
+'''
+def train_one_epoch(training_data_loader : DataLoader, optimizer, model, loss_function, batch_size : int):
     running_loss = 0.
     last_loss = 0.
 
@@ -84,7 +98,22 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
 
     return last_loss
 
-def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path : str):
+'''
+Method for training the model
+Parameters:
+    number_of_epochs (int) : number of epochs to train the model
+    model () : the model to be trained
+    learning_rate (float) : the rate at which the model learns
+    momentum (float) : 
+    training_data_loader (DataLoader) : data loader containing the training data
+    validation_data_loader (DataLoader) : data loader containing the validation data
+    batch_size (int) : the size of the batches
+    test_data_loader (DataLoader) :  data loader containing the test data
+    dist_plot_path (str) : the output path of the distribution plot
+Return:
+    model () : the trained model
+'''
+def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str):
     epoch_number = 0
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -123,9 +152,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
         running_vloss = 0.0
         for i, vdata in enumerate(validation_data_loader):
             vinputs, vlabels = vdata
-            #print("inp len", len(vinputs))
             voutputs = model(vinputs)
-            #print("out len", len(voutputs))
             vloss = loss_fn(voutputs, vlabels)
             running_vloss += vloss
 
@@ -151,11 +178,21 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
 '''
 Method fine-tunes a pre-trained model with new data
-Input: 
-Input:
-Return 
+Parameters:
+    filename (str) : the path of the pre-trained model
+    device (torch.device): the device to be used. CPU or CUDA.
+    frozenParams (list) : the params to be frozen in the pre-trained model
+    frozenLayers (list) : the layers to be frozen in the pre-trained model
+    model (Module) : the model module for the pretrained model
+    path (str) : the path for the training/validation data
+    name_of_fine_tuned_model (str) : the name of the file to save the fine-tuned model to
+    test_images_path (str) : the path for the test data
+    dist_plot_path (str) : the path for where to save the distribution plot
+    orgranize_fgnet (bool) : whether to orgranize the FG-NET dataset into identity folders (only required when initially downloading the dataset)
+Return:
+    None.
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -181,7 +218,6 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     # Train the unfrozen layers
     fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
-    #print("fine-tuned model: ", fine_tuned_model)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
@@ -189,7 +225,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     
 
 '''
-Main run
+Main run of fine-tuning pipeline
 '''
 
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
@@ -200,20 +236,34 @@ name_of_fine_tuned_model = "fine_tuned_model_1.pt"
 test_images_path = "datasets/fgnet/"
 device = torch.device('cuda:0')
 plot_out_path = "plots/cusp/"
+learning_rate = 0.001
+momentum = 0.09
+epochs = 10
+model_input_path = "models/backbone.pth"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_img_path', type=str, default=input_images_path, help="path to input images")
 parser.add_argument('--dist_plot_path', type=str, default=plot_out_path, help="output path for distribution plots")
 parser.add_argument('--organize_fgnet', type=bool, default='0', help="output path for distribution plots" )
 parser.add_argument('--test_data_path', type=str, default='datasets/fgnet/', help="path to test images")
+parser.add_argument('--model_input_path', type=str, default=model_input_path, help="path to pre-trained model")
+parser.add_argument('--lr', type=float, default=learning_rate, help='Learning rate')
+parser.add_argument('--momentum', type=float, default=momentum, help='Momentum')
+parser.add_argument('--epochs', type=int, default=epochs, help='Number of epochs to train model')
 
 args = parser.parse_args()
 print("Input img path: " + args.input_img_path)
 print("Dist plot path: ", args.dist_plot_path)
 print("Orgranize FG-NET dataset: " + str(args.organize_fgnet))
 print("Test imgs path: ", args.test_data_path)
+print("Model input path: ", args.model_input_path)
+print("Learning rate: ", str(args.lr))
+print("Momentum: ", str(args.momentum))
+print("Number of epochs: ", args.epochs)
 
-fine_tuning_pipeline("models/backbone.pth", device, frozenParams, frozenLayers,
-                      module, args.input_img_path, name_of_fine_tuned_model, args.test_data_path, args.dist_plot_path, args.organize_fgnet)
+fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers,
+                      module, args.input_img_path, name_of_fine_tuned_model,
+                        args.test_data_path, args.dist_plot_path, args.organize_fgnet,
+                        args.lr, args.momentum, args.epochs)
 
 
