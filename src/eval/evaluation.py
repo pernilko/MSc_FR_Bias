@@ -238,8 +238,11 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
 
             sim_scores.append(identity_sim_score)
-    #print(len(sim_scores))
     print(sim_scores)
+
+    df = create_dataframe_fg_net(sim_scores)
+    create_distribution_plot(df, "plots/test/")
+
     return sim_scores
 
 def calculate_age_mated_sim_scores(young_outputs, old_outputs):
@@ -267,6 +270,9 @@ def calculate_non_mated_sim_scores(template_outputs, non_mated_outputs):
             non_mated_sim_scores.append(sim_score)
     return non_mated_sim_scores
 
+def create_dataframe_fg_net(sim_scores):
+    df =  pd.DataFrame(sim_scores, columns=['mated young', 'mated middle', 'middle old', 'YoungvsOld', 'non-mated'])
+    return df
 
 def create_dataframe(similarity_scores):
     df = pd.DataFrame(similarity_scores, columns=['mated', '20vs65', 'non-mated'])
