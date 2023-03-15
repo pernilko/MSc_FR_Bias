@@ -237,8 +237,8 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
             identity_sim_score.append(np.mean(identity_age_mated)) # age-mated
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
 
-           
             sim_scores.append(identity_sim_score)
+    print(len(sim_scores))
     print(sim_scores)
     return sim_scores
 
