@@ -165,13 +165,11 @@ def get_filenames_by_batch(batch_size : int, batch_number : int, filenames : lis
 
 def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, outdir_plot : str):
     filenames = get_filename(test_data_loader)
-    print(len(filenames))
-
+    
     sim_scores = []
     for i, data in enumerate(test_data_loader):
         vinputs, vlabels = data
         voutputs = model(vinputs)
-        #print("len vlab: ", len(vlabels))
         batch_of_filenames = get_filenames_by_batch(len(vlabels), i, filenames)
         identities_idx  = np.array(torch.unique(torch.tensor(vlabels)))
 
@@ -213,7 +211,7 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, 
                     middle_out = voutputs[index]
                     mated_middle_outputs.append(middle_out)
                 if vlabels[index] == idx and (current_age >= 45 and current_age <= 65): # mated old
-                    print("old mated ", current_age, ", id: ", idx)
+                    #print("old mated ", current_age, ", id: ", idx)
                     old_out = voutputs[index]
                     mated_old_outputs.append(old_out)
                 if vlabels[index] == idx and (current_age >= 20 and current_age <= 30):
@@ -246,8 +244,6 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, 
     return sim_scores
 
 def calculate_age_mated_sim_scores(young_outputs, old_outputs):
-    #print("y ", young_outputs)
-    #print("o ", old_outputs)
     age_mated_sim_scores = []
     for young_output in young_outputs:
         for old_output in old_outputs:
@@ -271,7 +267,7 @@ def calculate_non_mated_sim_scores(template_outputs, non_mated_outputs):
     return non_mated_sim_scores
 
 def create_dataframe_fg_net(sim_scores):
-    df =  pd.DataFrame(sim_scores, columns=['mated young', 'mated middle', 'middle old', 'YoungvsOld', 'non-mated'])
+    df =  pd.DataFrame(sim_scores, columns=['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated'])
     return df
 
 def create_dataframe(similarity_scores):

@@ -47,10 +47,6 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
     sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, output_plot_path)
 
-    #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
-    #df = evaluation.create_dataframe(sim_scores)
-    #evaluation.create_distribution_plot(df, plot_output_filename)
-
 
 '''
 Running ArcFace pipeline

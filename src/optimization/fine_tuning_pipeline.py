@@ -140,9 +140,10 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
 
        
         if epoch + 1 == 10:    
-            sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
-            df = evaluation.create_dataframe(sim_scores)
-            evaluation.create_distribution_plot(df, dist_plot_path)
+            #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
+            #df = evaluation.create_dataframe(sim_scores)
+            #evaluation.create_distribution_plot(df, dist_plot_path)
+            sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path)
         
         epoch_number += 1
     return model
@@ -171,8 +172,12 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     if orgranize_fgnet:
         orgranize_fgnet_dataset(test_images_path)
 
-    test_data_loader = load_test_dataset(test_images_path, batch_size, tsfm)
-
+    tfsm_test = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Resize((98,98))
+    ])
+    
+    test_data_loader = load_test_dataset(test_images_path, 1002, tfsm_test)
 
     # Train the unfrozen layers
     fine_tuned_model = train_model(10, model, 0.01, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
@@ -180,19 +185,19 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
 
-    #test_data_loader = load_test_dataset("datasets/lfw/", 12, tsfm)
-    #evaluation.evaluate_performance(fine_tuned_model, test_data_loader)
 
     
 
-
+'''
+Main run
+'''
 
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
 frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
 input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
-test_images_path = "datasets/cusp_generated/"
+test_images_path = "datasets/fgnet/"
 device = torch.device('cuda:0')
 plot_out_path = "plots/cusp/"
 
