@@ -196,11 +196,11 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
                 current_age = batch_of_filenames[index][1].split('_')[1]
                 current_age = int(current_age.translate({ord(i): None for i in 'abcdefghijklmnopqrstuvwxyz'}))
              
-                if vlabels[index] == idx and (current_age >= 20 and current_age <= 25):  # age-mated young
+                if vlabels[index] == idx and (current_age >= 20 and current_age <= 30):  # age-mated young
                     #print("young age mated", current_age)
                     mated_young = voutputs[index]
                     age_mated_young_outputs.append(mated_young)
-                if vlabels[index] == idx and (current_age >= 55 and current_age <= 65): #age-mated old
+                if vlabels[index] == idx and (current_age >= 50 and current_age <= 70): #age-mated old
                     #print("old age mated ", current_age)
                     mated_old = voutputs[index]
                     age_mated_old_outputs.append(mated_old)
@@ -238,8 +238,8 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
 
             sim_scores.append(identity_sim_score)
-    print(len(sim_scores))
-    print(sim_scores)
+    #print(len(sim_scores))
+    #print(sim_scores)
     return sim_scores
 
 def calculate_age_mated_sim_scores(young_outputs, old_outputs):
