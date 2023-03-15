@@ -1,7 +1,7 @@
 import torch
 from data.data_preprocessing import load_test_dataset
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
-import utils.evaluation as evaluation
+import eval.evaluation as evaluation
 from torchvision import transforms
 
 '''

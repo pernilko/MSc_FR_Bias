@@ -2,10 +2,10 @@ import sys
 folder_root = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src'
 sys.path.append(folder_root)
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
-import utils.evaluation as evaluation
+import eval.evaluation as evaluation
 import torch;
 from torch.nn import Module as m
-from data.data_preprocessing import load_dataset, load_test_dataset
+from data.data_preprocessing import load_dataset, load_test_dataset, orgranize_fgnet_dataset
 from torchvision import transforms, datasets
 import os
 import numpy as np
@@ -84,7 +84,7 @@ def train_one_epoch(training_data_loader, optimizer, model, loss_function, batch
 
     return last_loss
 
-def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader):
+def train_model(number_of_epochs : int, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path : str):
     epoch_number = 0
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -142,7 +142,7 @@ def train_model(number_of_epochs : int, model, learning_rate, momentum, training
         if epoch + 1 == 10:    
             sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
             df = evaluation.create_dataframe(sim_scores)
-            evaluation.create_distribution_plot(df,"fine_tuned_arc_face_distribution_plot.png")
+            evaluation.create_distribution_plot(df, dist_plot_path)
         
         epoch_number += 1
     return model
@@ -154,7 +154,7 @@ Input:
 Input:
 Return 
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -168,11 +168,14 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     batch_size = 20
     # Load training and validation dataset
     training_data_loader, validation_data_loader = load_dataset(path, batch_size, tsfm)
+    if orgranize_fgnet:
+        orgranize_fgnet_dataset(test_images_path)
+
     test_data_loader = load_test_dataset(test_images_path, batch_size, tsfm)
 
 
     # Train the unfrozen layers
-    fine_tuned_model = train_model(10, model, 0.01, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader)
+    fine_tuned_model = train_model(10, model, 0.01, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
     #print("fine-tuned model: ", fine_tuned_model)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
@@ -190,12 +193,22 @@ module : torch.nn.Module = iresnet50()
 input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
 test_images_path = "datasets/cusp_generated/"
+device = torch.device('cuda:0')
+plot_out_path = "plots/cusp/"
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--input_img_path', type=str, default='0', help="path to input images")
-args = parser.parse_args()
-print("Argument: " + args.input_img_path)
+parser.add_argument('--input_img_path', type=str, default=input_images_path, help="path to input images")
+parser.add_argument('--dist_plot_path', type=str, default=plot_out_path, help="output path for distribution plots")
+parser.add_argument('--organize_fgnet', type=bool, default='0', help="output path for distribution plots" )
+parser.add_argument('--test_data_path', type=str, default='datasets/fgnet/', help="path to test images")
 
-fine_tuning_pipeline("models/backbone.pth", torch.device('cuda', 0), frozenParams, frozenLayers, module, args.input_img_path, name_of_fine_tuned_model, test_images_path)
+args = parser.parse_args()
+print("Input img path: " + args.input_img_path)
+print("Dist plot path: ", args.dist_plot_path)
+print("Orgranize FG-NET dataset: " + args.organize_fgnet)
+print("Test imgs path: ", args.test_data_path)
+
+fine_tuning_pipeline("models/backbone.pth", device, frozenParams, frozenLayers,
+                      module, args.input_img_path, name_of_fine_tuned_model, args.test_data_path, args.dist_plot_path, args.organize_fgnet)
 
 

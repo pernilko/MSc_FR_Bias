@@ -2,10 +2,12 @@ import os
 import pandas as pd
 from torchvision.io import read_image
 import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms, datasets
 from matplotlib import pyplot as plt
 import numpy as np
+import cv2
+import shutil
 
 def load_dataset(img_path : str, batch_size : int, transforms):
     
@@ -32,10 +34,25 @@ def load_dataset(img_path : str, batch_size : int, transforms):
 
     return training_data_loader, validation_data_loader
 
+'''
+Method loads test dataset
+
+Parameters:
+    img_path (str) : path to folder containing dataset
+    batch_size (int) : batch size
+    transforms () : 
+    fgnet_organize (bool) : boolean indicating if the FG-NET dataset should be organized into one folder per identity 
+Return:
+    test_data_loader (DataLoader)
+
+'''
 def load_test_dataset(img_path : str, batch_size : int, transforms):
     data = datasets.ImageFolder(img_path, transforms)
+    #classes = data.imgs.
+    #print(classes)
     test_data_loader = DataLoader(data, batch_size=batch_size, shuffle=False, num_workers=2)
     return test_data_loader
+
 
 def test_image_loader(training_data_loader, validation_data_loader):
     for train_batch, val_batch in zip(training_data_loader, validation_data_loader):
@@ -66,9 +83,29 @@ def test_image_loader(training_data_loader, validation_data_loader):
             plt.savefig("val" + str(counter)+ ".png")
             counter = counter + 1
 
+'''
+Method organizes FG-NET into one folder per identity
 
-tsfm = transforms.Compose([
-        transforms.ToTensor()
-])
+Parameters:
+    data_dir (str) : path to folder containing FG-NET dataset
+Return:
+    None. 
+'''
+def orgranize_fgnet_dataset(data_dir):
+     
+    identities = []
+    for filename in os.listdir(data_dir):
+            if not filename.endswith('.JPG'):
+                continue
+            
+            fname = filename.split('.')[0] # remove .jpg
+            
+            name = fname.split('A')[0] # name of identity
+            if name not in identities:
+                identities.append(name)
+                os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
+            
+            age = fname.split('A')[1] # age
+            shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
-load_dataset("datasets/cusp_generated", 20, tsfm)
+

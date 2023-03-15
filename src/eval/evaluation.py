@@ -4,7 +4,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
+from data.data_preprocessing import load_test_dataset
+from torch.utils.data import DataLoader
 import math
+import os
+from torchvision import transforms
 
 def evaluate_performance(model, test_data_loader):
 
@@ -124,10 +128,6 @@ def compute_similarity_scores_for_test_dataset(test_data_loader, model : iresnet
                         distance = calculate_similarity_score(output1, output2)
                         sim_score_non_mated.append(distance)
                         
-                
-                print(sim_score_mated)
-                print(sim_score_age_mated)
-                print(sim_score_non_mated)
                 sim_score_identity.append(np.mean(sim_score_mated))
                 sim_score_identity.append(np.mean(sim_score_age_mated))
                 sim_score_identity.append(np.mean(sim_score_non_mated))
@@ -135,17 +135,150 @@ def compute_similarity_scores_for_test_dataset(test_data_loader, model : iresnet
 
     return sim_scores
 
+def get_filename(data_loader : DataLoader):
+    filenames = []
+    filename_class = data_loader.dataset.imgs
+    for i in filename_class:
+        fname = i[0].split('/')[3]
+        class_name_pair = []
+        class_name_pair.append(i[1])
+        class_name_pair.append(fname.split('.')[0])
+        filenames.append(class_name_pair)
+
+    return filenames
+
+def get_filenames_by_identity(id : int, filenames : list):
+    filenames_id = []
+    for i in filenames:
+        if i[0] == id:
+            filenames_id.append(i[1])
+    return filenames_id
+
+def get_filenames_by_batch(batch_size : int, batch_number : int, filenames : list):
+    num_of_filenames = len(filenames)
+    imgs_per_batch = batch_size
+    batch_of_filenames = filenames[batch_number*imgs_per_batch:batch_number*imgs_per_batch+imgs_per_batch]
+    
+    return batch_of_filenames
+
+
+def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
+    filenames = get_filename(test_data_loader)
+    print(len(filenames))
+
+    sim_scores = []
+    for i, data in enumerate(test_data_loader):
+        vinputs, vlabels = data
+        voutputs = model(vinputs)
+        #print("len vlab: ", len(vlabels))
+        batch_of_filenames = get_filenames_by_batch(len(vlabels), i, filenames)
+        identities_idx  = np.array(torch.unique(torch.tensor(vlabels)))
+
+
+        for idx in identities_idx: # for each identity
+            age_mated_young_outputs = []
+            age_mated_old_outputs = []
+            mated_old_outputs = []
+            mated_middle_outputs = []
+            mated_young_outputs = []
+            non_mated_outputs = []
+            non_mated_template_outputs = []
+
+
+            identity_sim_score = []
+
+            for index in range(0,len(voutputs)): #for each index in outputs
+               
+                #print("len vout: ", len(voutputs))
+                #print(len(batch_of_filenames))
+                current_age = batch_of_filenames[index]
+                current_age = batch_of_filenames[index][1].split('_')[1]
+                current_age = int(current_age.translate({ord(i): None for i in 'abcdefghijklmnopqrstuvwxyz'}))
+             
+                if vlabels[index] == idx and (current_age >= 20 and current_age <= 25):  # age-mated young
+                    #print("young age mated", current_age)
+                    mated_young = voutputs[index]
+                    age_mated_young_outputs.append(mated_young)
+                if vlabels[index] == idx and (current_age >= 55 and current_age <= 65): #age-mated old
+                    #print("old age mated ", current_age)
+                    mated_old = voutputs[index]
+                    age_mated_old_outputs.append(mated_old)
+                if vlabels[index] == idx and (current_age >= 10 and current_age <= 15): #mated young
+                    #print("young mated ", current_age)
+                    young_out = voutputs[index]
+                    mated_young_outputs.append(young_out)
+                if vlabels[index] == idx and (current_age >= 20 and current_age <=40): #mated middle
+                    #print("middle mated ", current_age)
+                    middle_out = voutputs[index]
+                    mated_middle_outputs.append(middle_out)
+                if vlabels[index] == idx and (current_age >= 45 and current_age <= 65): # mated old
+                    #print("old mated ", current_age)
+                    old_out = voutputs[index]
+                    mated_old_outputs.append(old_out)
+                if vlabels[index] == idx and (current_age >= 20 and current_age <= 30):
+                    template_output = voutputs[index]
+                    non_mated_template_outputs.append(template_output)
+                if vlabels[index] != idx and (current_age >= 20 and current_age <= 30):
+                    #print("non-mated ",current_age)
+                    non_mated_out = voutputs[index]
+                    non_mated_outputs.append(non_mated_out)
+
+            
+            identity_mated_young = calculate_mated_sim_scores(mated_young_outputs)
+            identity_mated_middle = calculate_mated_sim_scores(mated_middle_outputs)
+            identity_mated_old = calculate_mated_sim_scores(mated_old_outputs)
+            identity_age_mated = calculate_age_mated_sim_scores(age_mated_young_outputs, age_mated_old_outputs)
+            identity_non_mated = calculate_non_mated_sim_scores(non_mated_template_outputs, non_mated_outputs)
+
+            identity_sim_score.append(np.mean(identity_mated_young)) # mated
+            identity_sim_score.append(np.mean(identity_mated_middle)) # mated
+            identity_sim_score.append(np.mean(identity_mated_old)) # mated
+            identity_sim_score.append(np.mean(identity_age_mated)) # age-mated
+            identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
+
+           
+            sim_scores.append(identity_sim_score)
+    print(sim_scores)
+    return sim_scores
+
+def calculate_age_mated_sim_scores(young_outputs, old_outputs):
+    #print("y ", young_outputs)
+    #print("o ", old_outputs)
+    age_mated_sim_scores = []
+    for young_output in young_outputs:
+        for old_output in old_outputs:
+            sim_score = calculate_similarity_score(young_output, old_output)
+            age_mated_sim_scores.append(sim_score)
+    return age_mated_sim_scores
+
+def calculate_mated_sim_scores(outputs):
+    mated_sim_scores = []
+    for i in range(len(outputs)-1):
+        sim_score = calculate_similarity_score(outputs[i], outputs[i+1])
+        mated_sim_scores.append(sim_score)
+    return mated_sim_scores
+
+def calculate_non_mated_sim_scores(template_outputs, non_mated_outputs):
+    non_mated_sim_scores = []
+    for template in template_outputs:
+        for non_mated in non_mated_outputs:
+            sim_score = calculate_similarity_score(template, non_mated)
+            non_mated_sim_scores.append(sim_score)
+    return non_mated_sim_scores
+
+
 def create_dataframe(similarity_scores):
     df = pd.DataFrame(similarity_scores, columns=['mated', '20vs65', 'non-mated'])
     return df
 
-def create_distribution_plot(df : pd.DataFrame, output_filename : str):
+def create_distribution_plot(df : pd.DataFrame, output_path : str):
     # need to take in a dataFrame which contains three columns named "mated", "agevsage" and "non-mated".
     # Each row must contain one identity with values pertaining to the three columns, 
     # i.e. the identitiy's similarity score for a mated sample, sim score compared to mated but older, and non-mated.
-    
+
+    os.makedirs(output_path, exist_ok=True)
     sns.displot(df, kind="kde")
-    plt.savefig(output_filename)
+    plt.savefig(f"{output_path}/distribution_plot.png")
 
 def G(x, y):
     n = len(y)
@@ -164,4 +297,12 @@ def A(threshold : float):
 
 def GARBE(A, B, alpha = 0.5):
     return alpha*A + (1-alpha)*B
+
+
+tsfm = transforms.Compose([
+        transforms.ToTensor(),
+        transforms.Resize((98, 98))])
+data_loader = load_test_dataset("datasets/fgnet/", 1002, tsfm)
+model = iresnet50()
+compute_sim_scores_fg_net(data_loader, model)
 
