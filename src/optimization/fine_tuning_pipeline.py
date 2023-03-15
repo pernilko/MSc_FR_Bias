@@ -210,7 +210,7 @@ parser.add_argument('--test_data_path', type=str, default='datasets/fgnet/', hel
 args = parser.parse_args()
 print("Input img path: " + args.input_img_path)
 print("Dist plot path: ", args.dist_plot_path)
-print("Orgranize FG-NET dataset: " + args.organize_fgnet)
+print("Orgranize FG-NET dataset: " + str(args.organize_fgnet))
 print("Test imgs path: ", args.test_data_path)
 
 fine_tuning_pipeline("models/backbone.pth", device, frozenParams, frozenLayers,
