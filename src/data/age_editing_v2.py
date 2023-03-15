@@ -8,19 +8,46 @@ from models.eg3dAge.eg3d import legacy
 import matplotlib.pyplot as plt
 import random
 
+'''
+Method for normalizing age between -1 and 1
 
+Parameters:
+    x () : 
+    rmin () :
+    rmax () :
+    tmin () : 
+    tmax () : 
+Return:
+    z () : normalized age
+'''
 def normalize(x, rmin = 0, rmax = 75, tmin = -1, tmax = 1):
-    # normalize age between -1 and 1
     z = ((x - rmin) / (rmax - rmin)) * (tmax - tmin) + tmin
     return z
 
-def load_model(device : torch.device, network_pkl):
+'''
+Method for loading pre-trained model
+
+Parameters:
+    device (torch.device) : the device to be used. Cuda or CPU.
+    network_pkl (str) : the path to the model
+Return:
+    G (Generator) : the generator of the GAN
+'''
+def load_model(device : torch.device, network_pkl : str):
     device = torch.device('cuda:0')
     with dnnlib.util.open_url(network_pkl) as f:
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
 
     return G
 
+'''
+Method for getting a random age
+
+Parameters:
+    age_bin (int) : the number of the age bin from where one wants a ranom number
+Return:
+    random number (int) : the random age in the age bin selected 
+'''
 def get_random_age(age_bin : int):
     if age_bin == 0:
         return random.randint(0, 5)
@@ -39,6 +66,9 @@ def get_random_age(age_bin : int):
     else:
         return random.randint(50, 70)
 
+'''
+Method for getting 
+'''
 def get_random_age_list(number_of_ages : int):
     ages = []
     for i in range(number_of_ages):
@@ -47,7 +77,18 @@ def get_random_age_list(number_of_ages : int):
     
     return ages
 
-def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
+'''
+Method for plotting images
+
+Parameters:
+    identity_imgs () : 
+    ages (list) : 
+    identity_name () : 
+    out_plot_dir (str) : the path where the images should be saved
+Return:
+    None.
+'''
+def plot_output(identity_imgs, ages, identity_name, out_plot_dir : str):
     # For every input image
     
     fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
@@ -60,14 +101,37 @@ def plot_output(identity_imgs, ages, identity_name, out_plot_dir):
     os.makedirs(out_plot_dir, exist_ok=True)
     plt.savefig(f"{out_plot_dir}/{identity_name}.png")
 
+'''
+Method for convering a tensor to uint8
+
+Parameters:
+    img_tensor (tensor) : the tensor to be converted
+Return:
+    img_tensor (uint8) : the converted tensor
+'''
 def to_uint8(img_tensor):
     img_tensor = (img_tensor.detach().cpu().numpy())
     img_tensor = np.clip(img_tensor, 0, 255).astype(np.uint8)
     return img_tensor
 
-def age_editing_eg3d(device : torch.device, network_pkl, input_images_path : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
+'''
+Method for generating synthetic age editied face images using eg3d
 
-    print("starting age editing with e3gd")
+Parameters:
+    device (torch.device) : the device to be used. Cuda or CPU.
+    network_pkl (str) : the path to the pre-trained model
+    truncation_psi (float) : 
+    truncation_cutoff (float) : 
+    outdir (str) : the path where the generated images should be saved
+    seeds (list) : the seeds to be used in generation
+Return:
+    None.
+
+
+'''
+def age_editing_eg3d(device : torch.device, network_pkl : str, truncation_psi : float, truncation_cutoff : float, outdir : str, seeds : list):
+
+    print("starting age editing with eg3d")
     # Load pre-trained model and input images
     G = load_model(device, network_pkl)
     os.makedirs(outdir, exist_ok=True)
@@ -109,7 +173,11 @@ def age_editing_eg3d(device : torch.device, network_pkl, input_images_path : str
         counter = counter + 1
     
 
+'''
+Running Age-EG3D generation
+'''
 
+# Defining default parameters
 device = torch.device('cuda:0')
 network_pkl = "data/eg3d_age_network.pkl"
 images_input_path = "models/cusp/synthetic_images/"
@@ -118,4 +186,5 @@ truncation_cutoff = 0.8
 outdir = "datasets/eg3d_generated/"
 seeds = list(range(301))
 
+# Running Age-EG3D generation
 age_editing_eg3d(device, network_pkl, images_input_path, truncation_psi, truncation_cutoff, outdir, seeds)
