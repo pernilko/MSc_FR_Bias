@@ -213,7 +213,7 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50):
                     middle_out = voutputs[index]
                     mated_middle_outputs.append(middle_out)
                 if vlabels[index] == idx and (current_age >= 45 and current_age <= 65): # mated old
-                    #print("old mated ", current_age)
+                    print("old mated ", current_age)
                     old_out = voutputs[index]
                     mated_old_outputs.append(old_out)
                 if vlabels[index] == idx and (current_age >= 20 and current_age <= 30):
