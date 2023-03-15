@@ -180,7 +180,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     test_data_loader = load_test_dataset(test_images_path, 1002, tfsm_test)
 
     # Train the unfrozen layers
-    fine_tuned_model = train_model(10, model, 0.01, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
+    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
     #print("fine-tuned model: ", fine_tuned_model)
     os.makedirs("models/fine_tuned_models/", exist_ok=True)
     torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
