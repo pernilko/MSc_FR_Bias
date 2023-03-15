@@ -117,8 +117,9 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     epoch_number = 0
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    loss_fn = torch.nn.CrossEntropyLoss()
     #margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
+    loss_fn = torch.nn.CrossEntropyLoss()
+   
 
     uniq_labels = []
     for i, data in enumerate(training_data_loader):
@@ -134,9 +135,6 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
     optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
-    
-    #module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes,1, False)
-    #module_partial_fc.train().cuda()
 
 
     for epoch in range(number_of_epochs):
@@ -217,17 +215,18 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     test_data_loader = load_test_dataset(test_images_path, 1002, tfsm_test)
 
     # Train the unfrozen layers
-    fine_tuned_model = train_model(10, model, 0.001, 0.09, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
-    os.makedirs("models/fine_tuned_models/", exist_ok=True)
-    torch.save(fine_tuned_model, "models/fine_tuned_models/" + name_of_fine_tuned_model)
+    dir_output_fined_tuned_models = "models/fine_tuned_models/"
+    fine_tuned_model = train_model(epochs, model, learning_rate, momentum, training_data_loader, validation_data_loader, batch_size, test_data_loader, dist_plot_path)
+    os.makedirs(dir_output_fined_tuned_models, exist_ok=True)
+    torch.save(fine_tuned_model, dir_output_fined_tuned_models + name_of_fine_tuned_model)
 
 
-    
 
 '''
 Main run of fine-tuning pipeline
 '''
 
+# Defining default input params
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
 frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
@@ -241,11 +240,12 @@ momentum = 0.09
 epochs = 10
 model_input_path = "models/backbone.pth"
 
+# Defining input argument parser
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_img_path', type=str, default=input_images_path, help="path to input images")
 parser.add_argument('--dist_plot_path', type=str, default=plot_out_path, help="output path for distribution plots")
-parser.add_argument('--organize_fgnet', type=bool, default='0', help="output path for distribution plots" )
-parser.add_argument('--test_data_path', type=str, default='datasets/fgnet/', help="path to test images")
+parser.add_argument('--organize_fgnet', type=bool, default=False, help="output path for distribution plots" )
+parser.add_argument('--test_data_path', type=str, default=test_images_path, help="path to test images")
 parser.add_argument('--model_input_path', type=str, default=model_input_path, help="path to pre-trained model")
 parser.add_argument('--lr', type=float, default=learning_rate, help='Learning rate')
 parser.add_argument('--momentum', type=float, default=momentum, help='Momentum')
@@ -261,6 +261,7 @@ print("Learning rate: ", str(args.lr))
 print("Momentum: ", str(args.momentum))
 print("Number of epochs: ", args.epochs)
 
+# Running finetuning pipeline
 fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers,
                       module, args.input_img_path, name_of_fine_tuned_model,
                         args.test_data_path, args.dist_plot_path, args.organize_fgnet,

@@ -1,60 +1,61 @@
 import os
-import pandas as pd
-from torchvision.io import read_image
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader
 from torchvision import transforms, datasets
 from matplotlib import pyplot as plt
 import numpy as np
-import cv2
 import shutil
 
-def load_dataset(img_path : str, batch_size : int, transforms):
+'''
+Method loads dataset and splits it into a training dataset and a validation dataset
+
+Parameters:
+    img_path (str) : path to training/validation dataset
+    batch_size (int) : the size of the batches
+    transforms (transforms) : transformations that are to be made to the dataset
+Return:
+    training_data_loader (DataLoader) : dataloader for the training dataset
+    validation_data_loader (DataLoader) : dataloader for the validation dataset
+'''
+def load_dataset(img_path : str, batch_size : int, transforms : transforms):
     
     data = datasets.ImageFolder(img_path, transforms)
-    '''
-    for c in data.targets:
-        print(c)
-    '''
    
-
     length = [round(len(data)*0.8), round(len(data)*0.2)]
     train_data, val_data = torch.utils.data.random_split(data, length)
 
     training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
     validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=2)
     
-    '''
-    for batch in training_data_loader:
-        inputs, targets = batch
-        print(targets)
-    '''
-    
-    
-
     return training_data_loader, validation_data_loader
 
 '''
 Method loads test dataset
 
 Parameters:
-    img_path (str) : path to folder containing dataset
-    batch_size (int) : batch size
-    transforms () : 
-    fgnet_organize (bool) : boolean indicating if the FG-NET dataset should be organized into one folder per identity 
+    img_path (str) : path to folder containing test dataset
+    batch_size (int) : the size of the batches
+    transforms (transforms) : transformations that are to be made to the dataset
 Return:
-    test_data_loader (DataLoader)
+    test_data_loader (DataLoader) : dataloader for the test dataset
 
 '''
-def load_test_dataset(img_path : str, batch_size : int, transforms):
+def load_test_dataset(img_path : str, batch_size : int, transforms : transforms):
     data = datasets.ImageFolder(img_path, transforms)
-    #classes = data.imgs.
-    #print(classes)
     test_data_loader = DataLoader(data, batch_size=batch_size, shuffle=False, num_workers=2)
+
     return test_data_loader
 
+'''
+Method plots images in training and validation loaders (for testing purposes)
 
-def test_image_loader(training_data_loader, validation_data_loader):
+Parameters:
+    training_data_loader (DataLoader) : dataloader containing the training dataset
+    validation_data_loader (DataLoader) :  dataloader containing the validation dataset
+Return:
+    None.
+'''
+def test_image_loader(training_data_loader : DataLoader, validation_data_loader : DataLoader):
     for train_batch, val_batch in zip(training_data_loader, validation_data_loader):
         train_inputs, train_targets = train_batch
         val_inputs, val_targets = val_batch
@@ -62,6 +63,7 @@ def test_image_loader(training_data_loader, validation_data_loader):
         for train_img, val_img in zip(train_inputs, val_inputs):
             train_image  = train_img.cpu().numpy()
             val_image  = val_img.cpu().numpy()
+            
             # transpose image to fit plt input
             train_image = train_image.T
             val_image = val_image.T
@@ -84,7 +86,9 @@ def test_image_loader(training_data_loader, validation_data_loader):
             counter = counter + 1
 
 '''
-Method organizes FG-NET into one folder per identity
+Method organizes FG-NET into one folder per identity. 
+Method is intended to be used when the dataset is initially downloaded as all images are in one folder 
+where the name of the file indicates identity. To be able to input the data into the model, it has to be organized into a folder per identity.
 
 Parameters:
     data_dir (str) : path to folder containing FG-NET dataset

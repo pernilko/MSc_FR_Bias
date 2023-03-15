@@ -3,6 +3,7 @@ from data.data_preprocessing import load_test_dataset
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
 import eval.evaluation as evaluation
 from torchvision import transforms
+import argparse
 
 '''
 Method for loading the bare ArcFace model
@@ -51,8 +52,23 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
 '''
 Running ArcFace pipeline
 '''
+
+# Defining default parameters
 model_path = "models/backbone.pth"
 device = torch.device('cuda', 0)
 test_dataset_path = 'datasets/fgnet/' #"datasets/cusp_generated/"
 output_plot_path = "plots/arcface/"
-arc_face_pipeline(model_path,  device, test_dataset_path, output_plot_path)
+
+# Defining input argument parser
+parser = argparse.ArgumentParser()
+parser.add_argument('--dist_plot_path', type=str, default=output_plot_path, help="output path for distribution plots")
+parser.add_argument('--model_input_path', type=str, default=model_path, help="path to pre-trained model")
+parser.add_argument('--test_data_path', type=str, default=test_dataset_path, help="path to test images")
+
+args = parser.parse_args()
+print("Model path: ", args.model_input_path)
+print("Test data path: ", args.test_data_path)
+print("Dist plot path: ", args.dist_plot_path)
+
+# Running ArcFace pipeline
+arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path)

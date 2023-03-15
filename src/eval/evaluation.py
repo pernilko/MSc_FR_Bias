@@ -60,12 +60,16 @@ def performance_measure(actual_labels, predicted_labels):
 
     return(class_id, true_positives, false_positives, true_negatives, false_negatives)
 
-'''
-def calculate_similarity_score(orginal_img, img_to_compare):
-    similarity_score = 1- np.linalg.norm(orginal_img.detach().numpy()-img_to_compare.detach().numpy())
-    return similarity_score
-'''
 
+'''
+Method calculates similarity score between two embeddings using either Euclidian or Cosine distance
+Parameters:
+    embeddings1 () : the first embedding
+    embeddings2 () : the second embedding
+    distance_type (str) : the distance measure to be used. Default is Cosine.
+Return:
+    similarity () : the similarity of the two embeddings
+'''
 def calculate_similarity_score(embeddings1, embeddings2, distance_type='Cosine'):
     embeddings1 = embeddings1.detach().numpy()
     embeddings2 = embeddings2.detach().numpy()
@@ -86,7 +90,16 @@ def calculate_similarity_score(embeddings1, embeddings2, distance_type='Cosine')
         raise 'Undefined distance metric %d' # distance_metric 
     return similarity
 
-def compute_similarity_scores_for_test_dataset(test_data_loader, model : iresnet50):
+'''
+Method for computing the similarity score for the cusp generated dataset (only for testing purposes)
+
+Parameters:
+    test_data_loader (DataLoader) : dataloader containing the test dataset
+    model (iresnet50) : model that the test dataset is to be test on
+Return:
+    sim_scores (list) : similarity scores for the test dataset
+'''
+def compute_similarity_scores_for_test_dataset(test_data_loader : DataLoader, model : iresnet50):
 
     sim_scores = []
     for i, data in enumerate(test_data_loader):
@@ -136,6 +149,14 @@ def compute_similarity_scores_for_test_dataset(test_data_loader, model : iresnet
 
     return sim_scores
 
+'''
+Method for getting all filenames from the dataloader
+
+Parameters:
+    data_loader (DataLoader) : dataloader containing the dataset
+Return:
+    filenames (list) : all filenames in the dataloader
+'''
 def get_filename(data_loader : DataLoader):
     filenames = []
     filename_class = data_loader.dataset.imgs
@@ -148,13 +169,16 @@ def get_filename(data_loader : DataLoader):
 
     return filenames
 
-def get_filenames_by_identity(id : int, filenames : list):
-    filenames_id = []
-    for i in filenames:
-        if i[0] == id:
-            filenames_id.append(i[1])
-    return filenames_id
+'''
+Method for getting the filenames for the current batch
 
+Parameters:
+    batch_size (int) : the size of the batches
+    batch_number (int) : the number of the current batch
+    filenames (list) : the list of all filenames in the dataloader
+Return:
+    batch_of_filenames (list) : the list of filenames in the current batch
+'''
 def get_filenames_by_batch(batch_size : int, batch_number : int, filenames : list):
     num_of_filenames = len(filenames)
     imgs_per_batch = batch_size
@@ -162,10 +186,21 @@ def get_filenames_by_batch(batch_size : int, batch_number : int, filenames : lis
     
     return batch_of_filenames
 
+'''
+Method computes similarity scores for the FG-Net dataset.
+A distribution plot is created from the similarity scores.
 
+Parameters:
+    test_data_loader (DataLoader) : dataloader containing the test dataset
+    model (iresnet50) : the model used to predict outputs on the test dataset
+    outdir_plot (str) : the path for where the distribution plots are to be saved
+Return:
+    sim_scores (list) : the similarity scores
+
+'''
 def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, outdir_plot : str):
     filenames = get_filename(test_data_loader)
-    
+
     sim_scores = []
     for i, data in enumerate(test_data_loader):
         vinputs, vlabels = data
@@ -236,13 +271,22 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, 
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
 
             sim_scores.append(identity_sim_score)
-    print(sim_scores)
 
     df = create_dataframe_fg_net(sim_scores)
     create_distribution_plot(df, outdir_plot)
 
     return sim_scores
 
+'''
+Method for calculating similarity scores for age-mated embeddings
+
+Parameters:
+    young_outputs () : the embeddings of young images of the identity
+    old_outputs () : the embeddings of old images of the identity
+Return:
+    age_mated_sim_scores (list) : the simlarity scores for the age-mated embeddings of one identity
+
+'''
 def calculate_age_mated_sim_scores(young_outputs, old_outputs):
     age_mated_sim_scores = []
     for young_output in young_outputs:
@@ -251,6 +295,14 @@ def calculate_age_mated_sim_scores(young_outputs, old_outputs):
             age_mated_sim_scores.append(sim_score)
     return age_mated_sim_scores
 
+'''
+Method for calculating the similarity scores of mated samples
+
+Parameters:
+    outputs () : the embeddings of mated samples
+Return:
+    mated_sim_scores (list): the similarity scores of the mated samples
+'''
 def calculate_mated_sim_scores(outputs):
     mated_sim_scores = []
     for i in range(len(outputs)-1):
@@ -258,6 +310,15 @@ def calculate_mated_sim_scores(outputs):
         mated_sim_scores.append(sim_score)
     return mated_sim_scores
 
+'''
+Method for calculating the similarity score of non-mated samples
+
+Parameters:
+    template_outputs () : the embeddings of the current identity
+    non_mated_outputs (): the embeddings of non-mated samples
+Return:
+    non_mated_sim_scores (list) : similarity scores for non-mated samples 
+'''
 def calculate_non_mated_sim_scores(template_outputs, non_mated_outputs):
     non_mated_sim_scores = []
     for template in template_outputs:
@@ -266,14 +327,40 @@ def calculate_non_mated_sim_scores(template_outputs, non_mated_outputs):
             non_mated_sim_scores.append(sim_score)
     return non_mated_sim_scores
 
+'''
+Method creates dataframe for the FG-Net similarity scores
+
+Parameters:
+    sim_scores (list) : the similarity scores for the FG-Net dataset
+Return:
+    df (DataFrame) : the dataframe containing the similarity scores with five columns
+'''
 def create_dataframe_fg_net(sim_scores):
     df =  pd.DataFrame(sim_scores, columns=['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated'])
     return df
 
+'''
+Method creates dataframe for similarity scores
+
+Parameters:
+    similarity_scores (list) : similarity scores for the test dataset
+Return:
+    df (DataFrame) : the dataframe containing the similarity scores with three columns
+
+'''
 def create_dataframe(similarity_scores):
     df = pd.DataFrame(similarity_scores, columns=['mated', '20vs65', 'non-mated'])
     return df
 
+'''
+Method creates a distribution plot
+
+Parameters:
+    df (DataFrame) : the dataframe containing the data that is to be plotted
+    output_path (str) : the path where the distribution plot should be saved
+Return:
+    None.
+'''
 def create_distribution_plot(df : pd.DataFrame, output_path : str):
     # need to take in a dataFrame which contains three columns named "mated", "agevsage" and "non-mated".
     # Each row must contain one identity with values pertaining to the three columns, 
