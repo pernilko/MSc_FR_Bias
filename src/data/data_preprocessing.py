@@ -24,8 +24,8 @@ def load_dataset(img_path : str, batch_size : int, transforms : transforms):
     length = [round(len(data)*0.8), round(len(data)*0.2)]
     train_data, val_data = torch.utils.data.random_split(data, length)
 
-    training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=2)
-    validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=2)
+    training_data_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=0)
+    validation_data_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False, num_workers=0)
     
     return training_data_loader, validation_data_loader
 

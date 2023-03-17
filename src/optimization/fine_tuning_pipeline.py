@@ -129,9 +129,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
             if lab not in uniq_labels:
                 uniq_labels.append(lab)
 
-    print("labels: ", uniq_labels)
     num_of_classes = len(uniq_labels)
-    print("num of classes: ", num_of_classes)
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
     optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
