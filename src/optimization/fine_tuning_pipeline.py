@@ -144,22 +144,22 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
 
         # We don't need gradients on to do reporting
         model.train(False)
+        with torch.no_grad():
+            running_vloss = 0.0
+            for i, vdata in enumerate(validation_data_loader):
+                vinputs, vlabels = vdata
+                voutputs = model(vinputs)
+                vloss = loss_fn(voutputs, vlabels)
+                running_vloss += vloss
 
-        running_vloss = 0.0
-        for i, vdata in enumerate(validation_data_loader):
-            vinputs, vlabels = vdata
-            voutputs = model(vinputs)
-            vloss = loss_fn(voutputs, vlabels)
-            running_vloss += vloss
+            avg_vloss = running_vloss / (i + 1)
+            print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
-        avg_vloss = running_vloss / (i + 1)
-        print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
-
-        # Track best performance, and save the model's state
-        if avg_vloss < best_vloss:
-            best_vloss = avg_vloss
-            model_path = 'model_{}'.format(epoch_number)
-            torch.save(model.state_dict(), model_path)
+            # Track best performance, and save the model's state
+            if avg_vloss < best_vloss:
+                best_vloss = avg_vloss
+                model_path = 'model_{}'.format(epoch_number)
+                torch.save(model.state_dict(), model_path)
 
        
         if epoch + 1 == 10:    
