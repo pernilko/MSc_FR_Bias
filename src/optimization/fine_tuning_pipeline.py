@@ -168,6 +168,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
             #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
             #df = evaluation.create_dataframe(sim_scores)
             #evaluation.create_distribution_plot(df, dist_plot_path)
+            print("Starting evaluation")
             sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path)
         
         epoch_number += 1
@@ -190,7 +191,7 @@ Parameters:
 Return:
     None.
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int ):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -201,7 +202,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
         transforms.ToTensor(),
         transforms.Resize(98)
     ])
-    batch_size = 20
+
     # Load training and validation dataset
     training_data_loader, validation_data_loader = load_dataset(path, batch_size, tsfm)
     if orgranize_fgnet:
@@ -212,6 +213,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
         transforms.Resize((98,98))
     ])
     
+
     test_data_loader = load_test_dataset(test_images_path, 1002, tfsm_test)
 
     # Train the unfrozen layers
@@ -239,6 +241,7 @@ learning_rate = 0.001
 momentum = 0.09
 epochs = 10
 model_input_path = "models/backbone.pth"
+batch_size = 15 
 
 # Defining input argument parser
 parser = argparse.ArgumentParser()
@@ -250,6 +253,7 @@ parser.add_argument('--model_input_path', type=str, default=model_input_path, he
 parser.add_argument('--lr', type=float, default=learning_rate, help='Learning rate')
 parser.add_argument('--momentum', type=float, default=momentum, help='Momentum')
 parser.add_argument('--epochs', type=int, default=epochs, help='Number of epochs to train model')
+parser.add_argument('--batch_size', type=int, default=batch_size, help='Batch Size')
 
 args = parser.parse_args()
 print("Input img path: " + args.input_img_path)
@@ -259,12 +263,13 @@ print("Test imgs path: ", args.test_data_path)
 print("Model input path: ", args.model_input_path)
 print("Learning rate: ", str(args.lr))
 print("Momentum: ", str(args.momentum))
-print("Number of epochs: ", args.epochs)
+print("Number of epochs: ", str(args.epochs))
+print("Batch size: ", str(args.epochs))
 
 # Running finetuning pipeline
 fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers,
                       module, args.input_img_path, name_of_fine_tuned_model,
                         args.test_data_path, args.dist_plot_path, args.organize_fgnet,
-                        args.lr, args.momentum, args.epochs)
+                        args.lr, args.momentum, args.epochs, args.batch_size)
 
 
