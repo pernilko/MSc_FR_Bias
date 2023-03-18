@@ -268,7 +268,7 @@ print("Model input path: ", args.model_input_path)
 print("Learning rate: ", str(args.lr))
 print("Momentum: ", str(args.momentum))
 print("Number of epochs: ", str(args.epochs))
-print("Batch size: ", str(args.epochs))
+print("Batch size: ", str(args.batch_size))
 
 # Running finetuning pipeline
 fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers,
