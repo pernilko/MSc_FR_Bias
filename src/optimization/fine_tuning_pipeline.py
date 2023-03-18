@@ -118,7 +118,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     #margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0)
-    loss_fn = torch.nn.CrossEntropyLoss()
+    #loss_fn = torch.nn.CrossEntropyLoss()
    
 
     uniq_labels = []
@@ -158,7 +158,13 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:
                 best_vloss = avg_vloss
-                model_path = 'model_{}'.format(epoch_number)
+
+                dir = "models/finetuned/"
+                os.makedirs(dir, exist_ok=True)
+                for file in os.scandir(dir):
+                    os.remove(file.path) # remove previously saved models to save memory
+                
+                model_path = f"{dir}model_{epoch_number}"
                 torch.save(model.state_dict(), model_path)
 
        
