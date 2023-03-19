@@ -168,12 +168,13 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 torch.save(model.state_dict(), model_path)
 
        
-        if epoch + 1 == 10:    
+        if (epoch + 1) % 10 == 0:    
             #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
             #df = evaluation.create_dataframe(sim_scores)
             #evaluation.create_distribution_plot(df, dist_plot_path)
             print("Starting evaluation")
-            sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path)
+            current_epoch_num = epoch + 1
+            sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path, current_epoch_num)
         
         epoch_number += 1
     return model
@@ -251,7 +252,7 @@ test_images_path = "datasets/fgnet/"
 device = torch.device('cuda:0')
 plot_out_path = "plots/cusp/"
 learning_rate = 0.001
-momentum = 0.09
+momentum = 0.9
 epochs = 10
 model_input_path = "models/backbone.pth"
 batch_size = 15 

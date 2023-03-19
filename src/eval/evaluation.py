@@ -198,7 +198,7 @@ Return:
     sim_scores (list) : the similarity scores
 
 '''
-def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, outdir_plot : str):
+def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, outdir_plot : str, epoch_num : int):
     filenames = get_filename(test_data_loader)
 
     sim_scores = []
@@ -273,7 +273,7 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, 
             sim_scores.append(identity_sim_score)
 
     df = create_dataframe_fg_net(sim_scores)
-    create_distribution_plot(df, outdir_plot)
+    create_distribution_plot(df, outdir_plot, epoch_num)
 
     return sim_scores
 
@@ -361,14 +361,14 @@ Parameters:
 Return:
     None.
 '''
-def create_distribution_plot(df : pd.DataFrame, output_path : str):
+def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : int):
     # need to take in a dataFrame which contains three columns named "mated", "agevsage" and "non-mated".
     # Each row must contain one identity with values pertaining to the three columns, 
     # i.e. the identitiy's similarity score for a mated sample, sim score compared to mated but older, and non-mated.
 
     os.makedirs(output_path, exist_ok=True)
     sns.displot(df, kind="kde")
-    plt.savefig(f"{output_path}/distribution_plot.png")
+    plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.png")
 
 def G(x, y):
     n = len(y)
