@@ -201,6 +201,15 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     model = load_pretrained_model(filename, device)
     model = unfreeze_model_layers(frozenParams, frozenLayers, model)
 
+    '''
+    #testing freezing
+    counter = 0
+    for name, param in model.named_parameters():
+        if counter > 72:
+            print("name: ", name, param.requires_grad)
+        counter = counter + 1
+    return
+    '''
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
@@ -234,7 +243,7 @@ Main run of fine-tuning pipeline
 
 # Defining default input params
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
-frozenLayers = ['layer1', 'layer2']
+frozenLayers = ['layer1', 'layer2', 'layer3']
 module : torch.nn.Module = iresnet50()
 input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
