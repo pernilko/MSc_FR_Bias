@@ -198,7 +198,7 @@ Return:
     sim_scores (list) : the similarity scores
 
 '''
-def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, outdir_plot : str, epoch_num : int):
+def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot : str, epoch_num : int):
     filenames = get_filename(test_data_loader)
 
     sim_scores = []
@@ -269,6 +269,10 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model : iresnet50, 
             identity_sim_score.append(np.mean(identity_mated_old)) # mated
             identity_sim_score.append(np.mean(identity_age_mated)) # age-mated
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
+            os.makedirs(f"logs/eval/epoch_{epoch_num}/", exist_ok=True)
+            f = open(f"logs/eval/epoch_{epoch_num}/identity_{idx}.txt", "w")
+            f.write(f"Identity mated young: {identity_mated_young}\n\nIdentity mated middle: {identity_mated_middle}\n\nIdentity mated old: {identity_mated_old}\n\nIdentity age-mated: {identity_age_mated}\n\nIdentity non-mated: {identity_non_mated}")
+            f.close()
 
             sim_scores.append(identity_sim_score)
 
@@ -388,15 +392,17 @@ def A(threshold : float):
 def GARBE(A, B, alpha = 0.5):
     return alpha*A + (1-alpha)*B
 
+
 '''
-
-
 tsfm = transforms.Compose([
         transforms.ToTensor(),
         transforms.Resize((98, 98))])
 outdir_plot = "plots/test/"
-data_loader = load_test_dataset("datasets/fgnet/", 1002, tsfm)
+data_loader = load_test_dataset("datasets/fgnet/", 20, tsfm)
 model = iresnet50()
-compute_sim_scores_fg_net(data_loader, model, outdir_plot)
+compute_sim_scores_fg_net(data_loader, model, outdir_plot,0)
+
 '''
+
+
 

@@ -42,7 +42,7 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
         transforms.ToTensor(),
         transforms.Resize((98,98))
     ])
-    batch_size = 20
+    batch_size = 1002
 
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
