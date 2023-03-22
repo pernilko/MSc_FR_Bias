@@ -86,6 +86,8 @@ def train_one_epoch(training_data_loader : DataLoader, optimizer, model, loss_fu
         loss = loss_function(outputs, labels)
         loss.backward()
 
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 5)
+
         # Adjust learning weights
         optimizer.step()
 
@@ -132,7 +134,12 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     num_of_classes = len(uniq_labels)
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
-    optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
+    #optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
+    optimizer = torch.optim.SGD(
+        [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
+        lr=learning_rate,
+        momentum=momentum,
+        weight_decay= 5e-4)
 
 
     for epoch in range(number_of_epochs):
@@ -245,7 +252,7 @@ Main run of fine-tuning pipeline
 
 # Defining default input params
 frozenParams = ['conv1.weight', 'bn1.weight', 'bn1.bias',  'prelu.weight']
-frozenLayers = ['layer1', 'layer2', 'layer3']
+frozenLayers = ['layer1', 'layer2']
 module : torch.nn.Module = iresnet50()
 input_images_path = "datasets/cusp_generated_v2/"
 name_of_fine_tuned_model = "fine_tuned_model_1.pt"
