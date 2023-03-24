@@ -138,8 +138,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     optimizer = torch.optim.SGD(
         [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
         lr=learning_rate,
-        momentum=momentum,
-        weight_decay= 5e-4)
+        momentum=momentum) #weight_decay= 5e-4
 
 
     for epoch in range(number_of_epochs):
