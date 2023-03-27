@@ -184,7 +184,7 @@ images_input_path = "models/cusp/synthetic_images/"
 truncation_psi = 0.5
 truncation_cutoff = 0
 outdir = "datasets/eg3d_generated/"
-seeds = list(range(1000))
+seeds = list(range(15000))
 
 # Running Age-EG3D generation
 age_editing_eg3d(device, network_pkl, outdir, seeds, truncation_psi, truncation_cutoff)
