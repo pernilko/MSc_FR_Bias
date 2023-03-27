@@ -1,9 +1,0 @@
-Identity mated young: [0.26850638, 0.24409792, 0.32756925, 0.26562363, 0.48353413]
-
-Identity mated middle: []
-
-Identity mated old: []
-
-Identity age-mated: []
-
-Identity non-mated: []
