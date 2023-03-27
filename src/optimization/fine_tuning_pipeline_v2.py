@@ -11,6 +11,7 @@ import os
 import numpy as np
 from models.insightface2.recognition.arcface_torch.losses import CombinedMarginLoss
 from models.insightface2.recognition.arcface_torch.partial_fc_v2 import PartialFC_V2
+from models.insightface2.recognition.arcface_torch.utils.utils_logging import AverageMeter
 from pytorch_metric_learning import losses
 import argparse
 from torch.utils.data import DataLoader
@@ -69,7 +70,7 @@ Parameters:
 Return:
     last_loss (float) : the last loss of the epoch
 '''
-def train_one_epoch(training_data_loader : DataLoader, optimizer, model, loss_function, batch_size : int):
+def train_one_epoch(training_data_loader : DataLoader, optimizer, model, loss_function, batch_size : int, ogArcFaceLoss : bool):
     running_loss = 0.
     last_loss = 0.
 
@@ -116,11 +117,16 @@ Parameters:
 Return:
     model () : the trained model
 '''
-def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str):
+def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str, ogArcFaceLoss : bool):
     epoch_number = 0
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
     #loss_fn = torch.nn.CrossEntropyLoss()
+
+    # testing insight face loss
+    if ogArcFaceLoss:
+        margin_loss = CombinedMarginLoss(64, 1.0, 0.5, 0.0, 0.4)
+
    
 
     uniq_labels = []
@@ -137,27 +143,61 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     weight_decay = 5e-4
 
     if opt == 'sgd':
-        #optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
-        optimizer = torch.optim.SGD(
-        [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
-        lr=learning_rate,
-        momentum=momentum, weight_decay=weight_decay)
-    elif opt == 'adamW':
-        optimizer = torch.optim.AdamW(
+        if ogArcFaceLoss:
+            module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes, 1.0, True)
+            module_partial_fc.train().cuda()
+            optimizer = torch.optim.SGD(
+            [{"params": model.parameters()}, {"params": module_partial_fc.parameters()}],
+            lr=learning_rate,
+            momentum=momentum, weight_decay=weight_decay)
+        else:
+            #optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
+            optimizer = torch.optim.SGD(
             [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
             lr=learning_rate,
-            weight_decay=weight_decay)
+            momentum=momentum, weight_decay=weight_decay)
+
+    elif opt == 'adamW':
+        if ogArcFaceLoss:
+            module_partial_fc = PartialFC_V2(margin_loss, 512, num_of_classes, 1.0, True)
+            module_partial_fc.train().cuda()
+            optimizer = torch.optim.AdamW(
+                [{"params": model.parameters()}, {"params": module_partial_fc.parameters()}],
+                lr=learning_rate,
+                weight_decay=weight_decay)
+        else:
+            optimizer = torch.optim.AdamW(
+                [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
+                lr=learning_rate,
+                weight_decay=weight_decay)
     else:
         raise Exception(f"Selected optimizer ({opt}) is not supported")
 
+    loss_am = AverageMeter()
+    amp = torch.cuda.amp.grad_scaler.GradScaler(growth_interval=100)
     for epoch in range(number_of_epochs):
         print('EPOCH {}:'.format(epoch_number + 1))
 
         # Make sure gradient tracking is on, and do a pass over the data
         model.train(True)
         with torch.enable_grad():
-            avg_loss = train_one_epoch(training_data_loader, optimizer, model, loss_fn, batch_size)
+            for i, data in enumerate(training_data_loader):
+                inputs, labels = data
+                
+                local_embeddings = model(inputs)
+                loss : torch.Tensor = module_partial_fc(local_embeddings, labels)
+                amp.scale(loss).backward()
+                amp.unscale_(opt)
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 5)
+                amp.step(opt)
+                amp.update()
+                opt.zero_grad()
 
+                print('Loss/Step Loss: ', loss.item())
+                print('Loss/Train Loss: ', loss_am.avg)
+                loss_am.update(loss.item(), 1)
+
+        '''
         # We don't need gradients on to do reporting
         model.train(False)
         with torch.no_grad():
@@ -183,7 +223,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 model_path = f"{dir}model_{epoch_number}"
                 torch.save(model.state_dict(), model_path)
 
-       
+       '''
         if (epoch + 1) % 10 == 0:    
             #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
             #df = evaluation.create_dataframe(sim_scores)
@@ -256,7 +296,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     # Train the unfrozen layers
     dir_output_fined_tuned_models = "models/fine_tuned_models/"
-    fine_tuned_model = train_model(epochs, model, lr, momentum, training_data_loader,
+    fine_tuned_model = train_model(epochs, model, learning_rate, momentum, training_data_loader,
                                     validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt)
     
     os.makedirs(dir_output_fined_tuned_models, exist_ok=True)
