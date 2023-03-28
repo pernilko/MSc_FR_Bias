@@ -86,7 +86,7 @@ def train_one_epoch(training_data_loader : DataLoader, optimizer, model, loss_fu
         loss = loss_function(outputs, labels)
         loss.backward()
 
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 5)
+        #torch.nn.utils.clip_grad_norm_(model.parameters(), 5)
 
         # Adjust learning weights
         optimizer.step()
@@ -217,7 +217,7 @@ Parameters:
 Return:
     None.
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, model : m, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int, opt : str):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int, opt : str):
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -238,7 +238,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Resize(98)
+        transforms.Resize(112)
     ])
 
     # Load training and validation dataset
@@ -248,7 +248,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     tfsm_test = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Resize((98,98))
+        transforms.Resize((112,112))
     ])
     
 
@@ -310,9 +310,6 @@ print("Batch size: ", str(args.batch_size))
 print("Optimizer: ", args.opt)
 
 # Running finetuning pipeline
-fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers,
-                      module, args.input_img_path, name_of_fine_tuned_model,
-                        args.test_data_path, args.dist_plot_path, args.organize_fgnet,
-                        args.lr, args.momentum, args.epochs, args.batch_size, args.opt)
+fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers, args.input_img_path, name_of_fine_tuned_model, args.test_data_path, args.dist_plot_path, args.organize_fgnet, args.lr, args.momentum, args.epochs, args.batch_size, args.opt)
 
 
