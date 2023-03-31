@@ -116,7 +116,7 @@ Parameters:
 Return:
     model () : the trained model
 '''
-def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str):
+def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str, experiment_name : str):
     epoch_number = 0
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -169,13 +169,19 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 running_vloss += vloss
 
             avg_vloss = running_vloss / (i + 1)
+
+            # log validation loss
+            os.makedirs(f"experiments/{experiment_name}/", exist_ok=True)
+            f = open(f"experiments/{experiment_name}/validation_loss_results.txt", "a")
+            f.write('LOSS train {} valid {}\n'.format(avg_loss, avg_vloss))
+            f.close()
             print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:
                 best_vloss = avg_vloss
 
-                dir = "models/finetuned/"
+                dir = f"experiments/{experiment_name}/models/finetuned_state_dict/"
                 os.makedirs(dir, exist_ok=True)
                 for file in os.scandir(dir):
                     os.remove(file.path) # remove previously saved models to save memory
@@ -217,7 +223,21 @@ Parameters:
 Return:
     None.
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int, opt : str):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int, opt : str, experiment_name : str):
+
+    # write training settings to file
+    os.makedirs(f"experiments/{experiment_name}/", exist_ok=True)
+    f = open(f"experiments/{experiment_name}/training_settings.txt", "w")
+    f.write(f"Frozen Layers: {frozenLayers}\n")
+    f.write(f"Batch Size: {batch_size}\n")
+    f.write(f"Number of epochs: {epochs}\n")
+    f.write(f"Learning Rate: {lr}\n")
+    f.write(f"Optimizer: {opt}\n")
+    if opt == 'sgd':
+        f.write(f"Momentum: {momentum}\n")
+    f.write(f"Training dataset: {path}\n")
+    f.write(f"Test dataset: {test_images_path}\n")
+    f.close()
 
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
@@ -255,14 +275,28 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     test_data_loader = load_test_dataset(test_images_path, 1002, tfsm_test)
 
     # Train the unfrozen layers
-    dir_output_fined_tuned_models = "models/fine_tuned_models/"
     fine_tuned_model = train_model(epochs, model, lr, momentum, training_data_loader,
                                     validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt)
     
+    dir_output_fined_tuned_models = f"experiments/{experiment_name}/fine_tuned_model/"
     os.makedirs(dir_output_fined_tuned_models, exist_ok=True)
     torch.save(fine_tuned_model, dir_output_fined_tuned_models + name_of_fine_tuned_model)
 
 
+def GetListOfFrozenLayers(layers : str):
+    frozenLayers = []
+    layers = layers.split(",")
+    for layer in layers:
+        l = layer.strip()
+        if int(l) == 1:
+            frozenLayers.append('layer1')
+        elif int(l) == 2:
+            frozenLayers.append('layer2')
+        elif int(l) == 3:
+            frozenLayers.append('layer3')
+        else:
+            raise Exception(f"Cannot freeze layer with value {l}")
+    return frozenLayers
 
 '''
 Main run of fine-tuning pipeline
@@ -283,6 +317,7 @@ epochs = 10
 model_input_path = "models/backbone.pth"
 batch_size = 15 
 opt = 'sgd'
+experiment_name = "test_experiment"
 
 # Defining input argument parser
 parser = argparse.ArgumentParser()
@@ -296,10 +331,13 @@ parser.add_argument('--momentum', type=float, default=momentum, help='Momentum')
 parser.add_argument('--epochs', type=int, default=epochs, help='Number of epochs to train model')
 parser.add_argument('--batch_size', type=int, default=batch_size, help='Batch Size')
 parser.add_argument('--opt', type=str, default=opt, help='Optimizer')
+parser.add_argument('--frozen_layers', type=str, default="1,2,3", help="The numbers of the layers of the model to freeze as string seperated by commas")
+parser.add_argument('--experiment_name', type=str, default=experiment_name, help="Name of current experiment")
 
 args = parser.parse_args()
 print("Input img path: " + args.input_img_path)
-print("Dist plot path: ", args.dist_plot_path)
+plot_path = f"experiments/{experiment_name}/{args.dist_plot_path}"
+print("Dist plot path: ", plot_path)
 print("Orgranize FG-NET dataset: " + str(args.organize_fgnet))
 print("Test imgs path: ", args.test_data_path)
 print("Model input path: ", args.model_input_path)
@@ -308,8 +346,11 @@ print("Momentum: ", str(args.momentum))
 print("Number of epochs: ", str(args.epochs))
 print("Batch size: ", str(args.batch_size))
 print("Optimizer: ", args.opt)
+layers = GetListOfFrozenLayers(args.frozen_layers)
+print("Layers: ", layers)
+print("Experiment Name: ", args.experiment_name)
 
 # Running finetuning pipeline
-fine_tuning_pipeline(args.model_input_path, device, frozenParams, frozenLayers, args.input_img_path, name_of_fine_tuned_model, args.test_data_path, args.dist_plot_path, args.organize_fgnet, args.lr, args.momentum, args.epochs, args.batch_size, args.opt)
+fine_tuning_pipeline(args.model_input_path, device, frozenParams, layers, args.input_img_path, name_of_fine_tuned_model, args.test_data_path, plot_path, args.organize_fgnet, args.lr, args.momentum, args.epochs, args.batch_size, args.opt, args.experiment_name)
 
 
