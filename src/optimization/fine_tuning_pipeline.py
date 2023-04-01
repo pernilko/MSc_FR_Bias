@@ -116,7 +116,7 @@ Parameters:
 Return:
     model () : the trained model
 '''
-def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str, experiment_name : str):
+def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str, experiment_name : str, test_data_loader_loss):
     epoch_number = 0
     best_vloss = 1_000_000.
     #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
@@ -161,6 +161,8 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
         # We don't need gradients on to do reporting
         model.train(False)
         with torch.no_grad():
+
+            # validation on val dataset
             running_vloss = 0.0
             for i, vdata in enumerate(validation_data_loader):
                 vinputs, vlabels = vdata
@@ -176,6 +178,17 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
             f.write('LOSS train {} valid {}\n'.format(avg_loss, avg_vloss))
             f.close()
             print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
+
+            #validation on test dataset
+            running_tloss = 0.0
+            for i, tdata in enumerate(test_data_loader_loss):
+                tinputs, tlabels = tdata
+                toutputs = model(tinputs)
+                tloss = loss_fn(toutputs, tlabels)
+                running_tloss += tloss
+
+            avg_tloss = running_tloss / (i + 1)
+            print('LOSS train {}, valid {}, test {}'.format(avg_loss, avg_vloss, avg_tloss))
 
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:
@@ -271,12 +284,12 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
         transforms.Resize((112,112))
     ])
     
-
+    test_data_loader_loss = load_test_dataset(test_images_path, batch_size, tfsm_test)
     test_data_loader = load_test_dataset(test_images_path, 1002, tfsm_test)
 
     # Train the unfrozen layers
     fine_tuned_model = train_model(epochs, model, lr, momentum, training_data_loader,
-                                    validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt, experiment_name)
+                                    validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt, experiment_name, test_data_loader_loss)
     
     dir_output_fined_tuned_models = f"experiments/{experiment_name}/fine_tuned_model/"
     os.makedirs(dir_output_fined_tuned_models, exist_ok=True)
@@ -336,7 +349,7 @@ parser.add_argument('--experiment_name', type=str, default=experiment_name, help
 
 args = parser.parse_args()
 print("Input img path: " + args.input_img_path)
-plot_path = f"experiments/{experiment_name}/{args.dist_plot_path}"
+plot_path = f"experiments/{args.experiment_name}/{args.dist_plot_path}"
 print("Dist plot path: ", plot_path)
 print("Orgranize FG-NET dataset: " + str(args.organize_fgnet))
 print("Test imgs path: ", args.test_data_path)
