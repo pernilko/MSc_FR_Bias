@@ -137,11 +137,13 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     weight_decay = 5e-4
 
     if opt == 'sgd':
-        #optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum)
+        optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+        '''
         optimizer = torch.optim.SGD(
         [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
         lr=learning_rate,
         momentum=momentum, weight_decay=weight_decay)
+        '''
     elif opt == 'adamW':
         optimizer = torch.optim.AdamW(
             [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
@@ -174,9 +176,6 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
 
             # log validation loss
             os.makedirs(f"experiments/{experiment_name}/", exist_ok=True)
-            f = open(f"experiments/{experiment_name}/validation_loss_results.txt", "a")
-            f.write('LOSS train {} valid {}\n'.format(avg_loss, avg_vloss))
-            f.close()
             print('LOSS train {} valid {}'.format(avg_loss, avg_vloss))
 
             #validation on test dataset
@@ -189,6 +188,9 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
 
             avg_tloss = running_tloss / (i + 1)
             print('LOSS train {}, valid {}, test {}'.format(avg_loss, avg_vloss, avg_tloss))
+            f = open(f"experiments/{experiment_name}/validation_loss_results.txt", "a")
+            f.write('LOSS train {}, valid {}, test {}'.format(avg_loss, avg_vloss, avg_tloss))
+            f.close()
 
             # Track best performance, and save the model's state
             if avg_vloss < best_vloss:
