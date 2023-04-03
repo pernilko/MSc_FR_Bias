@@ -297,7 +297,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     # Train the unfrozen layers
     dir_output_fined_tuned_models = "models/fine_tuned_models/"
     fine_tuned_model = train_model(epochs, model, learning_rate, momentum, training_data_loader,
-                                    validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt)
+                                    validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt, True)
     
     os.makedirs(dir_output_fined_tuned_models, exist_ok=True)
     torch.save(fine_tuned_model, dir_output_fined_tuned_models + name_of_fine_tuned_model)
