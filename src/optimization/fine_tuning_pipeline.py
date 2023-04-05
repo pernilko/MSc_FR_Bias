@@ -271,6 +271,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         transforms.Resize(112)
     ])
 
