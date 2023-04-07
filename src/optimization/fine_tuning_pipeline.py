@@ -187,7 +187,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
             avg_tloss = running_tloss / (i + 1)
             print('LOSS train {}, valid {}, test {}'.format(avg_loss, avg_vloss, avg_tloss))
             f = open(f"experiments/{experiment_name}/validation_loss_results.txt", "a")
-            f.write('LOSS train {}, valid {}, test {}'.format(avg_loss, avg_vloss, avg_tloss))
+            f.write('LOSS train {}, valid {}, test {}\n'.format(avg_loss, avg_vloss, avg_tloss))
             f.close()
 
             # Track best performance, and save the model's state
@@ -272,7 +272,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     tsfm = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
-        transforms.Resize(112)
+        transforms.Resize((112,112))
     ])
 
     # Load training and validation dataset
@@ -282,6 +282,7 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
 
     tfsm_test = transforms.Compose([
         transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         transforms.Resize((112,112))
     ])
     

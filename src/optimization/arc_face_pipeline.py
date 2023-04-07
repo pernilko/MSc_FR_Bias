@@ -40,7 +40,8 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Resize((98,98))
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        transforms.Resize((112,112))
     ])
     batch_size = 1002
 
