@@ -130,13 +130,13 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
     images_as_tensor_exp = images_as_tensor[:, None].expand([number_of_images, aging_steps, *images_as_tensor.shape[1:]]).reshape([-1,*images_as_tensor.shape[1:]])
     #print("shape tensor exp: ", images_as_tensor_exp.shape)
 
-    print(np.array(data_labels))
+    #print(np.array(data_labels))
     #labels_exp = torch.tensor(np.repeat(np.array(data_labels, dtype=int)[:,None],number_of_images,1).T.reshape(-1))
     labels_exp = torch.tensor(np.repeat(np.linspace(*data_labels,aging_steps,dtype=int)[:,None],number_of_images,1).T.reshape(-1))
 
 
     #print("labels exp: ",labels_exp)
-    batch_size = 16
+    batch_size = 8
 
     out_tensor_exp = torch.cat([generate_synthetic_data(
     g_ema,
