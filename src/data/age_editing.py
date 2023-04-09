@@ -355,9 +355,11 @@ device = torch.device('cuda', 0)
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_img_path', type=str, default=input_images_path, help="path to input images")
+parser.add_argument('--out_img_path', type=str, default=input_images_path, help="path to output images")
 args = parser.parse_args()
 print("inp images: ", args.input_img_path)
+print("out path: ", args.out_img_path)
 
-run(args.input_img_path, aging_steps, output_images_path, weights_path_ls, weights_path_rr, device)
+run(args.input_img_path, aging_steps, args.out_img_path, weights_path_ls, weights_path_rr, device)
 
 
