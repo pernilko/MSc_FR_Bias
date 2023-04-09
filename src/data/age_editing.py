@@ -136,7 +136,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
 
 
     #print("labels exp: ",labels_exp)
-    batch_size = 4
+    batch_size = 8
 
     out_tensor_exp = torch.cat([generate_synthetic_data(
     g_ema,
