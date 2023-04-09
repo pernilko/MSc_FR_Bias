@@ -136,7 +136,7 @@ def prep_data(side : int, batch_of_filenames, data_labels, g_ema, aging_steps : 
 
 
     #print("labels exp: ",labels_exp)
-    batch_size = 8
+    batch_size = 4
 
     out_tensor_exp = torch.cat([generate_synthetic_data(
     g_ema,
@@ -334,11 +334,9 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
             labels_exp.numpy().reshape(-1,aging_steps)
             ):
         os.makedirs(synthetic_images_path + os.path.basename(fname)[:-4], exist_ok=True)
-        fig,axs = plt.subplots(1,aging_steps+1,figsize=(aging_steps*4,4),dpi=100)
-        
         age_labels = ['Input'] + [str(i) for i in age_labels]
         
-        for ax,im,l in zip(axs,[im_in,*im_out],age_labels):
+        for im,l in zip([im_in,*im_out],age_labels):
             if l != 'Input':
                 img = PIL.Image.fromarray(to_uint8(im))
                 path = synthetic_images_path + os.path.basename(fname)[:-4] + "/"+  os.path.basename(fname)[:-4] + "_"+ str(age_cluster_get_random_age(int(l))) + '.png'
