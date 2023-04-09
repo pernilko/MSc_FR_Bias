@@ -15,6 +15,7 @@ from models.cusp.training.networks import VGG, module_no_grad
 from models.cusp.torch_utils import misc
 import random
 from models.cusp.generate import generate_images
+import argparse
 
 
 '''
@@ -351,6 +352,12 @@ input_images_path = "models/cusp/synthetic_images/"
 output_images_path = "datasets/cusp_generated_v2/"
 aging_steps = 4
 device = torch.device('cuda', 0)
-run(input_images_path, aging_steps, output_images_path, weights_path_ls, weights_path_rr, device)
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_img_path', type=str, default=input_images_path, help="path to input images")
+args = parser.parse_args()
+print("inp images: ", args.input_img_path)
+
+run(args.input_img_path, aging_steps, output_images_path, weights_path_ls, weights_path_rr, device)
 
 
