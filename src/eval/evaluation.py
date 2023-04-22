@@ -10,6 +10,155 @@ import math
 import os
 from torchvision import transforms
 from data.data_preprocessing import orgranize_fgnet_dataset
+from PIL import Image
+
+
+"""
+Computes the false non-match rates and false match rates for various thresholds
+
+Input: Mated comparison scores & Non-Mated comparison scores    
+    - gscores: mated comparison scores
+    - iscores: non-mated comparison scores
+    - ds_scores: False means that input scores are similarity scores 
+Output: Thresholds with corresponding FMRs and FNMRs
+"""
+def calculate_roc(gscores, iscores, ds_scores=False, rates=True):
+
+    if isinstance(gscores, list):
+        gscores = np.array(gscores, dtype=np.float64)
+
+    if isinstance(iscores, list):
+        iscores = np.array(iscores, dtype=np.float64)
+
+    if gscores.dtype == np.int:
+        gscores = np.float64(gscores)
+
+    if iscores.dtype == np.int:
+        iscores = np.float64(iscores)
+
+    if ds_scores:
+        gscores = gscores * -1
+        iscores = iscores * -1
+
+    gscores_number = len(gscores)
+    iscores_number = len(iscores)
+
+    gscores = zip(gscores, [1] * gscores_number)
+    iscores = zip(iscores, [0] * iscores_number)
+
+    gscores = list(gscores)
+    iscores = list(iscores)
+
+    scores = np.array(sorted(gscores + iscores, key=operator.itemgetter(0)))
+    cumul = np.cumsum(scores[:, 1])
+
+    thresholds, u_indices = np.unique(scores[:, 0], return_index=True)
+
+    fnm = cumul[u_indices] - scores[u_indices][:, 1]
+    fm = iscores_number - (u_indices - fnm)
+
+    if rates:
+        fnm_rates = fnm / gscores_number
+        fm_rates = fm / iscores_number
+    else:
+        fnm_rates = fnm
+        fm_rates = fm
+
+    if ds_scores:
+        return thresholds * -1, fm_rates, fnm_rates
+
+    return thresholds, fm_rates, fnm_rates
+
+# fmrs: list with the different fmrs
+# fnmrs: list with the different fnmrs                   [young_fmr, old_fmr] and [young_fnmr, old_fnmr]          
+# fmrs and fnmrs should have the same order: e.g. fmrs = [female_fmr, male_fmr] and fnmrs = [female_fnmr, male_fnmr]
+# alpha: weighting alpha=1: only fmr; alpha=0: only fnmr; alpha=0.5: fnmr and fmr same weight
+def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
+    x_fmr = fmrs
+    x_fnmrs = fnmrs
+    n = len(x_fmr)
+    sum = 0
+    
+    for xi in x_fmr:
+        for xj in x_fmr:
+            sum += np.abs(xi - xj)
+
+    g_fmr = (n / (n - 1)) * (sum / (2 * np.power(n, 2) * np.mean(x_fmr)))
+
+    # false non matches
+    n = len(x_fnmrs)
+    sum = 0
+    for xi in x_fnmrs:
+        for xj in x_fnmrs:
+            sum += np.abs(xi - xj)
+
+    g_fnmr = (n / (n - 1)) * (sum / (2 * np.power(n, 2) * np.mean(x_fnmrs)))
+    
+    garbe = alpha * g_fmr + (1 - alpha) * g_fnmr
+    return garbe
+
+
+def evaluate_fairness(model, test_data_loader):
+    filenames = get_filename(test_data_loader)
+
+    young_mated_sim_score = []
+    old_mated_sim_score = []
+    young_non_mated_sim_score = []
+    old_non_mated_sim_score = []
+    for i, data in enumerate(test_data_loader):
+        vinputs, vlabels = data
+        voutputs = model(vinputs)
+        batch_of_filenames = get_filenames_by_batch(len(vlabels), i, filenames)
+        identities_idx  = np.array(torch.unique(torch.tensor(vlabels)))
+
+
+        for idx in identities_idx: # for each identity
+            non_mated_young_list = []
+            mated_young_list = []
+            mated_old_list = []
+            non_mated_old_list = []
+
+            for index in range(0,len(voutputs)): #for each index in outputs
+                current_age = batch_of_filenames[index]
+                current_age = batch_of_filenames[index][1].split('_')[1]
+                current_age = int(current_age.translate({ord(i): None for i in 'abcdefghijklmnopqrstuvwxyz'}))
+             
+                if vlabels[index] == idx and (current_age >= 20 and current_age <= 30):
+                    #print("young mated", current_age)
+                    mated_young = voutputs[index]
+                    mated_young_list.append(mated_young)
+                if vlabels[index] != idx and (current_age >= 20 and current_age <= 30): 
+                    #print("young non-mated ", current_age)
+                    non_mated_young = voutputs[index]
+                    non_mated_young_list.append(non_mated_young)
+                if vlabels[index] == idx and (current_age >= 45 and current_age <= 70):
+                    mated_old = voutputs[index]
+                    mated_old_list.append(mated_old)
+                if vlabels[index] != idx and (current_age >= 45 and current_age <= 70):
+                    non_mated_old = voutputs[index]
+                    non_mated_old_list.append(non_mated_old)
+
+            identity_non_mated_young = calculate_non_mated_sim_scores(mated_young_list, non_mated_young_list)
+            identity_non_mated_old = calculate_non_mated_sim_scores(mated_old_list, non_mated_old_list)
+            identity_mated_young = calculate_mated_sim_scores(mated_young_list)
+            identity_mated_old = calculate_mated_sim_scores(mated_old_list)
+
+            young_mated_sim_score.append(np.mean(identity_mated_young))
+            old_mated_sim_score.append(np.mean(identity_mated_old))
+            young_non_mated_sim_score.append(np.mean(identity_non_mated_young))
+            old_non_mated_sim_score.append(np.mean(identity_non_mated_old))
+
+
+    
+    tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
+    tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+
+    fmrs = [fmr_young, fmr_old]
+    fnmrs = [fnmr_young, fnmr_old]
+
+    garbe = gini_aggregation_rate(fmrs,fnmrs)
+    return garbe
+
 
 def evaluate_performance(model, test_data_loader):
 
@@ -372,25 +521,12 @@ def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : i
 
     os.makedirs(output_path, exist_ok=True)
     sns.displot(df, kind="kde")
+    plt.grid(visible=True)
     plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.png")
 
-def G(x, y):
-    n = len(y)
-    g = ((n)/(n-1))
-    return g
 
-# FMNR
-def B(threshold):
-    b = 0
-    return b
 
-# FMR
-def A(threshold : float):
-    a = 0
-    return a
 
-def GARBE(A, B, alpha = 0.5):
-    return alpha*A + (1-alpha)*B
 
 
 '''
@@ -398,11 +534,13 @@ tsfm = transforms.Compose([
         transforms.ToTensor(),
         transforms.Resize((98, 98))])
 outdir_plot = "plots/test/"
-data_loader = load_test_dataset("datasets/fgnet/", 20, tsfm)
+data_loader = load_test_dataset("datasets/fgnet/", 128, tsfm)
 model = iresnet50()
-compute_sim_scores_fg_net(data_loader, model, outdir_plot,0)
+#compute_sim_scores_fg_net(data_loader, model, outdir_plot,0)
 
+#test2(model, data_loader)
 '''
+
 
 
 
