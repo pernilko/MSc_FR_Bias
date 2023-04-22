@@ -156,13 +156,14 @@ def evaluate_fairness(model, test_data_loader):
         if math.isnan(tresholds_young[t_y])== False:
             for t_o in range(len(tresholds_old)):
                 if math.isnan(tresholds_old[t_o])== False:
-                    fmrs = [fmr_young[t_y], fmr_old[t_o]]
-                    fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
-                    garbe = gini_aggregation_rate(fmrs,fnmrs)
-                    print(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
-                    f = open("garbe_metrics.txt", "a")
-                    f.write(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
-                    f.close()
+                    if tresholds_young[t_y] == tresholds_old[t_o]:
+                        fmrs = [fmr_young[t_y], fmr_old[t_o]]
+                        fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
+                        garbe = gini_aggregation_rate(fmrs,fnmrs)
+                        print(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
+                        f = open("garbe_metrics.txt", "a")
+                        f.write(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}\n")
+                        f.close()
 
 
     fmrs = [fmr_young, fmr_old]
