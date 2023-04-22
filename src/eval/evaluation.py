@@ -149,10 +149,18 @@ def evaluate_fairness(model, test_data_loader):
             young_non_mated_sim_score.append(np.mean(identity_non_mated_young))
             old_non_mated_sim_score.append(np.mean(identity_non_mated_old))
 
-
-    
+    print("young mated sim score", young_mated_sim_score)
+    print("old mated sim score", old_mated_sim_score)
+    print("young non mated sim score", young_non_mated_sim_score)
+    print("old non mated sim score", old_non_mated_sim_score)
     tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+    print("Thresolds_young: ", tresholds_young)
+    print("FMR young: ", fmr_young)
+    print("FNMR Young: ", fnmr_young)
+    print("Thresolds_old: ", tresholds_young)
+    print("FMR old: ", fmr_old)
+    print("FNMR old: ", fnmr_old)
 
     fmrs = [fmr_young, fmr_old]
     fnmrs = [fnmr_young, fnmr_old]
