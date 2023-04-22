@@ -153,11 +153,16 @@ def evaluate_fairness(model, test_data_loader):
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
 
     for t_y in range(len(tresholds_young)):
-        for t_o in range(len(tresholds_old)):
-            fmrs = [fmr_young[t_y], fmr_old[t_o]]
-            fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
-            garbe = gini_aggregation_rate(fmrs,fnmrs)
-            print(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
+        if math.isnan(tresholds_young[t_y])== False:
+            for t_o in range(len(tresholds_old)):
+                if math.isnan(tresholds_old[t_o])== False:
+                    fmrs = [fmr_young[t_y], fmr_old[t_o]]
+                    fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
+                    garbe = gini_aggregation_rate(fmrs,fnmrs)
+                    print(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
+                    f = open("garbe_metrics.txt", "a")
+                    f.write(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
+                    f.close()
 
 
     fmrs = [fmr_young, fmr_old]
