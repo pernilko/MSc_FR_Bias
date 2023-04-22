@@ -48,6 +48,9 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
     sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, output_plot_path, 0)
+    garbe = evaluation.evaluate_fairness(model, test_data_loader)
+    print("eval..")
+    print("GARBE: ", garbe)
 
 
 '''
