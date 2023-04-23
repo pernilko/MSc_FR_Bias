@@ -70,6 +70,39 @@ def calculate_roc(gscores, iscores, ds_scores=False, rates=True):
 
     return thresholds, fm_rates, fnm_rates
 
+"""
+Computes the false non-match rates and false match rates for various thresholds
+
+Input: Mated comparison scores & Non-Mated comparison scores
+    - gscores: mated comparison scores
+    - iscores: non-mated comparison scores
+    - ds_scores: False means that input scores are similarity scores
+    - threshold: threshold value for classification
+Output: FMR and FNMR for the given threshold
+"""
+def calculate_fmr_fnmr_with_threshold(gscores, iscores, threshold, ds_scores=False):
+    gscores_number = len(gscores)
+    iscores_number = len(iscores)
+
+    fnm = 0
+    for score in gscores:
+        if score < threshold:
+            fnm += 1
+
+    fm = 0
+    for score in iscores:
+        if score >= threshold:
+            fm += 1
+
+    fnmr = fnm / gscores_number
+    fmr = fm / iscores_number
+
+    if ds_scores:
+        return fmr, fnmr
+
+    return fnmr, fmr
+
+
 # fmrs: list with the different fmrs
 # fnmrs: list with the different fnmrs                   [young_fmr, old_fmr] and [young_fnmr, old_fnmr]          
 # fmrs and fnmrs should have the same order: e.g. fmrs = [female_fmr, male_fmr] and fnmrs = [female_fnmr, male_fnmr]
@@ -149,9 +182,13 @@ def evaluate_fairness(model, test_data_loader):
             young_non_mated_sim_score.append(np.mean(identity_non_mated_young))
             old_non_mated_sim_score.append(np.mean(identity_non_mated_old))
 
-    tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
-    tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+    #tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
+    #tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+    threshold = 0.6
+    fmr_young, fnmr_young = calculate_fmr_fnmr_with_threshold(young_mated_sim_score, young_non_mated_sim_score, threshold)
+    fmr_old, fnmr_old = calculate_fmr_fnmr_with_threshold(old_mated_sim_score, old_non_mated_sim_score, threshold)
 
+    '''
     for t_y in range(len(tresholds_young)):
         if math.isnan(tresholds_young[t_y])== False:
             for t_o in range(len(tresholds_old)):
@@ -164,12 +201,12 @@ def evaluate_fairness(model, test_data_loader):
                         f = open("garbe_metrics.txt", "a")
                         f.write(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}\n")
                         f.close()
-
-
+    '''
     fmrs = [fmr_young, fmr_old]
     fnmrs = [fnmr_young, fnmr_old]
 
     garbe = gini_aggregation_rate(fmrs,fnmrs)
+    print(f"Garbe({threshold}) = {garbe}")
     return garbe
 
 

@@ -113,3 +113,4 @@ def orgranize_fgnet_dataset(data_dir):
             shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
 
+
