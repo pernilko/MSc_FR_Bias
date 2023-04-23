@@ -209,8 +209,14 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
                         f.write(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}\n")
                         f.close()
 
+    x_ticks = [0.0, 0.25, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6]
+    y_ticks = [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     plt.figure()
     plt.scatter(threshold_values, garbe_values)
+    plt.xticks(range(len(x_ticks)), x_ticks)
+    plt.yticks(range(len(y_ticks)), y_ticks)
+    plt.xlabel("Threshold")
+    plt.ylabel("GARBE")
     plt.savefig(f"garbe_plot_test.png")
     '''
     fmrs = [fmr_young, fmr_old]
