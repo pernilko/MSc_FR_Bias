@@ -191,6 +191,9 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
     print("Old fmr: ", fmr_old, "Old fnmr: ", fnmr_old)
 
     '''
+
+    threshold_values = []
+    garbe_values = []
     for t_y in range(len(tresholds_young)):
         if math.isnan(tresholds_young[t_y])== False:
             for t_o in range(len(tresholds_old)):
@@ -199,10 +202,15 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
                         fmrs = [fmr_young[t_y], fmr_old[t_o]]
                         fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
                         garbe = gini_aggregation_rate(fmrs,fnmrs)
+                        threshold_values.append(round(tresholds_young[t_y], 3))
+                        garbe_values.append(garbe)
                         print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
                         f = open("garbe_metrics.txt", "a")
                         f.write(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}\n")
                         f.close()
+
+    plt.plot(threshold_values, garbe_values)
+    plt.savefig(f"garbe_plot_test.png")
     '''
     fmrs = [fmr_young, fmr_old]
     fnmrs = [fnmr_young, fnmr_old]
