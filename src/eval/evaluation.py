@@ -187,6 +187,9 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
 
+    f = open(f"{output_dir}/garbe_metrics_.txt", "a")
+    f.write(f"Epoch {current_epoch_num}: \n")
+    f.close()
     threshold_values = []
     garbe_values = []
     for t_y in range(len(tresholds_young)):
@@ -200,7 +203,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
                         threshold_values.append(round(tresholds_young[t_y], 2))
                         garbe_values.append(garbe)
                         #print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
-                        f = open(f"{output_dir}/garbe_metrics_{current_epoch_num}.txt", "a")
+                        f = open(f"{output_dir}/garbe_metrics_.txt", "a")
                         f.write(f"GARBE({round(tresholds_young[t_y], 2)}) = {garbe}\n")
                         f.close()
 
