@@ -132,7 +132,7 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
     return garbe
 
 
-def evaluate_fairness(model, test_data_loader):
+def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
     filenames = get_filename(test_data_loader)
 
     young_mated_sim_score = []
@@ -184,7 +184,6 @@ def evaluate_fairness(model, test_data_loader):
 
     #tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     #tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
-    threshold = 0.6
     fmr_young, fnmr_young = calculate_fmr_fnmr_with_threshold(young_mated_sim_score, young_non_mated_sim_score, threshold)
     fmr_old, fnmr_old = calculate_fmr_fnmr_with_threshold(old_mated_sim_score, old_non_mated_sim_score, threshold)
 

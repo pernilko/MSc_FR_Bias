@@ -32,7 +32,7 @@ Parameters:
 Return: ----
 
 """
-def arc_face_pipeline(model_filename : str, device : torch.device, path : str, plot_output_filename : str):
+def arc_face_pipeline(model_filename : str, device : torch.device, path : str, plot_output_filename : str, threshold: float):
 
     # Fetching arcface model
     model = load_arc_face_model(model_filename, device)
@@ -48,7 +48,7 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
     sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, output_plot_path, 0)
-    garbe = evaluation.evaluate_fairness(model, test_data_loader)
+    garbe = evaluation.evaluate_fairness(model, test_data_loader, threshold)
     #print("eval..")
     #print("GARBE: ", garbe)
 
@@ -68,11 +68,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dist_plot_path', type=str, default=output_plot_path, help="output path for distribution plots")
 parser.add_argument('--model_input_path', type=str, default=model_path, help="path to pre-trained model")
 parser.add_argument('--test_data_path', type=str, default=test_dataset_path, help="path to test images")
+parser.add_argument('--threshold', type=float, default=test_dataset_path, help="Threshold fmr and fnmr")
 
 args = parser.parse_args()
 print("Model path: ", args.model_input_path)
 print("Test data path: ", args.test_data_path)
 print("Dist plot path: ", args.dist_plot_path)
+print("Threshold fmr and fnmr: ", args.threshold)
 
 # Running ArcFace pipeline
-arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path)
+arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path, args.threshold)
