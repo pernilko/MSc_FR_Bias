@@ -182,8 +182,9 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
             young_non_mated_sim_score.append(np.mean(identity_non_mated_young))
             old_non_mated_sim_score.append(np.mean(identity_non_mated_old))
 
-    #tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
-    #tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+    tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
+    tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+    '''
     fmr_young, fnmr_young = calculate_fmr_fnmr_with_threshold(young_mated_sim_score, young_non_mated_sim_score, threshold)
     fmr_old, fnmr_old = calculate_fmr_fnmr_with_threshold(old_mated_sim_score, old_non_mated_sim_score, threshold)
     print("Young fmr: ", fmr_young, "Young fnmr: ", fnmr_young)
@@ -194,13 +195,13 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
         if math.isnan(tresholds_young[t_y])== False:
             for t_o in range(len(tresholds_old)):
                 if math.isnan(tresholds_old[t_o])== False:
-                    if tresholds_young[t_y] == tresholds_old[t_o]:
+                    if round(tresholds_young[t_y], 3) == round(tresholds_old[t_o], 3):
                         fmrs = [fmr_young[t_y], fmr_old[t_o]]
                         fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
                         garbe = gini_aggregation_rate(fmrs,fnmrs)
-                        print(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}")
+                        print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
                         f = open("garbe_metrics.txt", "a")
-                        f.write(f"GARBE for threshold = {tresholds_young[t_y]}, {tresholds_old[t_o]}: {garbe}\n")
+                        f.write(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}\n")
                         f.close()
     '''
     fmrs = [fmr_young, fmr_old]
@@ -208,6 +209,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
 
     garbe = gini_aggregation_rate(fmrs,fnmrs)
     print(f"Garbe({threshold}) = {garbe}")
+    '''
     return garbe
 
 
