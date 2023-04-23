@@ -209,6 +209,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
                         f.write(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}\n")
                         f.close()
 
+    plt.figure()
     plt.plot(threshold_values, garbe_values)
     plt.savefig(f"garbe_plot_test.png")
     '''
@@ -584,6 +585,7 @@ def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : i
     sns.displot(df, kind="kde")
     plt.grid(visible=True)
     plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.png")
+    plt.close()
 
 
 
