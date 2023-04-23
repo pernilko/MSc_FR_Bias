@@ -210,7 +210,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
             print("Starting evaluation")
             current_epoch_num = epoch + 1
             sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path, current_epoch_num)
-            garbe = evaluation.evaluate_fairness(model, test_data_loader, experiment_name)
+            garbe = evaluation.evaluate_fairness(model, test_data_loader, experiment_name, current_epoch_num)
         
         epoch_number += 1
     return model

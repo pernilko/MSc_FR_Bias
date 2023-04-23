@@ -21,6 +21,16 @@ def load_arc_face_model(filename : str, device : torch.device):
 
     return model
 
+def get_arcface_sim_scores(model_filename : str, test_data_loader):
+    # Fetching arcface model
+    model = load_arc_face_model(model_filename, device)
+    model.train(False)
+
+    sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, "", 0, False)
+
+    return sim_scores
+
+
 """
 Method for loading the bare arcface model and evaluating its performance and bias on a test dataset
 
@@ -48,7 +58,7 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, o
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
     sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, output_plot_path, 0)
-    garbe = evaluation.evaluate_fairness(model, test_data_loader, "arcface")
+    garbe = evaluation.evaluate_fairness(model, test_data_loader, "arcface", 0)
 
 
 '''

@@ -12,6 +12,7 @@ from torchvision import transforms
 from data.data_preprocessing import orgranize_fgnet_dataset
 from PIL import Image
 import operator
+from optimization.arc_face_pipeline import get_arcface_sim_scores
 
 
 """
@@ -132,7 +133,7 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
     return garbe
 
 
-def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : str):
+def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : str, current_epoch_num : int):
     filenames = get_filename(test_data_loader)
     output_dir = f"experiments/{experiment_name}"
     os.makedirs(output_dir, exist_ok=True)
@@ -187,6 +188,9 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
 
+    f = open(f"{output_dir}/garbe_metrics_.txt", "a")
+    f.write(f"Epoch {current_epoch_num}: \n")
+    f.close()
     threshold_values = []
     garbe_values = []
     for t_y in range(len(tresholds_young)):
@@ -200,7 +204,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
                         threshold_values.append(round(tresholds_young[t_y], 2))
                         garbe_values.append(garbe)
                         #print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
-                        f = open(f"{output_dir}/garbe_metrics.txt", "a")
+                        f = open(f"{output_dir}/garbe_metrics_.txt", "a")
                         f.write(f"GARBE({round(tresholds_young[t_y], 2)}) = {garbe}\n")
                         f.close()
 
@@ -210,7 +214,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     plt.yticks(np.arange(0, 1, step=0.1))
     plt.xlabel("Threshold")
     plt.ylabel("GARBE")
-    plt.savefig(f"{output_dir}/garbe_plot.png")
+    plt.savefig(f"{output_dir}/garbe_plot_{current_epoch_num}.png")
     return garbe
 
 
@@ -401,7 +405,7 @@ Return:
     sim_scores (list) : the similarity scores
 
 '''
-def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot : str, epoch_num : int):
+def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot : str, epoch_num : int, plot=True):
     filenames = get_filename(test_data_loader)
 
     sim_scores = []
@@ -474,9 +478,10 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot 
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
 
             sim_scores.append(identity_sim_score)
-
-    df = create_dataframe_fg_net(sim_scores)
-    create_distribution_plot(df, outdir_plot, epoch_num)
+    if plot:
+        df = create_dataframe_fg_net(sim_scores)
+        create_distribution_plot(df, outdir_plot, epoch_num)
+        create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot, epoch_num)
 
     return sim_scores
 
@@ -577,6 +582,42 @@ def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : i
     plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.png")
     plt.close()
 
+def create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot : str, epoch_num : int):
+    arcface_sim_scores = get_arcface_sim_scores("models/backbone.pth", test_data_loader)
+    dfs = []
+
+    for i in range(len(sim_scores[0])):
+        df_list = []
+        for row_ft, row_af in zip(sim_scores, arcface_sim_scores):
+            new_row = []
+            new_row.append(row_ft[i])
+            new_row.append(row_af[i])
+            df_list.append(new_row)
+        df = create_dataframe_finetuned_vs_arcface(df_list)
+        dfs.append(df)
+        
+    create_subplots(dfs, outdir_plot, epoch_num)
+
+def create_dataframe_finetuned_vs_arcface(sim_scores):
+    df = pd.DataFrame(sim_scores, columns=['Fine_tuned ArcFace', 'ArcFace'])
+    return df
+
+def create_subplots(dfs, outdir_plot, epoch_num):
+    os.makedirs(outdir_plot, exist_ok=True)
+    fig,axs = plt.subplots(1, len(dfs))
+
+    labels = ['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated']
+    # For every [input,step...]
+    for ax,df,l in zip(axs, dfs, labels):
+        ax.axis('off')
+        ax.imshow(sns.displot(df, kind="kde"))
+        ax.set_title(l)
+    
+    plt.grid(visible=True)
+    plt.xlabel("Similarity")
+    plt.ylabel("Density")
+    plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_dist_plot.png")
+    plt.close()
 
 
 
