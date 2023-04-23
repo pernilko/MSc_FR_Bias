@@ -157,11 +157,11 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
                 current_age = batch_of_filenames[index][1].split('_')[1]
                 current_age = int(current_age.translate({ord(i): None for i in 'abcdefghijklmnopqrstuvwxyz'}))
              
-                if vlabels[index] == idx and (current_age >= 20 and current_age <= 30):
+                if vlabels[index] == idx and (current_age >= 5 and current_age <= 20):
                     #print("young mated", current_age)
                     mated_young = voutputs[index]
                     mated_young_list.append(mated_young)
-                if vlabels[index] != idx and (current_age >= 20 and current_age <= 30): 
+                if vlabels[index] != idx and (current_age >= 5 and current_age <= 20): 
                     #print("young non-mated ", current_age)
                     non_mated_young = voutputs[index]
                     non_mated_young_list.append(non_mated_young)
