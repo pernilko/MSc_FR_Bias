@@ -210,7 +210,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
                         f.close()
 
     plt.figure()
-    plt.plot(threshold_values, garbe_values)
+    plt.scatter(threshold_values, garbe_values)
     plt.savefig(f"garbe_plot_test.png")
     '''
     fmrs = [fmr_young, fmr_old]
