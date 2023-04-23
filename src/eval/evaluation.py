@@ -200,7 +200,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
                         threshold_values.append(round(tresholds_young[t_y], 2))
                         garbe_values.append(garbe)
                         #print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
-                        f = open(f"{output_dir}/garbe_metrics.txt", "a")
+                        f = open(f"{output_dir}/garbe_metrics_{current_epoch_num}.txt", "a")
                         f.write(f"GARBE({round(tresholds_young[t_y], 2)}) = {garbe}\n")
                         f.close()
 
