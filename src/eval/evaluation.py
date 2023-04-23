@@ -186,6 +186,8 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
     #tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
     fmr_young, fnmr_young = calculate_fmr_fnmr_with_threshold(young_mated_sim_score, young_non_mated_sim_score, threshold)
     fmr_old, fnmr_old = calculate_fmr_fnmr_with_threshold(old_mated_sim_score, old_non_mated_sim_score, threshold)
+    print("Young fmr: ", fmr_young, "Young fnmr: ", fnmr_young)
+    print("Old fmr: ", fmr_old, "Old fnmr: ", fnmr_old)
 
     '''
     for t_y in range(len(tresholds_young)):
