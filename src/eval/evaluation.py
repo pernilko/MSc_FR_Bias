@@ -12,6 +12,7 @@ from torchvision import transforms
 from data.data_preprocessing import orgranize_fgnet_dataset
 from PIL import Image
 import operator
+from optimization.arc_face_pipeline import get_arcface_sim_scores
 
 
 """
@@ -404,7 +405,7 @@ Return:
     sim_scores (list) : the similarity scores
 
 '''
-def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot : str, epoch_num : int):
+def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot : str, epoch_num : int, plot=True):
     filenames = get_filename(test_data_loader)
 
     sim_scores = []
@@ -477,9 +478,10 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot 
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
 
             sim_scores.append(identity_sim_score)
-
-    df = create_dataframe_fg_net(sim_scores)
-    create_distribution_plot(df, outdir_plot, epoch_num)
+    if plot:
+        df = create_dataframe_fg_net(sim_scores)
+        create_distribution_plot(df, outdir_plot, epoch_num)
+        create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot, epoch_num)
 
     return sim_scores
 
@@ -580,6 +582,42 @@ def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : i
     plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.png")
     plt.close()
 
+def create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot : str, epoch_num : int):
+    arcface_sim_scores = get_arcface_sim_scores("models/backbone.pth", test_data_loader)
+    dfs = []
+
+    for i in range(len(sim_scores[0])):
+        df_list = []
+        for row_ft, row_af in zip(sim_scores, arcface_sim_scores):
+            new_row = []
+            new_row.append(row_ft[i])
+            new_row.append(row_af[i])
+            df_list.append(new_row)
+        df = create_dataframe_finetuned_vs_arcface(df_list)
+        dfs.append(df)
+        
+    create_subplots(dfs, outdir_plot, epoch_num)
+
+def create_dataframe_finetuned_vs_arcface(sim_scores):
+    df = pd.DataFrame(sim_scores, columns=['Fine_tuned ArcFace', 'ArcFace'])
+    return df
+
+def create_subplots(dfs, outdir_plot, epoch_num):
+    os.makedirs(outdir_plot, exist_ok=True)
+    fig,axs = plt.subplots(1, len(dfs))
+
+    labels = ['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated']
+    # For every [input,step...]
+    for ax,df,l in zip(axs, dfs, labels):
+        ax.axis('off')
+        ax.imshow(sns.displot(df, kind="kde"))
+        ax.set_title(l)
+    
+    plt.grid(visible=True)
+    plt.xlabel("Similarity")
+    plt.ylabel("Density")
+    plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_dist_plot.png")
+    plt.close()
 
 
 
