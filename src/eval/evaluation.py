@@ -132,7 +132,7 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
     return garbe
 
 
-def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : str):
+def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : str, current_epoch_num : int):
     filenames = get_filename(test_data_loader)
     output_dir = f"experiments/{experiment_name}"
     os.makedirs(output_dir, exist_ok=True)
@@ -210,7 +210,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     plt.yticks(np.arange(0, 1, step=0.1))
     plt.xlabel("Threshold")
     plt.ylabel("GARBE")
-    plt.savefig(f"{output_dir}/garbe_plot.png")
+    plt.savefig(f"{output_dir}/garbe_plot_{current_epoch_num}.png")
     return garbe
 
 
