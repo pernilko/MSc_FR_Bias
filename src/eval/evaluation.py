@@ -195,7 +195,7 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
         if math.isnan(tresholds_young[t_y])== False:
             for t_o in range(len(tresholds_old)):
                 if math.isnan(tresholds_old[t_o])== False:
-                    if round(tresholds_young[t_y], 3) == round(tresholds_old[t_o], 3):
+                    if round(tresholds_young[t_y], 2) == round(tresholds_old[t_o], 2):
                         fmrs = [fmr_young[t_y], fmr_old[t_o]]
                         fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
                         garbe = gini_aggregation_rate(fmrs,fnmrs)
