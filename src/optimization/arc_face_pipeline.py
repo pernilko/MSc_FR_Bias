@@ -32,7 +32,7 @@ Parameters:
 Return: ----
 
 """
-def arc_face_pipeline(model_filename : str, device : torch.device, path : str, plot_output_filename : str, threshold: float):
+def arc_face_pipeline(model_filename : str, device : torch.device, path : str, output_plot_path : str):
 
     # Fetching arcface model
     model = load_arc_face_model(model_filename, device)
@@ -48,9 +48,7 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, p
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
     sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, output_plot_path, 0)
-    garbe = evaluation.evaluate_fairness(model, test_data_loader, threshold)
-    #print("eval..")
-    #print("GARBE: ", garbe)
+    garbe = evaluation.evaluate_fairness(model, test_data_loader, "arcface")
 
 
 '''
@@ -61,21 +59,19 @@ Running ArcFace pipeline
 model_path = "models/backbone.pth"
 device = torch.device('cuda', 0)
 test_dataset_path = 'datasets/fgnet/' #"datasets/cusp_generated/"
-output_plot_path = "plots/arcface/"
-default_threshold = 0.5
+experiment_name = "arcface"
+experiment_path = f"experiments/{experiment_name}"
 
 # Defining input argument parser
 parser = argparse.ArgumentParser()
-parser.add_argument('--dist_plot_path', type=str, default=output_plot_path, help="output path for distribution plots")
+parser.add_argument('--dist_plot_path', type=str, default=experiment_path, help="output path for distribution plots")
 parser.add_argument('--model_input_path', type=str, default=model_path, help="path to pre-trained model")
 parser.add_argument('--test_data_path', type=str, default=test_dataset_path, help="path to test images")
-parser.add_argument('--threshold', type=float, default=default_threshold, help="Threshold fmr and fnmr")
 
 args = parser.parse_args()
 print("Model path: ", args.model_input_path)
 print("Test data path: ", args.test_data_path)
 print("Dist plot path: ", args.dist_plot_path)
-print("Threshold fmr and fnmr: ", args.threshold)
 
 # Running ArcFace pipeline
-arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path, args.threshold)
+arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path)

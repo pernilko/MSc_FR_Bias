@@ -132,8 +132,10 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
     return garbe
 
 
-def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
+def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : str):
     filenames = get_filename(test_data_loader)
+    output_dir = f"experiments/{experiment_name}"
+    os.makedirs(output_dir, exist_ok=True)
 
     young_mated_sim_score = []
     old_mated_sim_score = []
@@ -184,13 +186,6 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
 
     tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
-    '''
-    fmr_young, fnmr_young = calculate_fmr_fnmr_with_threshold(young_mated_sim_score, young_non_mated_sim_score, threshold)
-    fmr_old, fnmr_old = calculate_fmr_fnmr_with_threshold(old_mated_sim_score, old_non_mated_sim_score, threshold)
-    print("Young fmr: ", fmr_young, "Young fnmr: ", fnmr_young)
-    print("Old fmr: ", fmr_old, "Old fnmr: ", fnmr_old)
-
-    '''
 
     threshold_values = []
     garbe_values = []
@@ -202,29 +197,20 @@ def evaluate_fairness(model, test_data_loader : DataLoader, threshold: float):
                         fmrs = [fmr_young[t_y], fmr_old[t_o]]
                         fnmrs = [fnmr_young[t_y], fnmr_old[t_o]]
                         garbe = gini_aggregation_rate(fmrs,fnmrs)
-                        threshold_values.append(round(tresholds_young[t_y], 3))
+                        threshold_values.append(round(tresholds_young[t_y], 2))
                         garbe_values.append(garbe)
-                        print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
-                        f = open("garbe_metrics.txt", "a")
-                        f.write(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}\n")
+                        #print(f"GARBE for threshold = {round(tresholds_young[t_y], 3)}, {round(tresholds_old[t_o], 3)}: {garbe}")
+                        f = open(f"{output_dir}/garbe_metrics.txt", "a")
+                        f.write(f"GARBE({round(tresholds_young[t_y], 2)}) = {garbe}\n")
                         f.close()
 
-    #x_ticks = [0.0, 0.25, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6]
-    #y_ticks = [0.0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
     plt.figure()
     plt.scatter(threshold_values, garbe_values)
     plt.xticks(np.arange(0, 1, step=0.1))
     plt.yticks(np.arange(0, 1, step=0.1))
     plt.xlabel("Threshold")
     plt.ylabel("GARBE")
-    plt.savefig(f"garbe_plot_test.png")
-    '''
-    fmrs = [fmr_young, fmr_old]
-    fnmrs = [fnmr_young, fnmr_old]
-
-    garbe = gini_aggregation_rate(fmrs,fnmrs)
-    print(f"Garbe({threshold}) = {garbe}")
-    '''
+    plt.savefig(f"{output_dir}/garbe_plot.png")
     return garbe
 
 
@@ -486,10 +472,6 @@ def compute_sim_scores_fg_net(test_data_loader : DataLoader, model, outdir_plot 
             identity_sim_score.append(np.mean(identity_mated_old)) # mated
             identity_sim_score.append(np.mean(identity_age_mated)) # age-mated
             identity_sim_score.append(np.mean(identity_non_mated)) # non-mated
-            os.makedirs(f"logs/eval/epoch_{epoch_num}/", exist_ok=True)
-            f = open(f"logs/eval/epoch_{epoch_num}/identity_{idx}.txt", "w")
-            f.write(f"Identity mated young: {identity_mated_young}\n\nIdentity mated middle: {identity_mated_middle}\n\nIdentity mated old: {identity_mated_old}\n\nIdentity age-mated: {identity_age_mated}\n\nIdentity non-mated: {identity_non_mated}")
-            f.close()
 
             sim_scores.append(identity_sim_score)
 
