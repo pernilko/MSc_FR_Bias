@@ -21,15 +21,6 @@ def load_arc_face_model(filename : str, device : torch.device):
 
     return model
 
-def get_arcface_sim_scores(model_filename : str, test_data_loader):
-    # Fetching arcface model
-    model = load_arc_face_model(model_filename, device)
-    model.train(False)
-
-    sim_scores = compute_sim_scores_fg_net(test_data_loader, model, "", 0, False)
-
-    return sim_scores
-
 
 """
 Method for loading the bare arcface model and evaluating its performance and bias on a test dataset

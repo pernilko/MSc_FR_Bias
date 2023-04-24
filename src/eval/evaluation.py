@@ -12,7 +12,33 @@ from torchvision import transforms
 from data.data_preprocessing import orgranize_fgnet_dataset
 from PIL import Image
 import operator
-from optimization.arc_face_pipeline import get_arcface_sim_scores
+
+
+'''
+Method for loading the bare ArcFace model
+
+Parameters: 
+    filename (string) : the path for the file containing the pre-trained ArcFace model
+    device (torch.device) : specifies whether to use cpu or cuda
+Return: 
+    model () : the pre-trained ArcFace model
+'''
+def load_arc_face_model(filename : str, device : torch.device):
+    loaded_model = torch.load(filename,  map_location = device)
+    model = iresnet50()
+    model.load_state_dict(loaded_model, strict=True)
+
+    return model
+
+def get_arcface_sim_scores(model_filename : str, test_data_loader):
+    device = torch.device('cuda:0')
+    # Fetching arcface model
+    model = load_arc_face_model(model_filename, device)
+    model.train(False)
+
+    sim_scores = compute_sim_scores_fg_net(test_data_loader, model, "", 0, False)
+
+    return sim_scores
 
 
 """
