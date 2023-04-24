@@ -635,7 +635,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
     labels = ['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated']
     # For every [input,step...]
     for ax,df,l in zip(axs, dfs, labels):
-        tdf = create_arcface_vs_finetuned_plot(df)
+        tdf = create_dataframe_finetuned_vs_arcface(df)
         ax.axis('off')
         sns.kdeplot(tdf, ax=ax)
         ax.set_title(l)
