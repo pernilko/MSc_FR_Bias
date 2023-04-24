@@ -636,7 +636,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
     # For every [input,step...]
     for ax,df,l in zip(axs, dfs, labels):
         ax.axis('off')
-        ax.imshow(sns.displot(df, kind="kde"))
+        sns.displot(df, kind="kde", ax=ax)
         ax.set_title(l)
     
     plt.grid(visible=True)
