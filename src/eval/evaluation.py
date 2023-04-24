@@ -635,7 +635,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
     labels = ['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated']
     # For every [input,step...]
     for ax,df,l in zip(axs, dfs, labels):
-        sns.distplot(df, kind="kde")
+        sns.displot(df, kind="kde")
         plt.grid(visible=True)
         plt.xlabel("Similarity")
         plt.ylabel("Density")
