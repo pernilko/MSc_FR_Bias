@@ -203,8 +203,9 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 torch.save(model.state_dict(), model_path)
 
         if (epoch + 1) == 1:
-            sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path, current_epoch_num)
-            garbe = evaluation.evaluate_fairness(model, test_data_loader, experiment_name, current_epoch_num)
+            epoch_num_current = epoch + 1
+            sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path, epoch_num_current)
+            garbe = evaluation.evaluate_fairness(model, test_data_loader, experiment_name, epoch_num_current)
 
         if (epoch + 1) % 10 == 0:    
             #sim_scores = evaluation.compute_similarity_scores_for_test_dataset(test_data_loader, model)
