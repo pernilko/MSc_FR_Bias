@@ -1,0 +1,8 @@
+Frozen Layers: ['layer1', 'layer2', 'layer3']
+Batch Size: 25
+Number of epochs: 11
+Learning Rate: 0.01
+Optimizer: sgd
+Momentum: 0.9
+Training dataset: datasets/mixed_dataset/
+Test dataset: datasets/fgnet/
