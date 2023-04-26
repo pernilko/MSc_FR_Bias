@@ -129,6 +129,21 @@ def calculate_fmr_fnmr_with_threshold(gscores, iscores, threshold, ds_scores=Fal
 
     return fnmr, fmr
 
+def calculate_fmr_fnmr_test(mated_scores, non_mated_scores, threshold):
+    # Convert similarity scores to binary match/non-match labels based on threshold
+    mated_labels = np.where(mated_scores >= threshold, 1, 0)
+    non_mated_labels = np.where(non_mated_scores >= threshold, 1, 0)
+
+    # Handle NaN values by setting them to 0.5 (i.e., neutral threshold)
+    mated_labels[np.isnan(mated_labels)] = 0.5
+    non_mated_labels[np.isnan(non_mated_labels)] = 0.5
+
+    # Calculate FMR and FNMR
+    fmr = np.nanmean(non_mated_labels) # False Match Rate = Non-Match Labels / Total Non-Match Scores
+    fnmr = 1 - np.nanmean(mated_labels) # False Non-Match Rate = 1 - Match Labels / Total Match Scores
+
+    return fmr, fnmr
+
 
 # fmrs: list with the different fmrs
 # fnmrs: list with the different fnmrs                   [young_fmr, old_fmr] and [young_fnmr, old_fnmr]          
@@ -213,6 +228,18 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
 
     tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
+
+    thresholds_test = np.arange(0, 1, step=0.05)
+    for t in thresholds_test:
+        young_fmr_test, young_fnmr_test = calculate_fmr_fnmr_test(young_mated_sim_score, young_non_mated_sim_score, t)
+        old_fmr_test, old_fnmr_test = calculate_fmr_fnmr_test(old_mated_sim_score, old_non_mated_sim_score, t)
+        print(f"Threshold = {t}: FMR Young = {young_fmr_test}, FNMR Young = {young_fnmr_test}")
+        print(f"Threshold = {t}: FMR Old = {old_fmr_test}, FNMR Old = {old_fnmr_test}")
+        fmrs_test = [young_fmr_test, old_fmr_test]
+        fnmrs_test = [young_fnmr_test, old_fnmr_test]
+        garbe_test = gini_aggregation_rate(fmrs_test, fnmrs_test)
+        print(f"GARBE({t})= {garbe_test}")
+
 
     f = open(f"{output_dir}/garbe_metrics_.txt", "a")
     f.write(f"Epoch {current_epoch_num}: \n")
@@ -645,8 +672,6 @@ def create_subplots(dfs, outdir_plot, epoch_num):
         plt.tight_layout()
         plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_{l}_plot_{epoch_num}.pdf")
         plt.close()
-
-
 
 
 
