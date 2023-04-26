@@ -605,7 +605,8 @@ def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : i
     plt.grid(visible=True)
     plt.xlabel("Similarity")
     plt.ylabel("Density")
-    plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.png")
+    plt.tight_layout()
+    plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.pdf")
     plt.close()
 
 def create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot : str, epoch_num : int):
@@ -640,6 +641,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
         plt.xlabel("Similarity")
         plt.ylabel("Density")
         plt.title(l)
+        plt.tight_layout()
         plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_{l}_plot.pdf")
         plt.close()
 
