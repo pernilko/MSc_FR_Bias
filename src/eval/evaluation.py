@@ -627,14 +627,14 @@ def create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot :
     create_subplots(dfs, outdir_plot, epoch_num)
 
 def create_dataframe_finetuned_vs_arcface(sim_scores):
-    df = pd.DataFrame(sim_scores, columns=['Fine_tuned ArcFace', 'ArcFace'])
+    df = pd.DataFrame(sim_scores, columns=['Fine-tuned ArcFace', 'ArcFace'])
     return df
 
 def create_subplots(dfs, outdir_plot, epoch_num):
     os.makedirs(outdir_plot, exist_ok=True)
     fig,axs = plt.subplots(1, len(dfs))
 
-    labels = ['mated young', 'mated middle', 'mated old', 'YoungvsOld', 'non-mated']
+    labels = ['Mated Young', 'Mated Middle', 'Mated Old', 'Young vs Old', 'Non-mated']
     # For every [input,step...]
     for ax,df,l in zip(axs, dfs, labels):
         sns.displot(df, kind="kde")
