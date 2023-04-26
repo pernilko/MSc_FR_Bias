@@ -240,7 +240,8 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     plt.yticks(np.arange(0, 1, step=0.1))
     plt.xlabel("Threshold")
     plt.ylabel("GARBE")
-    plt.savefig(f"{output_dir}/garbe_plot_{current_epoch_num}.png")
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/garbe_plot_{current_epoch_num}.pdf")
     return garbe
 
 
