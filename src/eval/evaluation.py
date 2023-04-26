@@ -229,18 +229,41 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     tresholds_young, fmr_young, fnmr_young = calculate_roc(young_mated_sim_score, young_non_mated_sim_score)
     tresholds_old, fmr_old, fnmr_old = calculate_roc(old_mated_sim_score, old_non_mated_sim_score)
 
-    thresholds_test = np.arange(0, 1, step=0.05)
+    f = open(f"{output_dir}/garbe_metrics_.txt", "a")
+    f.write(f"Epoch {current_epoch_num}: \n")
+    f.close()
+    thresholds_test = np.arange(0, 1, step=0.025)
+    garbe_values_test = []
+    thresholds_test_non_nan = []
     for t in thresholds_test:
         young_fmr_test, young_fnmr_test = calculate_fmr_fnmr_test(young_mated_sim_score, young_non_mated_sim_score, t)
         old_fmr_test, old_fnmr_test = calculate_fmr_fnmr_test(old_mated_sim_score, old_non_mated_sim_score, t)
-        print(f"Threshold = {t}: FMR Young = {young_fmr_test}, FNMR Young = {young_fnmr_test}")
-        print(f"Threshold = {t}: FMR Old = {old_fmr_test}, FNMR Old = {old_fnmr_test}")
+        #print(f"Threshold = {t}: FMR Young = {young_fmr_test}, FNMR Young = {young_fnmr_test}")
+        #print(f"Threshold = {t}: FMR Old = {old_fmr_test}, FNMR Old = {old_fnmr_test}")
         fmrs_test = [young_fmr_test, old_fmr_test]
         fnmrs_test = [young_fnmr_test, old_fnmr_test]
         garbe_test = gini_aggregation_rate(fmrs_test, fnmrs_test)
-        print(f"GARBE({t})= {garbe_test}")
+        #print(f"GARBE({t}) = {garbe_test}")
+        f = open(f"{output_dir}/garbe_metrics_.txt", "a")
+        f.write(f"Threshold = {t}: FMR Young = {young_fmr_test}, FNMR Young = {young_fnmr_test}\n")
+        f.write(f"Threshold = {t}: FMR Old = {old_fmr_test}, FNMR Old = {old_fnmr_test}\n")
+        f.write(f"GARBE({t}) = {garbe_test}\n")
+        f.close()
+        if np.isnan(garbe_test) == False:
+            thresholds_test_non_nan.append(t)
+            garbe_values_test.append(garbe_test)
+        
+    
+    plt.figure()
+    plt.scatter(thresholds_test_non_nan, garbe_values_test)
+    plt.xticks(np.arange(0, 1, step=0.1))
+    plt.yticks(np.arange(0, 1, step=0.1))
+    plt.xlabel("Threshold")
+    plt.ylabel("GARBE")
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/garbe_plot_{current_epoch_num}.pdf")
 
-
+    '''
     f = open(f"{output_dir}/garbe_metrics_.txt", "a")
     f.write(f"Epoch {current_epoch_num}: \n")
     f.close()
@@ -269,7 +292,8 @@ def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : st
     plt.ylabel("GARBE")
     plt.tight_layout()
     plt.savefig(f"{output_dir}/garbe_plot_{current_epoch_num}.pdf")
-    return garbe
+    '''
+    return garbe_test
 
 
 def evaluate_performance(model, test_data_loader):
