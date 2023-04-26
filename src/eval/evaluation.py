@@ -640,7 +640,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
         plt.xlabel("Similarity")
         plt.ylabel("Density")
         plt.title(l)
-        plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_{l}_plot.png")
+        plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_{l}_plot.pdf")
         plt.close()
 
 
