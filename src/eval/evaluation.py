@@ -176,7 +176,7 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
 
 def evaluate_fairness(model, test_data_loader : DataLoader, experiment_name : str, current_epoch_num : int):
     filenames = get_filename(test_data_loader)
-    output_dir = f"experiments/{experiment_name}"
+    output_dir = f"experiments/{experiment_name}/garbe"
     os.makedirs(output_dir, exist_ok=True)
 
     young_mated_sim_score = []
@@ -652,13 +652,14 @@ def create_distribution_plot(df : pd.DataFrame, output_path : str, epoch_num : i
     # Each row must contain one identity with values pertaining to the three columns, 
     # i.e. the identitiy's similarity score for a mated sample, sim score compared to mated but older, and non-mated.
 
-    os.makedirs(output_path, exist_ok=True)
+    path = f"{output_path}/epoch_{epoch_num}"
+    os.makedirs(path, exist_ok=True)
     sns.displot(df, kind="kde")
     plt.grid(visible=True)
     plt.xlabel("Similarity")
     plt.ylabel("Density")
     plt.tight_layout()
-    plt.savefig(f"{output_path}/distribution_plot_{epoch_num}.pdf")
+    plt.savefig(f"{path}/distribution_plot.pdf")
     plt.close()
 
 def create_arcface_vs_finetuned_plot(sim_scores, test_data_loader, outdir_plot : str, epoch_num : int):
@@ -682,7 +683,8 @@ def create_dataframe_finetuned_vs_arcface(sim_scores):
     return df
 
 def create_subplots(dfs, outdir_plot, epoch_num):
-    os.makedirs(outdir_plot, exist_ok=True)
+    path = f"{outdir_plot}/epoch_{epoch_num}"
+    os.makedirs(path, exist_ok=True)
     fig,axs = plt.subplots(1, len(dfs))
 
     labels = ['Mated Young', 'Mated Middle', 'Mated Old', 'Young vs Old', 'Non-mated']
@@ -694,7 +696,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
         plt.ylabel("Density")
         plt.title(l)
         plt.tight_layout()
-        plt.savefig(f"{outdir_plot}/arcfaceVsFineTuned_{l}_plot_{epoch_num}.pdf")
+        plt.savefig(f"{path}/arcfaceVsFineTuned_{l}_plot.pdf")
         plt.close()
 
 
