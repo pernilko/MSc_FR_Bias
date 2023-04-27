@@ -112,5 +112,24 @@ def orgranize_fgnet_dataset(data_dir):
             age = fname.split('A')[1] # age
             shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
+def organize_dataset(data_dir : str):
+    identities = []
+    for filename in os.listdir(data_dir):
+        if not filename.endswith('.jpg'):
+            continue
+        
+        fname = filename.split('.')[0] # remove .jpg
+        print(fname)
+        
+        name = fname.split('_')[0] # name of identity
+        if name not in identities:
+            identities.append(name)
+            os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
+        
+        age = fname.split('_')[1].split('m')[1] # age
+        print(age)
+        shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
-
+def count_number_of_images(data_dir : str):
+    num_of_imgs = sum([len(files) for r, d, files in os.walk(data_dir)])
+    return num_of_imgs
