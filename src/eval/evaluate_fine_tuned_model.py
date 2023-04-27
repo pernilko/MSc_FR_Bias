@@ -8,7 +8,7 @@ import argparse
 
 def load_model(filename : str, device : torch.device):
     loaded_model = torch.load(filename,  map_location = device)
-    model = torch.Module()
+    model = iresnet50()
     model.load_state_dict(loaded_model, strict=True)
 
     return model
