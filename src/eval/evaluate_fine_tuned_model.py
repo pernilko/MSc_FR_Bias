@@ -48,7 +48,7 @@ parser.add_argument('--experiment_name', type=str, default=experiment_name, help
 args = parser.parse_args()
 print("Model path: " + args.model_path)
 print("Test dataset path: " + args.test_dataset_path)
-print("Organize test dataset: " + args.organize_test_dataset)
+print("Organize test dataset: " + str(args.organize_test_dataset))
 print("Experiment name: " + args.experiment_name)
 
 evaluate_fine_tuned_model(args.model_path, args.test_dataset_path, args.organize_test_dataset, args.experiment_name)
