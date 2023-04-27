@@ -119,15 +119,23 @@ def organize_dataset(data_dir : str):
             continue
         
         fname = filename.split('.')[0] # remove .jpg
-        print(fname)
-        
+
         name = fname.split('_')[0] # name of identity
         if name not in identities:
             identities.append(name)
             os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
         
-        age = fname.split('_')[1].split('m')[1] # age
-        print(age)
+        fname_age_male = fname.split('_')[1].split('m')
+        fname_age_female = fname.split('_')[1].split('f')
+
+        age = 0
+        if len(fname_age_female) == 2:
+            age = fname_age_female[1]
+        elif len(fname_age_male) == 2:
+            age = fname_age_male[1]
+        else:
+            raise Exception("Could not find age")
+
         shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
 def count_number_of_images(data_dir : str):

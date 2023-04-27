@@ -200,7 +200,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                     os.remove(file.path) # remove previously saved models to save memory
                 
                 model_path = f"{dir}model_{epoch_number}"
-                torch.save(model.state_dict(), model_path)
+                torch.save(model.state_dict(), f"{model_path}.pth")
         '''
         if (epoch + 1) == 1:
             epoch_num_current = epoch + 1
