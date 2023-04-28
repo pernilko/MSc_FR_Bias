@@ -23,13 +23,13 @@ This repository contains the source code for the implementation of the master th
 
 ### Installation
 
-##### Prerequisites
+#### Prerequisites
 In order to run this repository, one needs the following tools:
 
 * pyhton3
 * pip 
 
-##### Inital Setup
+#### Inital Setup
 First, clone the GitHub repository for the MSc_FR_Bias project using the following command:
 
 ```
@@ -59,7 +59,7 @@ mkdir datasets
 
 Once the folder has been created, the FG-NET dataset needs to be downloaded and stored to a folder called `fgnet`. The FG-NET dataset can be acquired from `INSERT LINK`. 
 
-##### Creating a virtual enviorment
+#### Creating a virtual enviorment
 
 First, check if virtualenv is already installed using the following command:
 
@@ -85,7 +85,7 @@ Finally, it is time to activate the virtual enviorment. Use the following comman
 source <env_name>/bin/activate
 ```
 
-##### Installing the required packages
+#### Installing the required packages
 Once the virtual enviorment has been created, run the following command to install the required packages:
 
 ```
@@ -94,12 +94,12 @@ pip install -r requirements.txt
 
 ### Running the code
 
-##### Creating synthetic face images of different ages using CUSP
+#### Creating synthetic face images of different ages using CUSP
 
 
-##### Creating synthetic face images of different ages using EG3D-Age
+#### Creating synthetic face images of different ages using EG3D-Age
 
-##### Fine-tuning the ArcFace model on a synthetic dataset
+#### Fine-tuning the ArcFace model on a synthetic dataset
 
 Navigate into the `src`-folder of the `MSc_FR_Bias`-project. Then, run the following command
 
