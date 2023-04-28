@@ -5,7 +5,6 @@ from data.data_preprocessing import load_test_dataset, organize_dataset, count_n
 from torchvision import transforms
 import argparse
 
-
 def load_model(filename : str, device : torch.device):
     loaded_model = torch.load(filename,  map_location = device)
     model = iresnet50()
@@ -52,5 +51,4 @@ print("Organize test dataset: " + str(args.organize_test_dataset))
 print("Experiment name: " + args.experiment_name)
 
 evaluate_fine_tuned_model(args.model_path, args.test_dataset_path, args.organize_test_dataset, args.experiment_name)
-
 
