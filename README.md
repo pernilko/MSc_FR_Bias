@@ -52,7 +52,7 @@ In order to run this repository
 * pip 
 
 
-#####Creating a virtual enviorment
+##### Creating a virtual enviorment
 
 First, check if virtualenv is already installed using the following command:
 
