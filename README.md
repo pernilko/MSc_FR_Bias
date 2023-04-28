@@ -3,6 +3,16 @@
 This repository contains the source code for the implementation of the master thesis. The master thesis investigates the use of synthetic data to fine-tune a face recognition system in order to attempt to reduce the system's bias towards age. 
 
 ### Table of Contents
+- [Features](#features)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Inital Setup](#inital-setup)
+  - [Creating a virtual enviorment](#creating-a-virtual-enviorment)
+  - [Installing the required packages](#installing-the-required-packages)
+- [Running the code](#running-the-code)
+    - [Creating synthetic face images of different ages using CUSP](#creating-synthetic-face-images-of-different-ages-using-cusp)
+    - [Creating synthetic face images of different ages using EG3D-Age](#creating-synthetic-face-images-of-different-ages-using-eg3d-age)
+    - [Fine-tuning the ArcFace model on a synthetic dataset](#fine-tuning-the-arcface-model-on-a-synthetic-dataset)
 
 ### Features
 
@@ -12,13 +22,21 @@ This repository contains the source code for the implementation of the master th
 * Evaluate the performance of the fine-tuned model thorugh distribution plots and the GARBE metric.
 
 ### Installation
+
+##### Prerequisites
+In order to run this repository, one needs the following tools:
+
+* pyhton3
+* pip 
+
+##### Inital Setup
 First, clone the GitHub repository for the MSc_FR_Bias project using the following command:
 
 ```
 git clone https://github.com/pernilko/MSc_FR_Bias.git
 ```
 
-Once the project has been cloned, create a folder within the src-folder of the project with the name models. This can be done with the following command:
+Once the project has been cloned, create a folder within the `src`-folder of the project with the name models. This can be done with the following command:
 
 ```
 mkdir models
@@ -31,26 +49,15 @@ Inside this folder, a series of other repositories needs to be downloaded:
 
 Inside the models-folder, the InsightFace repository should be download to a folder named `insightface2`, the EG3D-Age repository should be downloaded to a folder named `eg3dAge`, and the CUSP repository should be downloaded to a folder named `cusp`.
 
-Once these repositories have been downloaded and their folders are appropriatly named, the pre-trained ArcFace model from the InsightFace repository needs to be downloaded into the `models`-folder. This can be done by using the following command:
+Once these repositories have been downloaded and their folders are appropriatly named, the pre-trained ArcFace model from the InsightFace repository needs to be downloaded into the `models`-folder. The ArcFace model can be found in the model zoo of the `arcface_torch` InsightFace repository (`https://github.com/deepinsight/insightface/tree/master/recognition/arcface_torch`). In the README file contained in this project, there is a model zoo section which provides a link to a OneDrive. In the OneDrive, select the folder named `ms1mv3_arcface_r50_fp16`. Inside this folder, there is a file named `backbone.pth`. Download this file and store it in the `models`-folder that was created inside the `src`-folder of the `MSc_FR_Bias`-project.
 
-```
-```
 
 Finally, create a new folder in the `src`-folder of the project. This folder should be named `datasets`. This can be done through the following command:
 ```
 mkdir datasets
 ```
 
-Once the folder has been created, the FG-NET dataset needs to be downloaded and stored to a folder called `fgnet`. The FG-NET dataset can be acquired from `INSERT LINK`.
-
-In this folder, the synthetic face images generated should be stored. 
-
-##### Prerequisites
-In order to run this repository
-
-* pyhton3
-* pip 
-
+Once the folder has been created, the FG-NET dataset needs to be downloaded and stored to a folder called `fgnet`. The FG-NET dataset can be acquired from `INSERT LINK`. 
 
 ##### Creating a virtual enviorment
 
