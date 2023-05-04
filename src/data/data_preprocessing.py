@@ -154,13 +154,12 @@ def plot_mixed_dataset_images(imgs_path):
         for filename in os.listdir(dir):
             age = filename.split('_')[1]
             ages.append(age)
-            img = plt.imread(img)
+            img = plt.imread(filename)
             imgs.append(img)
             num_of_imgs += 1
         
         fig, axs = plt.subplots(1, num_of_imgs, figsize=(num_of_imgs*4,4), dpi=100)
         for img, ax, age in zip(imgs, axs, ages):
-            img = plt.imread(img)
             ax.imshow(img)
             ax.set_title(f'Label "{str(age)}"')
         
