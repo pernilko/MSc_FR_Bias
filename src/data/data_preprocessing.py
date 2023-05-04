@@ -156,16 +156,15 @@ def plot_mixed_dataset_images(imgs_path):
         image_files = [os.path.join(subfolder, f) for f in os.listdir(subfolder) if os.path.isfile(os.path.join(subfolder, f))]
         
         # Create a plot for the current identity
-        fig, ax = plt.subplots()
+        fig, axs = plt.subplots()
         
         # Loop through all image files and plot them on the same axes
-        for image_file in image_files:
+        for img, ax in zip(image_files, axs):
             # Load the image and plot it
-            img = plt.imread(image_file)
+            img = plt.imread(img)
             ax.imshow(img)
-            
-        # Set the plot title to the current identity name
-        ax.set_title(image_file)
+            # Set the plot title to the current identity name
+            ax.set_title(img)
         
         os.makedirs("mixed_dataset/plots", exist_ok=True)
         # Display the plot
