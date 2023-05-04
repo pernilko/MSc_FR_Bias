@@ -144,35 +144,29 @@ def count_number_of_images(data_dir : str):
 
 def plot_mixed_dataset_images(imgs_path):
 
-    # Get a list of all subfolders in the main folder
-    subfolders = [os.path.join(imgs_path, f) for f in os.listdir(imgs_path) if os.path.isdir(os.path.join(imgs_path, f))]
+    for directory in os.listdir(imgs_path):
+        dir = os.path.join(imgs_path, directory)
 
-    # Loop through all subfolders and plot images for each identity
-    for subfolder in subfolders:
-        # Get the identity name from the subfolder name
-        identity = os.path.basename(subfolder)
         
-        # Get a list of all image files in the subfolder
-        image_files = [os.path.join(subfolder, f) for f in os.listdir(subfolder) if os.path.isfile(os.path.join(subfolder, f))]
         ages = []
-        for filename in image_files:
-            ages.append(filename.split("_")[1])
-
+        imgs = []
+        num_of_imgs = 0
+        for filename in os.listdir(dir):
+            age = filename.split('_')[1]
+            ages.append(age)
+            img = plt.imread(img)
+            imgs.append(img)
+            num_of_imgs += 1
         
-        # Create a plot for the current identity
-        fig, axs = plt.subplots(1, len(image_files), figsize=(len(image_files)*4,4), dpi=100)
-        
-        # Loop through all image files and plot them on the same axes
-        for img, ax, age in zip(image_files, axs, ages):
-            # Load the image and plot it
+        fig, axs = plt.subplots(1, num_of_imgs, figsize=(num_of_imgs*4,4), dpi=100)
+        for img, ax, age in zip(imgs, axs, ages):
             img = plt.imread(img)
             ax.imshow(img)
-            # Set the plot title to the current identity name
             ax.set_title(f'Label "{str(age)}"')
         
         os.makedirs("mixed_dataset/plots", exist_ok=True)
         # Display the plot
-        plt.savefig(f"mixed_dataset/plots/{identity}.pdf")
+        plt.savefig(f"mixed_dataset/plots/{dir}.pdf")
 
 
 plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
