@@ -141,3 +141,36 @@ def organize_dataset(data_dir : str):
 def count_number_of_images(data_dir : str):
     num_of_imgs = sum([len(files) for r, d, files in os.walk(data_dir)])
     return num_of_imgs
+
+def plot_mixed_dataset_images(imgs_path):
+
+    # Get a list of all subfolders in the main folder
+    subfolders = [os.path.join(imgs_path, f) for f in os.listdir(imgs_path) if os.path.isdir(os.path.join(imgs_path, f))]
+
+    # Loop through all subfolders and plot images for each identity
+    for subfolder in subfolders:
+        # Get the identity name from the subfolder name
+        identity = os.path.basename(subfolder)
+        
+        # Get a list of all image files in the subfolder
+        image_files = [os.path.join(subfolder, f) for f in os.listdir(subfolder) if os.path.isfile(os.path.join(subfolder, f))]
+        
+        # Create a plot for the current identity
+        fig, ax = plt.subplots()
+        
+        # Loop through all image files and plot them on the same axes
+        for image_file in image_files:
+            # Load the image and plot it
+            img = plt.imread(image_file)
+            ax.imshow(img)
+            
+        # Set the plot title to the current identity name
+        ax.set_title(image_file)
+        
+        os.makedirs("mixed_dataset/plots", exist_ok=True)
+        # Display the plot
+        plt.savefig(f"mixed_dataset/plots/{identity}.pdf")
+
+
+plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
+

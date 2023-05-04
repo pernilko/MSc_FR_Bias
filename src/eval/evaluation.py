@@ -700,7 +700,6 @@ def create_subplots(dfs, outdir_plot, epoch_num):
         plt.close()
 
 
-
 '''
 tsfm = transforms.Compose([
         transforms.ToTensor(),
