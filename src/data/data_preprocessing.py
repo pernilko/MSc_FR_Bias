@@ -146,18 +146,19 @@ def plot_mixed_dataset_images(imgs_path):
 
     for directory in os.listdir(imgs_path):
         dir = os.path.join(imgs_path, directory)
-
         
         ages = []
         imgs = []
         num_of_imgs = 0
-        for filename in os.listdir(dir):
+        for filename in os.walk(dir):
             f = os.path.join(dir, filename)
-            age = filename.split('_')[1]
+            identity_age = filename.split('.')[0]
+            age = identity_age.split('_')[1]
             ages.append(age)
             img = plt.imread(f)
             imgs.append(img)
             num_of_imgs += 1
+            
         
         fig, axs = plt.subplots(1, num_of_imgs, figsize=(num_of_imgs*4,4), dpi=100)
         for img, ax, age in zip(imgs, axs, ages):
