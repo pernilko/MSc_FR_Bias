@@ -152,9 +152,10 @@ def plot_mixed_dataset_images(imgs_path):
         imgs = []
         num_of_imgs = 0
         for filename in os.listdir(dir):
+            f = os.path.join(dir, filename)
             age = filename.split('_')[1]
             ages.append(age)
-            img = plt.imread(filename)
+            img = plt.imread(f)
             imgs.append(img)
             num_of_imgs += 1
         
