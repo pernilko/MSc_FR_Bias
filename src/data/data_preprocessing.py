@@ -156,7 +156,7 @@ def plot_mixed_dataset_images(imgs_path):
         image_files = [os.path.join(subfolder, f) for f in os.listdir(subfolder) if os.path.isfile(os.path.join(subfolder, f))]
         
         # Create a plot for the current identity
-        fig, axs = plt.subplots()
+        fig, axs = plt.subplots(1, len(image_files))
         
         # Loop through all image files and plot them on the same axes
         for img, ax in zip(image_files, axs):
