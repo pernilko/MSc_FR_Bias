@@ -166,7 +166,7 @@ def plot_mixed_dataset_images(imgs_path):
         
         os.makedirs("mixed_dataset/plots", exist_ok=True)
         # Display the plot
-        plt.savefig(f"mixed_dataset/plots/{dir}.pdf")
+        plt.savefig(f"mixed_dataset/plots/{directory}.pdf")
 
 
 plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
