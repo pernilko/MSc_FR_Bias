@@ -154,17 +154,21 @@ def plot_mixed_dataset_images(imgs_path):
         
         # Get a list of all image files in the subfolder
         image_files = [os.path.join(subfolder, f) for f in os.listdir(subfolder) if os.path.isfile(os.path.join(subfolder, f))]
+        ages = []
+        for filename in image_files:
+            ages.append(filename.split("_")[1])
+
         
         # Create a plot for the current identity
-        fig, axs = plt.subplots(1, len(image_files))
+        fig, axs = plt.subplots(1, len(image_files), figsize=(len(image_files)*4,4), dpi=100)
         
         # Loop through all image files and plot them on the same axes
-        for img, ax in zip(image_files, axs):
+        for img, ax, age in zip(image_files, axs, ages):
             # Load the image and plot it
             img = plt.imread(img)
             ax.imshow(img)
             # Set the plot title to the current identity name
-            ax.set_title(img)
+            ax.set_title(f'Label "{str(age)}"')
         
         os.makedirs("mixed_dataset/plots", exist_ok=True)
         # Display the plot
