@@ -143,6 +143,7 @@ def count_number_of_images(data_dir : str):
     return num_of_imgs
 
 def sort_filenames(filenames):
+    print(filenames)
     list = []
     for i in range(len(filenames)):
         if(len(list) == 0):
