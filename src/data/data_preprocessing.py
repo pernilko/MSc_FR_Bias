@@ -164,7 +164,8 @@ def sort_filenames(filenames):
                     if int(current) < int(age) and int(next) > int(age):
                         list.insert(list.index(list[e+1]), filenames[i])
                     elif int(current) > int(age) and int(current) != int(age):
-                        list.insert(list.index(list[e]), filenames[i])
+                        if filenames[i] not in list:
+                            list.insert(list.index(list[e]), filenames[i])
     return list
 
 
