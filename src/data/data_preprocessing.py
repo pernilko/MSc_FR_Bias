@@ -163,6 +163,8 @@ def sort_filenames(filenames):
                     next = next.strip('abcdef')
                     if int(current) < int(age) and int(next) > int(age):
                         list.insert(list.index(list[e+1]), filenames[i])
+                    elif int(current) > int(age):
+                        list.insert(list.index(list[e]), filenames[i])
     return list
 
 
