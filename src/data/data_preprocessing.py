@@ -151,7 +151,7 @@ def sort_filenames(filenames):
         else:
             age = getage(filenames[i])
             age = age.strip('abcdef')
-            previous_age = getage(list[i-1])
+            previous_age = getage(list[len(list)-1])
             previous_age = previous_age.strip('abcdef')
             if int(age) >= int(previous_age):
                 list.append(filenames[i])
