@@ -142,15 +142,42 @@ def count_number_of_images(data_dir : str):
     num_of_imgs = sum([len(files) for r, d, files in os.walk(data_dir)])
     return num_of_imgs
 
+def sort_filenames(filenames):
+    list = []
+    for i in range(len(filenames)):
+        if(len(list) == 0):
+            list.append(filenames[i])
+        else:
+            age = getage(filenames[i])
+            previous_age = getage(list[i-1])
+            if age > previous_age:
+                list.append(age)
+            else:
+                list.insert(list.index(previous_age), age)
+    return list
+
+
+def getage(filename):
+    identity_age = filename.split('.')[0]
+    age = identity_age.split('_')[1]
+    return age
+
+
 def plot_mixed_dataset_images(imgs_path):
 
     for directory in os.listdir(imgs_path):
         dir = os.path.join(imgs_path, directory)
+
+        filenames = []
+        for filename in sorted(os.listdir(dir)):
+            filenames.append(filename)
+
+        sorted_filenames = sort_filenames(filenames)
         
         ages = []
         imgs = []
         num_of_imgs = 0
-        for filename in sorted(os.listdir(dir)):
+        for filename in sorted_filenames:
             print(filename)
             f = os.path.join(dir, filename)
             identity_age = filename.split('.')[0]
