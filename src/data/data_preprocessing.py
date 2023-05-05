@@ -154,16 +154,17 @@ def sort_filenames(filenames):
             if age > previous_age:
                 list.append(filenames[i])
             else:
-                list.insert(list.index(list[i-1]), filenames[i])
+                for e in range(len(list)-1):
+                    current = getage(list[e])
+                    next = getage(list[e+1])
+                    if current < age and next > age:
+                        list.insert(list.index(list[e+1]), filenames[i])
     return list
 
 
 def getage(filename):
-    print("fname: ", filename)
     identity_age = filename.split('.')[0]
-    print("id_Age: ", identity_age)
     age = identity_age.split('_')[1]
-    print("age: ", age)
     return age
 
 
