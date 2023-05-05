@@ -150,14 +150,18 @@ def sort_filenames(filenames):
             list.append(filenames[i])
         else:
             age = getage(filenames[i])
+            age = age.strip('abcdef')
             previous_age = getage(list[i-1])
-            if age > previous_age:
+            previous_age = previous_age.strip('abcdef')
+            if int(age) >= int(previous_age):
                 list.append(filenames[i])
             else:
                 for e in range(len(list)-1):
                     current = getage(list[e])
+                    current = current.strip('abcdef')
                     next = getage(list[e+1])
-                    if current < age and next > age:
+                    next = next.strip('abcdef')
+                    if int(current) < int(age) and int(next) > int(age):
                         list.insert(list.index(list[e+1]), filenames[i])
     return list
 
