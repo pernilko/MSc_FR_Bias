@@ -150,7 +150,7 @@ def plot_mixed_dataset_images(imgs_path):
         ages = []
         imgs = []
         num_of_imgs = 0
-        for filename in os.walk(dir):
+        for filename in sorted(os.listdir(dir)):
             print(filename)
             f = os.path.join(dir, filename)
             identity_age = filename.split('.')[0]
