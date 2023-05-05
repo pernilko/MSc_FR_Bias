@@ -167,8 +167,11 @@ def sort_filenames(filenames):
 
 
 def getage(filename):
+    print("fname: ", filename)
     identity_age = filename.split('.')[0]
+    print("idage: ", identity_age)
     age = identity_age.split('_')[1]
+    print("age: ", age)
     return age
 
 
