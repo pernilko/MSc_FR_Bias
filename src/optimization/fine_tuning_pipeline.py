@@ -123,6 +123,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     #loss_fn = torch.nn.CrossEntropyLoss()
    
 
+    
     uniq_labels = []
     for i, data in enumerate(training_data_loader):
         inps, labels = data
@@ -134,6 +135,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
     print(uniq_labels)
     num_of_classes = len(uniq_labels)
     print("number of classes: ", num_of_classes)
+    num_of_classes = 1876
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
     weight_decay = 5e-4
