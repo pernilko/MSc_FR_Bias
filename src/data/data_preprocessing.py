@@ -112,7 +112,7 @@ def orgranize_fgnet_dataset(data_dir):
             age = fname.split('A')[1] # age
             shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
-def organize_dataset(data_dir : str):
+def organize_dataset(data_dir : str, uncw = True):
     identities = []
     for filename in os.listdir(data_dir):
         if not filename.endswith('.jpg'):
@@ -125,8 +125,14 @@ def organize_dataset(data_dir : str):
             identities.append(name)
             os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
         
-        fname_age_male = fname.split('_')[1].split('m')
-        fname_age_female = fname.split('_')[1].split('f')
+        if uncw:
+            fname_age_male = fname.split('_')[1].split('M')
+            fname_age_female = fname.split('_')[1].split('F')
+        else: 
+            fname_age_male = fname.split('_')[1].split('m')
+            fname_age_female = fname.split('_')[1].split('f')
+
+        
 
         age = 0
         if len(fname_age_female) == 2:
@@ -213,5 +219,6 @@ def plot_mixed_dataset_images(imgs_path):
         plt.savefig(f"mixed_dataset/plots/{directory}.pdf")
 
 
-plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
+#plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
+organize_dataset("datasets/uncw/")
 
