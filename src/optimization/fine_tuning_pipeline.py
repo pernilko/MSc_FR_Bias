@@ -132,6 +132,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 uniq_labels.append(lab)
 
     num_of_classes = len(uniq_labels)
+    print("number of classes: ", num_of_classes)
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
     weight_decay = 5e-4
