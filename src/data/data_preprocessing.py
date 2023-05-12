@@ -240,7 +240,23 @@ def count_num_of_files_per_identity(uncw_path, name):
         file_count_list.append(dir_count)
 
     print(f"{name}: ")
-    print(file_count_list)
+    #print(file_count_list)
+
+    counts_num = []
+    for f_c in file_count_list:
+        count = f_c[1]
+        if count not in counts_num:
+            counts_num.append(count)
+
+    for count in counts_num:
+
+        i = 0
+        for f_c in file_count_list:
+            if f_c[1] == count:
+                i += 1
+        
+        print(f"{i} identities have {count} images")
+
         
         
 
