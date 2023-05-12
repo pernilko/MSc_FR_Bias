@@ -131,6 +131,8 @@ def calculate_fmr_fnmr_with_threshold(gscores, iscores, threshold, ds_scores=Fal
 
 def calculate_fmr_fnmr_test(mated_scores, non_mated_scores, threshold):
     # Convert similarity scores to binary match/non-match labels based on threshold
+    print("mated scores: ", mated_scores)
+    print("non mated scores: ", non_mated_scores)
     mated_labels = np.where(mated_scores >= threshold, 1, 0)
     non_mated_labels = np.where(non_mated_scores >= threshold, 1, 0)
 
