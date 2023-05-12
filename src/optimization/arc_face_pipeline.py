@@ -33,7 +33,7 @@ Parameters:
 Return: ----
 
 """
-def arc_face_pipeline(model_filename : str, device : torch.device, path : str, output_plot_path : str):
+def arc_face_pipeline(model_filename : str, device : torch.device, path : str, output_plot_path : str, experiment_name : str):
 
     # Fetching arcface model
     model = load_arc_face_model(model_filename, device)
@@ -49,7 +49,7 @@ def arc_face_pipeline(model_filename : str, device : torch.device, path : str, o
     # Load test dataset and create distribution plot
     test_data_loader = load_test_dataset(path, batch_size, tsfm)
     sim_scores = compute_sim_scores_fg_net(test_data_loader, model, output_plot_path, 0, False)
-    garbe = evaluate_fairness(model, test_data_loader, "arcface", 0)
+    garbe = evaluate_fairness(model, test_data_loader, experiment_name, 0)
 
 
 '''
@@ -68,11 +68,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--dist_plot_path', type=str, default=experiment_path, help="output path for distribution plots")
 parser.add_argument('--model_input_path', type=str, default=model_path, help="path to pre-trained model")
 parser.add_argument('--test_data_path', type=str, default=test_dataset_path, help="path to test images")
+parser.add_argument('--experiment_name', type=str, default=experiment_name, help="Name of experiment")
 
 args = parser.parse_args()
 print("Model path: ", args.model_input_path)
 print("Test data path: ", args.test_data_path)
 print("Dist plot path: ", args.dist_plot_path)
+print("Experiment name: ", args.experiment_name)
 
 # Running ArcFace pipeline
-arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path)
+arc_face_pipeline(args.model_input_path,  device, args.test_data_path, args.dist_plot_path, args.experiment_name)
