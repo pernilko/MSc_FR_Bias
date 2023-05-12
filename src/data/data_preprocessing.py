@@ -218,7 +218,20 @@ def plot_mixed_dataset_images(imgs_path):
         # Display the plot
         plt.savefig(f"mixed_dataset/plots/{directory}.pdf")
 
+def remove_identities_from_folder(mixed_dataset_path, uncw_path):
+    for dir_mixed in os.listdir(mixed_dataset_path):
+        for dir_uncw in os.listdir(uncw_path):
+            dir_path_uncw = os.path.join(uncw_path, dir_uncw)
+            if dir_mixed == dir_uncw:
+                shutil.rmtree(dir_path_uncw)
+
+
+             
+
+remove_identities_from_folder("datasets/mixed_dataset_v3", "datasets/uncw")
+
+
 
 #plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
-organize_dataset("datasets/uncw/")
+#organize_dataset("datasets/uncw/")
 
