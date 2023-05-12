@@ -154,9 +154,10 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
     x_fnmrs = fnmrs
     n = len(x_fmr)
     sum = 0
-    
     for xi in x_fmr:
+        print("xi: ", xi)
         for xj in x_fmr:
+            print("xj: ", xj)
             sum += np.abs(xi - xj)
     
     s = (n / (n - 1))
