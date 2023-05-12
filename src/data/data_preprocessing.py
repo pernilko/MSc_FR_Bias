@@ -238,7 +238,10 @@ def count_num_of_files_per_identity(uncw_path, name):
         dir_count.append(dir)
         dir_count.append(file_count)
         file_count_list.append(dir_count)
+        if file_count <= 2:
+            shutil.rmtree(dir_path_uncw)
 
+    '''
     print(f"{name}: ")
     #print(file_count_list)
 
@@ -256,7 +259,7 @@ def count_num_of_files_per_identity(uncw_path, name):
                 i += 1
         
         print(f"{i} identities have {count} images")
-
+    '''
         
         
 
@@ -265,5 +268,5 @@ def count_num_of_files_per_identity(uncw_path, name):
 #organize_dataset("datasets/uncw/")
 
 count_num_of_files_per_identity("datasets/uncw", "uncw")
-count_num_of_files_per_identity("datasets/mixed_dataset_v3", "mixed")
+#count_num_of_files_per_identity("datasets/mixed_dataset_v3", "mixed")
 
