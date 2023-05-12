@@ -227,11 +227,27 @@ def remove_identities_from_folder(mixed_dataset_path, uncw_path):
 
 
              
+def count_num_of_files_per_identity(uncw_path, name): 
+    file_count_list = []
+    for dir in os.listdir(uncw_path):
+        dir_path_uncw = os.path.join(uncw_path, dir)
+        dir_count = []
+        file_count = 0
+        for filename in os.listdir(dir_path_uncw):
+            file_count += 1
+        dir_count.append(dir)
+        dir_count.append(file_count)
+        file_count_list.append(dir_count)
 
-remove_identities_from_folder("datasets/mixed_dataset_v3", "datasets/uncw")
+    print(f"{name}: ")
+    print(file_count_list)
+        
+        
 
-
-
+#remove_identities_from_folder("datasets/mixed_dataset_v3", "datasets/uncw")
 #plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
 #organize_dataset("datasets/uncw/")
+
+count_num_of_files_per_identity("datasets/uncw", "uncw")
+count_num_of_files_per_identity("datasets/mixed_dataset_v3", "mixed")
 
