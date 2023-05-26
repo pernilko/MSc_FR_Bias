@@ -349,6 +349,6 @@ print("Layers: ", layers)
 print("Experiment Name: ", args.experiment_name)
 
 # Running finetuning pipeline
-fine_tuning_pipeline(args.model_input_path, device, frozenParams, layers, args.input_img_path, name_of_fine_tuned_model, args.test_data_path, plot_path, args.organize_fgnet, args.lr, args.momentum, args.epochs, args.batch_size, args.opt, args.experiment_name)
+fine_tuning_pipeline(args.model_input_path, device, frozenParams, layers, args.input_img_path, args.test_data_path, plot_path, args.organize_fgnet, args.lr, args.momentum, args.epochs, args.batch_size, args.opt, args.experiment_name)
 
 
