@@ -637,6 +637,7 @@ Return:
 '''
 def create_dataframe_finetuned_vs_arcface(sim_scores):
     df = pd.DataFrame(sim_scores, columns=['Fine-tuned ArcFace', 'ArcFace'])
+    print(df)
     return df
 
 
@@ -668,5 +669,22 @@ def create_subplots(dfs, outdir_plot, epoch_num):
         plt.close()
 
 
+
+def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir_plot : str, epoch_num : int):
+    arcface_sim_scores = get_arcface_sim_scores("models/backbone.pth", test_data_loader)
+    dfs = []
+
+    for i in range(len(sim_scores[0])):
+        df_list = []
+        for row_ft, row_af in zip(sim_scores, arcface_sim_scores):
+            new_row = []
+            new_row.append(row_ft[i])
+            new_row.append(row_af[i])
+            df_list.append(new_row)
+        df = create_dataframe_finetuned_vs_arcface(df_list)
+        dfs.append(df)
+    
+    print("end")
+    #create_subplots(dfs, outdir_plot, epoch_num)
 
 
