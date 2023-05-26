@@ -670,7 +670,7 @@ def create_subplots(dfs, outdir_plot, epoch_num):
 
 
 
-def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir_plot : str, epoch_num : int):
+def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir : str, epoch_num : int):
     arcface_sim_scores = get_arcface_sim_scores("models/backbone.pth", test_data_loader)
     dfs = []
 
@@ -684,9 +684,21 @@ def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir_plot : str,
         df = create_dataframe_finetuned_vs_arcface(df_list)
         dfs.append(df)
     
+    groups = ['Mated Young', 'Mated Middle', 'Mated Old', 'Young vs Old', 'Non-mated']
+    counter = 0
     for dataframe in dfs:
-        mean = dataframe["Fine-tuned ArcFace"].mean()
-        print("Mean: ", mean)
-    #create_subplots(dfs, outdir_plot, epoch_num)
+        mean_finetuned = dataframe["Fine-tuned ArcFace"].mean()
+        std_finetuned = dataframe["Fine-tuned ArcFace"].std()
+        mean_arcface = dataframe["ArcFace"].mean()
+        std_arcface = dataframe["ArcFace"].std()
+        f = open(f"{outdir}/mean_and_std.txt", "a")
+        f.write(f"Group {groups[counter]}\n")
+        f.write(f"Mean for fine-tuned model: {mean_finetuned}\n")
+        f.write(f"Mean for ArcFace model: {mean_arcface}\n")
+        f.write(f"Std for fine-tuned model: {std_finetuned}\n")
+        f.write(f"Std for ArcFace model: {std_arcface}\n")
+        f.close()
+        counter += 1
+
 
 
