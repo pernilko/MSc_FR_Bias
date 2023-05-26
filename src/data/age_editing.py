@@ -20,8 +20,11 @@ import argparse
 
 '''
 Method for reading the filenames of the input images to be subjected to age editing
-Input: images_path -> path of where the input images are located
-Output: batch_of_filenames -> filenames for the current path of images
+
+Parameters:
+    images_path (str) : path to images
+Return:
+    batch_of_filenames (list) : filenames
 '''
 def read_image_filenames(images_path : str):
     batch_of_filenames = [
@@ -32,9 +35,12 @@ def read_image_filenames(images_path : str):
     return batch_of_filenames
 
 '''
-Method loads the pre-trained CUSP model
-Input: device 
-Output: g_ema
+Method for loading the pre-trained CUSP model
+Parameters:
+    device (torch.device) : device to be used load the model
+    weights_path (str) : path to model weights
+Return:
+    g_ema
 '''
 def load_cusp(device : torch.device, weights_path : str):
     print("weights path: ", weights_path)
@@ -61,11 +67,19 @@ def load_cusp(device : torch.device, weights_path : str):
     return g_ema
 
 '''
-Method 
+Method for generating synthetic face images using CUSP
+
+Parameters:
+    G
+    img
+    label
+    global_blur_val
+    mask_blur_val
+    return_msk (bool)
+Return:
+    to_return
 '''
 def generate_synthetic_data(G, img, label, global_blur_val=None, mask_blur_val=None, return_msk=False):
-    print(G.attr_map.fc0.init_args[0])
-    print(label.shape)
     ohe_label = torch.nn.functional.one_hot(torch.tensor(label), num_classes=G.attr_map.fc0.init_args[0]).to(img.device)
     c_out, c_out_skip = G.content_enc(img)
     
@@ -173,11 +187,11 @@ def to_uint8(img_tensor):
 Method plots and saves plots of generated images
 
 Parameters:
-    batch_of_filenames () :
+    batch_of_filenames (list) : filenames
     img_in_tensor () :
     img_out_tensor () :
     labels_exp () :
-    aging_steps () :
+    aging_steps (int) : number of aging steps
 
 '''
 def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
@@ -204,6 +218,15 @@ def plot_output(batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, a
         counter = counter + 1
 
 
+
+'''
+Method for getting a random age from a age bin
+
+Parameters:
+    age_bin (int) : the age bin to get a random age from
+Return:
+    random age (int) : random age from specified age bin
+'''
 def get_random_age(age_bin : int):
     if age_bin == 0:
         return random.randint(0, 5)
@@ -224,14 +247,19 @@ def get_random_age(age_bin : int):
 
 '''
 Method generates synthetic face images of input images.
-The method applies age editing to all input images, and generates new images with different ages of each identity.
+The method applies age editing to all input images, and 
+generates new images with different ages of each identity.
 
 Parameters:
-    images_path (string) : path for the data which age editing should be applied to
+    images_path (str) : path to dataset to apply age editing to
+    output_images_path (str) : path to where to save the generated images
+    weights_path_ls (str) : path to model weights of the CUSP Lifespan model
+    weights_path_rr (str) : path to model weights of the CUSP Restricted Range model
+    device (torch.device) : device to use to load model
 Return:
-    ---
+    None
 '''
-def run(images_path : str, aging_steps : int, output_images_path : str, weights_path_ls : str,  weights_path_rr : str, device : torch.device):
+def run(images_path : str, output_images_path : str, weights_path_ls : str,  weights_path_rr : str, device : torch.device):
 
     FFHQ_LS_KEY = "lats"  # Model trained on LATS dataset
     FFHQ_RR_KEY = "hrfae" # Model trained on HRFAE dataset
@@ -247,28 +275,10 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
         classes=(20,65))
     }
 
-    #g_ema = load_cusp(device, weights_path)
     side_config_rr = configs[FFHQ_RR_KEY]['side']
     side_config_ls = configs[FFHQ_LS_KEY]['side']
 
-    '''
-    age_labels_ls = []
-    age_labels_rr = []
-    age_bins = [0, 1 , 2, 3, 4, 5, 6, 7]
-    for age_bin in age_bins:
-        if age_bin < 4:
-            age = get_random_age(age_bin)
-            age_labels_ls.append(age)
-        else:
-            age = get_random_age(age_bin)
-            age_labels_rr.append(age)
-
-    '''
-
     batch_of_filenames = read_image_filenames(images_path)
-
-    #print("ages ls: ", age_labels_ls)
-    #print("ages rr: ", age_labels_rr)
 
     age_range = (1,9)
 
@@ -290,6 +300,14 @@ def run(images_path : str, aging_steps : int, output_images_path : str, weights_
     #create_dataset(output_images_path, batch_of_filenames, images_as_tensor, out_tensor, labels_exp, aging_steps)
     '''
 
+'''
+Method for getting random age
+
+Parameters:
+    class_idx (int)
+Return:
+    age (int)
+'''
 def age_cluster_get_random_age(class_idx : int):
     if class_idx == 1 or class_idx == 2:
         age = get_random_age(0)
@@ -315,12 +333,14 @@ def age_cluster_get_random_age(class_idx : int):
 Method creates dataset of generated images, and saves the images to folder.
 
 Parameters:
-    synthetic_images_path (string) : 
-    batch_of_filenames (string) : 
+    synthetic_images_path (str) : 
+    batch_of_filenames (list) : 
     img_in_tensor () : 
     img_out_tensor () : 
     labels_exp () : 
     aging_steps (int) : 
+Return:
+    None
 
 '''
 def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tensor, img_out_tensor, labels_exp, aging_steps):
@@ -344,6 +364,11 @@ def create_dataset(synthetic_images_path : str, batch_of_filenames, img_in_tenso
                 img.save(path)
 
 
+
+
+'''
+Generating synthetic face images with different ages using the CUSP model
+'''
 
 weights_path_rr = 'data/cusp-network.pkl' 
 weights_path_ls = 'data/cusp-network-ls.pkl' #data/cusp-network-ls.pkl # LifeSpan 

@@ -5,6 +5,7 @@ from torchvision import transforms, datasets
 from matplotlib import pyplot as plt
 import numpy as np
 import shutil
+from collections import Counter
 
 '''
 Method loads dataset and splits it into a training dataset and a validation dataset
@@ -95,7 +96,7 @@ Parameters:
 Return:
     None. 
 '''
-def orgranize_fgnet_dataset(data_dir):
+def orgranize_fgnet_dataset(data_dir : str):
      
     identities = []
     for filename in os.listdir(data_dir):
@@ -112,44 +113,31 @@ def orgranize_fgnet_dataset(data_dir):
             age = fname.split('A')[1] # age
             shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
 
-def organize_dataset(data_dir : str, uncw = True):
-    identities = []
-    for filename in os.listdir(data_dir):
-        if not filename.endswith('.jpg'):
-            continue
-        
-        fname = filename.split('.')[0] # remove .jpg
 
-        name = fname.split('_')[0] # name of identity
-        if name not in identities:
-            identities.append(name)
-            os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
-        
-        if uncw:
-            fname_age_male = fname.split('_')[1].split('M')
-            fname_age_female = fname.split('_')[1].split('F')
-        else: 
-            fname_age_male = fname.split('_')[1].split('m')
-            fname_age_female = fname.split('_')[1].split('f')
+'''
+Method for counting number of images in dataset
 
-        
-
-        age = 0
-        if len(fname_age_female) == 2:
-            age = fname_age_female[1]
-        elif len(fname_age_male) == 2:
-            age = fname_age_male[1]
-        else:
-            raise Exception("Could not find age")
-
-        shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
+Parameters:
+    data_dir (str) : path to dataset
+Return:
+    num_of_imgs (int)
+'''
 
 def count_number_of_images(data_dir : str):
     num_of_imgs = sum([len(files) for r, d, files in os.walk(data_dir)])
     return num_of_imgs
 
+
+
+'''
+Method for sorting filenames according to age
+
+Parameters:
+    filenames (list) : list of filenames to be sorted
+Return:
+    list (list)
+'''
 def sort_filenames(filenames):
-    print(filenames)
     list = []
     for i in range(len(filenames)):
         if(len(list) == 0):
@@ -175,16 +163,29 @@ def sort_filenames(filenames):
     return list
 
 
-def getage(filename):
-    print("fname: ", filename)
+'''
+Method for retriving the age from the filename
+
+Parameters:
+    filename (str) : path to dataset
+Return:
+    age (str)
+'''
+def getage(filename : str):
     identity_age = filename.split('.')[0]
-    print("idage: ", identity_age)
     age = identity_age.split('_')[1]
-    print("age: ", age)
     return age
 
 
-def plot_mixed_dataset_images(imgs_path):
+'''
+Method for plotting images in the Mixed Dataset
+
+Parameters:
+    imgs_path (str) : path to dataset
+Return:
+    None
+'''
+def plot_mixed_dataset_images(imgs_path : str):
 
     for directory in os.listdir(imgs_path):
         dir = os.path.join(imgs_path, directory)
@@ -218,53 +219,69 @@ def plot_mixed_dataset_images(imgs_path):
         # Display the plot
         plt.savefig(f"mixed_dataset/plots/{directory}.pdf")
 
-def remove_identities_from_folder(mixed_dataset_path, uncw_path):
-    for dir_mixed in os.listdir(mixed_dataset_path):
-        for dir_uncw in os.listdir(uncw_path):
-            dir_path_uncw = os.path.join(uncw_path, dir_uncw)
-            if dir_mixed == dir_uncw:
-                shutil.rmtree(dir_path_uncw)
 
+'''
+Method for creating a histogram showing the number of images per age in the FG-NET dataset
 
-             
-def count_num_of_files_per_identity(uncw_path, name): 
-    file_count_list = []
-    for dir in os.listdir(uncw_path):
-        dir_path_uncw = os.path.join(uncw_path, dir)
-        dir_count = []
-        file_count = 0
-        for filename in os.listdir(dir_path_uncw):
-            file_count += 1
-        dir_count.append(dir)
-        dir_count.append(file_count)
-        file_count_list.append(dir_count)
+Parameters:
+    path (str) : path to dataset
+Return:
+    None
+'''
+def num_of_images_per_age_in_fgnet(path : str):
+    all_ages = []
+    for dir in os.listdir(path):
+        dir_path = os.path.join(path, dir)
+        for filename in os.listdir(dir_path):
+            identity_age = filename.split('.')[0]
+            age = identity_age.split('_')[1]
+            age= age.strip('abcdef')
+            all_ages.append(int(age))
 
+    number_counts = Counter(all_ages)
+    
+    unique_numbers = list(number_counts.keys())
+    counts = list(number_counts.values())
+    plt.bar(unique_numbers, counts)
 
-    print(f"{name}: ")
-    #print(file_count_list)
+    plt.xlabel('Age')
+    plt.ylabel('Number of Images')
+    plt.title('Number of Images Per Age in FG-NET ')
 
-    counts_num = []
-    for f_c in file_count_list:
-        print(f_c[0])
-        if f_c[0].startswith('s') == False:
-            count = f_c[1]
-            if count not in counts_num:
-                counts_num.append(count)
-
-    for count in counts_num:
-
-        i = 0
-        for f_c in file_count_list:
-            if f_c[1] == count:
-                i += 1
+    plt.savefig("Images_Per_Age_In_FGNET.pdf")
         
-        print(f"{i} identities have {count} images")
 
 
-#remove_identities_from_folder("datasets/mixed_dataset_v3", "datasets/uncw")
-#plot_mixed_dataset_images("datasets/mixed_dataset_v2/")
-#organize_dataset("datasets/uncw/")
+''' Remove maybe?
+def organize_dataset(data_dir : str, uncw = True):
+    identities = []
+    for filename in os.listdir(data_dir):
+        if not filename.endswith('.jpg'):
+            continue
+        
+        fname = filename.split('.')[0] # remove .jpg
 
-#count_num_of_files_per_identity("datasets/uncw", "uncw")
-#count_num_of_files_per_identity("datasets/mixed_dataset_v3", "mixed")
+        name = fname.split('_')[0] # name of identity
+        if name not in identities:
+            identities.append(name)
+            os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
+        
+        if uncw:
+            fname_age_male = fname.split('_')[1].split('M')
+            fname_age_female = fname.split('_')[1].split('F')
+        else: 
+            fname_age_male = fname.split('_')[1].split('m')
+            fname_age_female = fname.split('_')[1].split('f')
 
+        
+
+        age = 0
+        if len(fname_age_female) == 2:
+            age = fname_age_female[1]
+        elif len(fname_age_male) == 2:
+            age = fname_age_male[1]
+        else:
+            raise Exception("Could not find age")
+
+        shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
+'''

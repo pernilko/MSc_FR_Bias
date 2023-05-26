@@ -57,7 +57,7 @@ Finally, create a new folder in the `src`-folder of the project. This folder sho
 mkdir datasets
 ```
 
-Once the folder has been created, the FG-NET dataset needs to be downloaded and stored to a folder called `fgnet`. The FG-NET dataset can be acquired from `INSERT LINK`. 
+Once the folder has been created, the FG-NET dataset needs to be downloaded and stored to a folder called `fgnet`. 
 
 #### Creating a virtual enviorment
 
@@ -95,14 +95,33 @@ pip install -r requirements.txt
 ### Running the code
 
 #### Creating synthetic face images of different ages using CUSP
+Prior to appying age editing using CUSP, base identities has to be acquired. Either acquire real face images to use as the base identites or generate synthetic base identities using another repository. StyleGAN2-ADA can e.g. be used to generate the synthetic base identities. 
+
+Once the base identities have been acquired, navigate into the `src`-folder of the `MSc_FR_Bias`-project. Then, run the following command
+
+```
+python3 -m data.age_editing --input_img_path=<path-to-images> --out_img_path=<path-where-to-save-generated-images>
+```
 
 
 #### Creating synthetic face images of different ages using EG3D-Age
+Navigate into the `src`-folder of the `MSc_FR_Bias`-project. Then, run the following command
+
+```
+python3 -m data.age_editing_v2
+```
 
 #### Fine-tuning the ArcFace model on a synthetic dataset
 
 Navigate into the `src`-folder of the `MSc_FR_Bias`-project. Then, run the following command
 
+```
+python3 -m optimization.fine_tuning_pipeline --input_img_path=<path-to-training-dataset> --dist_plot_path=plots/ --lr=<learning-rate> --momentum=<momentum> --epochs=<number-of-epochs> --batch_size=<size_of_batch> --frozen_layers=<layers_to_freeze> --experiment_name=<name-of-experiment> --test_data_path=<path-to-test-dataset>
+```
+
+
+
+Example: 
 ```
 python3 -m optimization.fine_tuning_pipeline --input_img_path=datasets/eg3d_generated/ --dist_plot_path=plots/ --lr=0.01 --momentum=0.9 --epochs=150 --batch_size=25 --frozen_layers=1,2,3 --experiment_name=eg3d_exp_1 --test_data_path=datasets/fgnet/
 ```

@@ -1,6 +1,4 @@
 import sys
-folder_root = '/mnt/c/Users/PernilleKopperud/Documents/InfoSec/MasterThesis/master_thesis/MSc_FR_Bias/src'
-sys.path.append(folder_root)
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
 import eval.evaluation as evaluation
 import torch;
@@ -9,21 +7,19 @@ from data.data_preprocessing import load_dataset, load_test_dataset, orgranize_f
 from torchvision import transforms, datasets
 import os
 import numpy as np
-from models.insightface2.recognition.arcface_torch.losses import CombinedMarginLoss
-from models.insightface2.recognition.arcface_torch.partial_fc_v2 import PartialFC_V2
 from pytorch_metric_learning import losses
 import argparse
 from torch.utils.data import DataLoader
 
 
 '''
-Method for loading the pretrained ArcFace model
+Method for loading the pre-trained ArcFace model
 
 Parameters:
     filename (string) : path for the file containing the pre-trained ArcFace model. Should be .pt or .pth file 
     device (torch.device) : specifies whether to use cpu or cuda
 Return: 
-    model (Iresnet)
+    model : the pre-trained ArcFace model
 '''
 def load_pretrained_model(filename : str, device : torch.device):
     loaded_model = torch.load(filename,  map_location = device)
@@ -34,12 +30,13 @@ def load_pretrained_model(filename : str, device : torch.device):
 
 '''
 Method freezes specified layers, the remaining layers are unfrozen.
+
 Parameters:
     frozenParams (list) : list of strings containing the parameter keys of the parameters to freeze
     frozenLayers (list) : list of strings containing the partial parameter keys of layers to be frozen
     model (Module) : the module for the model
 Return:
-    model () : the model with the appropriate 
+    model : model
 '''
 def unfreeze_model_layers(frozenParams: list, frozenLayers : list, model : iresnet50):
 
@@ -60,11 +57,12 @@ def unfreeze_model_layers(frozenParams: list, frozenLayers : list, model : iresn
 
 '''
 Method for training one epoch of the model
+
 Parameters:
     training_data_loader (DataLoader) : data loader containing the training data
-    optimizer () : the optimizer to be used during training
-    model () : the model that is being trained
-    loss_function () : the loss function
+    optimizer : the optimizer to be used during training
+    model : the model that is being trained
+    loss_function : the loss function
     batch_size (int) : the size of the batch
 Return:
     last_loss (float) : the last loss of the epoch
@@ -102,9 +100,10 @@ def train_one_epoch(training_data_loader : DataLoader, optimizer, model, loss_fu
 
 '''
 Method for training the model
+
 Parameters:
     number_of_epochs (int) : number of epochs to train the model
-    model () : the model to be trained
+    model : the model to be trained
     learning_rate (float) : the rate at which the model learns
     momentum (float) : 
     training_data_loader (DataLoader) : data loader containing the training data
@@ -114,16 +113,12 @@ Parameters:
     dist_plot_path (str) : the output path of the distribution plot
     opt (str) : string indicating which optimizer to use
 Return:
-    model () : the trained model
+    model : the trained model
 '''
 def train_model(number_of_epochs : int, model, learning_rate : float, momentum : float, training_data_loader : DataLoader, validation_data_loader : DataLoader, batch_size : int, test_data_loader : DataLoader, dist_plot_path : str, opt : str, experiment_name : str, test_data_loader_loss):
     epoch_number = 0
     best_vloss = 1_000_000.
-    #optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
-    #loss_fn = torch.nn.CrossEntropyLoss()
    
-
-    
     uniq_labels = []
     for i, data in enumerate(training_data_loader):
         inps, labels = data
@@ -133,13 +128,11 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 uniq_labels.append(lab)
 
     num_of_classes = len(uniq_labels)
-    #num_of_classes = 1876
 
     loss_fn = losses.ArcFaceLoss(num_of_classes, 512, margin=28.6, scale=64)
     weight_decay = 5e-4
 
     if opt == 'sgd':
-        #optimizer = torch.optim.SGD(loss_fn.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
         optimizer = torch.optim.SGD(
         [{"params": model.parameters()}, {"params": loss_fn.parameters()}],
         lr=learning_rate,
@@ -203,12 +196,6 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 
                 model_path = f"{dir}model_{epoch_number}"
                 torch.save(model.state_dict(), f"{model_path}.pth")
-        '''
-        if (epoch + 1) == 1:
-            epoch_num_current = epoch + 1
-            sim_scores = evaluation.compute_sim_scores_fg_net(test_data_loader, model, dist_plot_path, epoch_num_current)
-            garbe = evaluation.evaluate_fairness(model, test_data_loader, experiment_name, epoch_num_current)
-        '''
 
         if (epoch + 1) % 10 == 0:
             print("Starting evaluation")
@@ -221,15 +208,14 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
 
 
 '''
-Method fine-tunes a pre-trained model with new data
+Method fine-tunes the pre-trained model
+
 Parameters:
     filename (str) : the path of the pre-trained model
     device (torch.device): the device to be used. CPU or CUDA.
     frozenParams (list) : the params to be frozen in the pre-trained model
     frozenLayers (list) : the layers to be frozen in the pre-trained model
-    model (Module) : the model module for the pretrained model
     path (str) : the path for the training/validation data
-    name_of_fine_tuned_model (str) : the name of the file to save the fine-tuned model to
     test_images_path (str) : the path for the test data
     dist_plot_path (str) : the path for where to save the distribution plot
     orgranize_fgnet (bool) : whether to orgranize the FG-NET dataset into identity folders (only required when initially downloading the dataset)
@@ -238,10 +224,11 @@ Parameters:
     epochs (int) : number of epochs
     batch_size (int) : batch size
     opt (str) : string indicating optimizer to use. Either sgd or adamW
+    experiment_name (str) : name of experiment
 Return:
     None.
 '''
-def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, path : str, name_of_fine_tuned_model : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int, opt : str, experiment_name : str):
+def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: list, frozenLayers, path : str, test_images_path : str, dist_plot_path : str, orgranize_fgnet : bool, lr : float, momentum : float, epochs : int, batch_size : int, opt : str, experiment_name : str):
 
     # write training settings to file
     os.makedirs(f"experiments/{experiment_name}/", exist_ok=True)
@@ -260,19 +247,6 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     # Fetching pretrained model and unfreezing some layers
     model = load_pretrained_model(filename, device)
     model = unfreeze_model_layers(frozenParams, frozenLayers, model)
-
-    ''' Number of frozen and unfrozen params
-    frozen = 0
-    unfrozen = 0
-    for param in model.parameters():
-        if param.requires_grad:
-            unfrozen += 1
-        else:
-            frozen += 1
-    print("Frozen: ", frozen)
-    print("Unfrozen: ", unfrozen)
-    return
-    '''
 
     tsfm = transforms.Compose([
         transforms.ToTensor(),
@@ -297,12 +271,16 @@ def fine_tuning_pipeline(filename : str, device : torch.device, frozenParams: li
     # Train the unfrozen layers
     fine_tuned_model = train_model(epochs, model, lr, momentum, training_data_loader,
                                     validation_data_loader, batch_size, test_data_loader, dist_plot_path, opt, experiment_name, test_data_loader_loss)
-    
-    #dir_output_fined_tuned_models = f"experiments/{experiment_name}/fine_tuned_model/"
-    #os.makedirs(dir_output_fined_tuned_models, exist_ok=True)
-    #torch.save(fine_tuned_model, dir_output_fined_tuned_models + name_of_fine_tuned_model)
 
 
+'''
+Method for getting list of frozen layers
+
+Parameters:
+    layers (str) : layers to freeze
+Return:
+    frozenLayers (list) : list of layers to freeze
+'''
 def GetListOfFrozenLayers(layers : str):
     frozenLayers = []
     layers = layers.split(",")
@@ -319,7 +297,7 @@ def GetListOfFrozenLayers(layers : str):
     return frozenLayers
 
 '''
-Main run of fine-tuning pipeline
+Running the fine-tuning pipeline
 '''
 
 # Defining default input params

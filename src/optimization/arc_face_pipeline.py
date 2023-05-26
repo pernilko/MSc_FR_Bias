@@ -6,13 +6,13 @@ from torchvision import transforms
 import argparse
 
 '''
-Method for loading the bare ArcFace model
+Method for loading the pre-trained ArcFace model
 
 Parameters: 
-    filename (string) : the path for the file containing the pre-trained ArcFace model
+    filename (str) : the path for the file containing the pre-trained ArcFace model
     device (torch.device) : specifies whether to use cpu or cuda
 Return: 
-    model () : the pre-trained ArcFace model
+    model : the pre-trained ArcFace model
 '''
 def load_arc_face_model(filename : str, device : torch.device):
     loaded_model = torch.load(filename,  map_location = device)
@@ -26,12 +26,13 @@ def load_arc_face_model(filename : str, device : torch.device):
 Method for loading the bare arcface model and evaluating its performance and bias on a test dataset
 
 Parameters:
-    model_filename (string) : the path for the file containing the pre-trained arcface model
+    model_filename (str) : the path for the file containing the pre-trained arcface model
     device (torch.device) : specifies whether to use cpu or cuda
-    path (string) : the path for the test dataset which the model is to be evaluated on
-    plot_output_filename (string) : the path for where the generated distribution plot is to be saved
-Return: ----
-
+    path (str) : the path for the test dataset which the model is to be evaluated on
+    output_plot_path (str) : the path for where the generated distribution plot is to be saved
+    experiment_name (str) : name of experiment 
+Return:
+    None
 """
 def arc_face_pipeline(model_filename : str, device : torch.device, path : str, output_plot_path : str, experiment_name : str):
 

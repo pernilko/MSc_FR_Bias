@@ -8,21 +8,6 @@ from models.eg3dAge.eg3d import legacy
 import matplotlib.pyplot as plt
 import random
 
-'''
-Method for normalizing age between -1 and 1
-
-Parameters:
-    x () : 
-    rmin () :
-    rmax () :
-    tmin () : 
-    tmax () : 
-Return:
-    z () : normalized age
-'''
-def normalize(x, rmin = 0, rmax = 75, tmin = -1, tmax = 1):
-    z = ((x - rmin) / (rmax - rmin)) * (tmax - tmin) + tmin
-    return z
 
 '''
 Method for loading pre-trained model
@@ -39,6 +24,22 @@ def load_model(device : torch.device, network_pkl : str):
         G = legacy.load_network_pkl(f)['G_ema'].to(device)
 
     return G
+
+'''
+Method for normalizing age between -1 and 1
+
+Parameters:
+    x
+    rmin
+    rmax
+    tmin
+    tmax 
+Return:
+    z : normalized age
+'''
+def normalize(x, rmin = 0, rmax = 75, tmin = -1, tmax = 1):
+    z = ((x - rmin) / (rmax - rmin)) * (tmax - tmin) + tmin
+    return z
 
 '''
 Method for getting a random age
@@ -67,7 +68,12 @@ def get_random_age(age_bin : int):
         return random.randint(50, 70)
 
 '''
-Method for getting 
+Method for getting a list of random ages
+
+Parameters:
+    number_of_ages (int) : the number of random ages to get
+Return:
+    ages (list) : list of random ages
 '''
 def get_random_age_list(number_of_ages : int):
     ages = []
@@ -81,16 +87,14 @@ def get_random_age_list(number_of_ages : int):
 Method for plotting images
 
 Parameters:
-    identity_imgs () : 
-    ages (list) : 
-    identity_name () : 
+    identity_imgs : images belonging to the identity
+    ages (list) : list of ages
+    identity_name (str) : the name of the identity
     out_plot_dir (str) : the path where the images should be saved
 Return:
     None.
 '''
-def plot_output(identity_imgs, ages, identity_name, out_plot_dir : str):
-    # For every input image
-    
+def plot_output(identity_imgs, ages : list, identity_name : str, out_plot_dir : str): 
     fig,axs = plt.subplots(1, len(identity_imgs), figsize=(len(identity_imgs)*4,4), dpi=100)
     age_labels = [f'Label "{str(i)}"' for i in ages]
     for ax, img, l in zip(axs, identity_imgs, age_labels):
@@ -115,13 +119,13 @@ def to_uint8(img_tensor):
     return img_tensor
 
 '''
-Method for generating synthetic age editied face images using eg3d
+Method for generating synthetic age editied face images using age-eg3d
 
 Parameters:
     device (torch.device) : the device to be used. Cuda or CPU.
     network_pkl (str) : the path to the pre-trained model
-    truncation_psi (float) : 
-    truncation_cutoff (float) : 
+    truncation_psi (float) : trunaction psi, default = 0.5
+    truncation_cutoff (float) : truncation cutoff, default = 0
     outdir (str) : the path where the generated images should be saved
     seeds (list) : the seeds to be used in generation
 Return:
@@ -150,7 +154,6 @@ def age_editing_eg3d(device : torch.device, network_pkl : str,  outdir : str, se
         camera_params = torch.cat([cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)
         conditioning_params = torch.cat([conditioning_cam2world_pose.reshape(-1, 16), intrinsics.reshape(-1, 9)], 1)    
 
-        #ages = [0, 6, 11, 16, 21, 31, 41, 51, 61, 71]
         ages = get_random_age_list(8)
         imgs = []
         for age in ages:

@@ -1,7 +1,7 @@
 from eval.evaluation import evaluate_fairness, compute_sim_scores_fg_net
 import torch
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
-from data.data_preprocessing import load_test_dataset, organize_dataset, count_number_of_images
+from data.data_preprocessing import load_test_dataset, count_number_of_images
 from torchvision import transforms
 import argparse
 
@@ -12,7 +12,7 @@ def load_model(filename : str, device : torch.device):
 
     return model
 
-def evaluate_fine_tuned_model(model_path, test_dataset_path, organize_dataset_for_eval : bool, experiment_name : str):
+def evaluate_fine_tuned_model(model_path, test_dataset_path, experiment_name : str):
     model = load_model(model_path, torch.device('cuda:0'))
     tfsm_test = transforms.Compose([
         transforms.ToTensor(),
@@ -20,8 +20,6 @@ def evaluate_fine_tuned_model(model_path, test_dataset_path, organize_dataset_fo
         transforms.Resize((112,112))
     ])
     
-    if organize_dataset_for_eval:
-        organize_dataset(test_dataset_path)
     total_num_of_images = count_number_of_images(test_dataset_path)
     test_data_loader = load_test_dataset(test_dataset_path, total_num_of_images, tfsm_test)
 
@@ -33,7 +31,7 @@ def evaluate_fine_tuned_model(model_path, test_dataset_path, organize_dataset_fo
 
 
 model_path = "models/backbone.pth"
-test_dataset_path = "datasets/ITWCCBoys/"
+test_dataset_path = "datasets/fgnet/"
 experiment_name = "test_experiment"
 
 
