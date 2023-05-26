@@ -683,6 +683,8 @@ def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir : str, epoc
         df = create_dataframe_finetuned_vs_arcface(df_list)
         dfs.append(df)
     
+    os.makedirs(outdir, exist_ok=True)
+    
     groups = ['Mated Young', 'Mated Middle', 'Mated Old', 'Young vs Old', 'Non-mated']
     counter = 0
     for dataframe in dfs:

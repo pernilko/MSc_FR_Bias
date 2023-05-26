@@ -28,7 +28,7 @@ def evaluate_fine_tuned_model(model_path, test_dataset_path, experiment_name : s
     plot_path = f"experiments/{experiment_name}/plots/"
     sim_scores = compute_sim_scores_fg_net(test_data_loader, model, plot_path, 0, False)
     print("entering new method")
-    create_arcface_vs_finetuned(sim_scores, test_data_loader, None, 0)
+    create_arcface_vs_finetuned(sim_scores, test_data_loader, f"experiments/{experiment_name}/", 0)
     
     garbe = evaluate_fairness(model, test_data_loader, experiment_name, 0)
 
