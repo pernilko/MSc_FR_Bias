@@ -156,9 +156,9 @@ def gini_aggregation_rate(fmrs, fnmrs, alpha=0.5):
     n = len(x_fmr)
     sum = 0
     for xi in x_fmr:
-        print("xi: ", xi)
+        #print("xi: ", xi)
         for xj in x_fmr:
-            print("xj: ", xj)
+            #print("xj: ", xj)
             sum += np.abs(xi - xj)
     
     s = (n / (n - 1))
@@ -637,7 +637,6 @@ Return:
 '''
 def create_dataframe_finetuned_vs_arcface(sim_scores):
     df = pd.DataFrame(sim_scores, columns=['Fine-tuned ArcFace', 'ArcFace'])
-    print(df)
     return df
 
 
