@@ -684,7 +684,9 @@ def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir_plot : str,
         df = create_dataframe_finetuned_vs_arcface(df_list)
         dfs.append(df)
     
-    print("end")
+    for dataframe in dfs:
+        mean = dataframe["Fine-tuned ArcFace"].mean()
+        print("Mean: ", mean)
     #create_subplots(dfs, outdir_plot, epoch_num)
 
 
