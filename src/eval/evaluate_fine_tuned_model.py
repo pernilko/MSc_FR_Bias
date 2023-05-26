@@ -50,5 +50,5 @@ print("Test dataset path: " + args.test_dataset_path)
 print("Organize test dataset: " + str(args.organize_test_dataset))
 print("Experiment name: " + args.experiment_name)
 
-evaluate_fine_tuned_model(args.model_path, args.test_dataset_path, args.organize_test_dataset, args.experiment_name)
+evaluate_fine_tuned_model(args.model_path, args.test_dataset_path, args.experiment_name)
 
