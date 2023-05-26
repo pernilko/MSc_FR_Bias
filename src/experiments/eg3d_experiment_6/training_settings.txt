@@ -1,8 +1,0 @@
-Frozen Layers: ['layer1', 'layer2', 'layer3']
-Batch Size: 25
-Number of epochs: 150
-Learning Rate: 0.01
-Optimizer: sgd
-Momentum: 0.85
-Training dataset: datasets/eg3d_generated/
-Test dataset: datasets/fgnet/
