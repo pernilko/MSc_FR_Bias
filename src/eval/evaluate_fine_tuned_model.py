@@ -26,7 +26,7 @@ def evaluate_fine_tuned_model(model_path, test_dataset_path, experiment_name : s
     print("starting evaluation")
     model.train(False)
     plot_path = f"experiments/{experiment_name}/plots/"
-    sim_scores = compute_sim_scores_fg_net(test_data_loader, model, plot_path, 0, True)
+    sim_scores = compute_sim_scores_fg_net(test_data_loader, model, plot_path, 0, False)
     print("entering new method")
     create_arcface_vs_finetuned(sim_scores, test_data_loader, None, 0)
     
