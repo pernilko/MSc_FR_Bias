@@ -1,4 +1,4 @@
-from eval.evaluation import evaluate_fairness, compute_sim_scores_fg_net, create_arcface_vs_finetuned
+from eval.evaluation import evaluate_fairness, compute_sim_scores_fg_net, calculate_mean_and_std_for_arcface_vs_finetuned
 import torch
 from models.insightface2.recognition.arcface_torch.backbones import iresnet50
 from data.data_preprocessing import load_test_dataset, count_number_of_images
@@ -27,8 +27,7 @@ def evaluate_fine_tuned_model(model_path, test_dataset_path, experiment_name : s
     model.train(False)
     plot_path = f"experiments/{experiment_name}/plots/"
     sim_scores = compute_sim_scores_fg_net(test_data_loader, model, plot_path, 0, False)
-    print("entering new method")
-    create_arcface_vs_finetuned(sim_scores, test_data_loader, f"experiments/{experiment_name}/", 0)
+    calculate_mean_and_std_for_arcface_vs_finetuned(sim_scores, test_data_loader, f"experiments/{experiment_name}/")
     
     garbe = evaluate_fairness(model, test_data_loader, experiment_name, 0)
 

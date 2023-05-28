@@ -669,7 +669,19 @@ def create_subplots(dfs, outdir_plot, epoch_num):
 
 
 
-def create_arcface_vs_finetuned(sim_scores, test_data_loader, outdir : str, epoch_num : int):
+'''
+Method for calculating the mean and standard deviation for the pre-trained ArcFace model
+and the fine-tuned model
+
+Parameters:
+    sim_scores (list) : list of similarity scores for the fine-tuned model
+    test_data_loader (DataLoader) : dataloader for the test dataset
+    outdir (str) : path to where the mean and std file should be saved
+Return:
+    None
+
+'''
+def calculate_mean_and_std_for_arcface_vs_finetuned(sim_scores, test_data_loader, outdir : str):
     arcface_sim_scores = get_arcface_sim_scores("models/backbone.pth", test_data_loader)
     dfs = []
 
