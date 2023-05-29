@@ -1,0 +1,25 @@
+Group Mated Young
+Mean for fine-tuned model: 0.2393915649842132
+Mean for ArcFace model: 0.3792869746685028
+Std for fine-tuned model: 0.15290840061593367
+Std for ArcFace model: 0.18489842982338975
+Group Mated Middle
+Mean for fine-tuned model: 0.2895272195339203
+Mean for ArcFace model: 0.46981692711512246
+Std for fine-tuned model: 0.18505589762468552
+Std for ArcFace model: 0.11479390492988524
+Group Mated Old
+Mean for fine-tuned model: 0.33197953552007675
+Mean for ArcFace model: 0.4709780812263489
+Std for fine-tuned model: 0.06844685670192657
+Std for ArcFace model: 0.10264344148251013
+Group Young vs Old
+Mean for fine-tuned model: 0.22317815728485584
+Mean for ArcFace model: 0.3355981893837452
+Std for fine-tuned model: 0.20981313096642432
+Std for ArcFace model: 0.1124042606894571
+Group Non-mated
+Mean for fine-tuned model: 0.04971899038366974
+Mean for ArcFace model: 0.044770841905847195
+Std for fine-tuned model: 0.02593897775066936
+Std for ArcFace model: 0.02276316611119783
