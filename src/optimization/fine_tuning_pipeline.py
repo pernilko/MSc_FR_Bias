@@ -197,7 +197,8 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 model_path = f"{dir}model_{epoch_number}"
                 torch.save(model.state_dict(), f"{model_path}.pth")
             
-            # only for testing purposes - should be removed
+            '''
+            # only for testing purposes
             if (epoch + 1) == 150:
                 dir = f"experiments/{experiment_name}/models/finetuned_state_dict/"
                 os.makedirs(dir, exist_ok=True)
@@ -206,6 +207,7 @@ def train_model(number_of_epochs : int, model, learning_rate : float, momentum :
                 
                 model_path = f"{dir}model_{epoch_number}"
                 torch.save(model.state_dict(), f"{model_path}.pth")
+            '''
 
 
         if (epoch + 1) % 10 == 0:
