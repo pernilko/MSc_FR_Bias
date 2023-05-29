@@ -1,0 +1,7 @@
+Frozen Layers: ['layer1', 'layer2', 'layer3']
+Batch Size: 25
+Number of epochs: 150
+Learning Rate: 0.01
+Optimizer: adamW
+Training dataset: datasets/mixed_dataset_v2/
+Test dataset: datasets/fgnet_v2/
