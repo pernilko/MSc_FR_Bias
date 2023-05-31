@@ -249,39 +249,3 @@ def num_of_images_per_age_in_fgnet(path : str):
     plt.title('Number of Images Per Age in FG-NET ')
 
     plt.savefig("Images_Per_Age_In_FGNET.pdf")
-        
-
-
-''' Remove maybe?
-def organize_dataset(data_dir : str, uncw = True):
-    identities = []
-    for filename in os.listdir(data_dir):
-        if not filename.endswith('.jpg'):
-            continue
-        
-        fname = filename.split('.')[0] # remove .jpg
-
-        name = fname.split('_')[0] # name of identity
-        if name not in identities:
-            identities.append(name)
-            os.makedirs(f"{data_dir}/{name}/", exist_ok=True)
-        
-        if uncw:
-            fname_age_male = fname.split('_')[1].split('M')
-            fname_age_female = fname.split('_')[1].split('F')
-        else: 
-            fname_age_male = fname.split('_')[1].split('m')
-            fname_age_female = fname.split('_')[1].split('f')
-
-        
-
-        age = 0
-        if len(fname_age_female) == 2:
-            age = fname_age_female[1]
-        elif len(fname_age_male) == 2:
-            age = fname_age_male[1]
-        else:
-            raise Exception("Could not find age")
-
-        shutil.move(f"{data_dir}/{filename}", f"{data_dir}/{name}/{name}_{age}.jpg")
-'''

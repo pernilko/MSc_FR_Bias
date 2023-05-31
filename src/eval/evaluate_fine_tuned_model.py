@@ -5,6 +5,15 @@ from data.data_preprocessing import load_test_dataset, count_number_of_images
 from torchvision import transforms
 import argparse
 
+'''
+Method for loading model
+
+Parameters:
+    filename (str) : path to the model file
+    device (torch.device) : device to load model with
+Return:
+    model : loaded model
+'''
 def load_model(filename : str, device : torch.device):
     loaded_model = torch.load(filename,  map_location = device)
     model = iresnet50()
@@ -12,6 +21,16 @@ def load_model(filename : str, device : torch.device):
 
     return model
 
+'''
+Method for evaluating model. Calculates GARBE metric, and std and mean for similarity scores
+
+Parameters:
+    model_path (str) : path to model file
+    test_dataset_path (str) : path to test dataset
+    experiment_name (str) : name of experiment
+Return:
+    None
+'''
 def evaluate_fine_tuned_model(model_path, test_dataset_path, experiment_name : str):
     model = load_model(model_path, torch.device('cuda:0'))
     tfsm_test = transforms.Compose([
@@ -31,6 +50,11 @@ def evaluate_fine_tuned_model(model_path, test_dataset_path, experiment_name : s
     
     garbe = evaluate_fairness(model, test_data_loader, experiment_name, 0)
 
+
+
+'''
+Running evaluation of models
+'''
 
 model_path = "models/backbone.pth"
 test_dataset_path = "datasets/fgnet/"
